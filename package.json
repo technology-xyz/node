@@ -1,0 +1,27 @@
+{
+  "name": "koi-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/cli.js",
+  "bin": {
+    "koi-node": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js"
+  },
+  "keywords": [
+    "koi-node",
+    "node-cli"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arweave": "^1.10.13",
+    "jsonfile": "^6.1.0",
+    "koi_tools": "git+https://github.com/open-koi/tools.git",
+    "node-fetch": "^2.6.1",
+    "prompt": "^1.1.0",
+    "prompts": "^2.4.1",
+    "smartweave": "^0.4.29"
+  }
+}
