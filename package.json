@@ -17,6 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "arweave": "^1.10.13",
+    "axios": "^0.21.1",
+    "chalk": "^4.1.1",
     "jsonfile": "^6.1.0",
     "koi_tools": "git+https://github.com/open-koi/tools.git",
     "node-fetch": "^2.6.1",

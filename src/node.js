@@ -220,6 +220,7 @@ class node {
       distribute = true;
     }
     if (block > trafficLogs.close && !distribute) {
+      console.log("truuuuu");
       this.isRanked = false;
       return true;
     }

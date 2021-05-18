@@ -2,15 +2,18 @@
 
 const { runNode, runVote } = require("./main");
 const { koi_tools } = require("koi_tools");
+const axios = require("axios");
 const tools = new koi_tools();
 
 const prompts = require("prompts");
+const chalk = require("chalk");
 
 const init = async () => {
   let response = await prompts({
     type: "select",
     name: "options",
     message: "Select Option",
+
     choices: [
       { title: "VoteDirect", value: "voteDirect" },
       { title: "VoteIndirect", value: "voteIndirect" },
@@ -32,7 +35,9 @@ const init = async () => {
     const contractState = await getCacheData(path);
 
     if (balance === "0") {
-      console.log("You are wallet doesnt have Ar, you can't vote direct.");
+      console.log(
+        chalk.green("You are wallet doesnt have Ar, you can't vote direct.")
+      );
       return;
     }
     if (!(tools.address in contractState.data.stakes)) {
@@ -41,11 +46,17 @@ const init = async () => {
         name: "Stake_Amount",
         message: "Plz stake to Vote unless you Can’t make a vote",
       });
-      if (
-        contractState.data.balance < 1 ||
-        !(tools.address in contractState.data.balance)
-      ) {
-        console.log("Your wallet doesn’t have koi balance");
+      if (koiBalance == 0) {
+        const link = "https://koi.rocks/faucet";
+        console.log(
+          chalk.green(
+            "Your wallet doesn’t have koi balance, here the link " +
+              chalk.blue.underline.bold(`${link}`) +
+              "," +
+              " " +
+              "you can get free koi."
+          )
+        );
         return;
       }
     }
