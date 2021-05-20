@@ -64,7 +64,7 @@
     rxjs "^6.6.6"
     smartweave "^0.4.27"
 
-"@kyve/query@^0.0.0-alpha.7":
+"@kyve/query@^0.0.0-alpha.8":
   version "0.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/@kyve/query/-/query-0.0.0-alpha.8.tgz#b9bf8c64be8250c7dd12721b74d28fea17c1e787"
   integrity sha512-8KEzD12U+aFnffn3Bt1PirxEGDu/Gxfj/5e9drth4ze46RkrA5YYbjUwsmepahUhRBfDOzvZTSiXwqD3zCI0UA==
@@ -1623,12 +1623,12 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-koi_tools@2.1.16-beta.8:
-  version "2.1.16-beta.8"
-  resolved "https://registry.yarnpkg.com/koi_tools/-/koi_tools-2.1.16-beta.8.tgz#ff688e2e71e80f6bf28e22ca36eeabefcdc7d657"
-  integrity sha512-RalPUv/PINeCb3lZQob+NOouCLiwXGr2g2UH6ljod7GKTRN7A8HaiVitZnanURV7WDG4k//CnekDrmWZ0zrb1g==
+koi_tools@2.1.16-beta.9:
+  version "2.1.16-beta.9"
+  resolved "https://registry.yarnpkg.com/koi_tools/-/koi_tools-2.1.16-beta.9.tgz#473f452c7bcb7906f2e12f28aa340d3de54b2920"
+  integrity sha512-gEGJlp8drBUrSwfTBJtSAFlRj8a9P4uqnjRu5UvsBvQCQTkhWw21Uo0GziutCGhbNL97Q2PfCcY5AgDJKvGmng==
   dependencies:
-    "@kyve/query" "^0.0.0-alpha.7"
+    "@kyve/query" "^0.0.0-alpha.8"
     arweave "^1.10.13"
     axios "^0.21.1"
     dotenv "^9.0.2"

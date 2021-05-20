@@ -1,7 +1,5 @@
-const { getCacheData, ADDR_BUNDLER } = require("koi_tools/common");
+const { getCacheData, ADDR_BUNDLER_CURRENT } = require("koi_tools/common");
 const { Node } = require("koi_tools/node");
-
-const ADDR_BUNDLER_CURRENT = ADDR_BUNDLER + "/state/current"; // TODO import this from koi_tools/common instead
 
 /**
  * Main entry point point
