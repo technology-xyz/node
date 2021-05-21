@@ -38,6 +38,8 @@ function runNode(arg) {
 
     if (checkForVote(stateData, block)) await searchVote(stateData);
 
+    // if (checkProposeSlash(stateData, block)) await tools.proposeSlash();
+
     if (isProposalRanked(stateData, block)) await rankProposal();
 
     if (isRewardDistributed(stateData, block)) await distribute();
@@ -61,6 +63,17 @@ function runNode(arg) {
       console.log(`for ${voteId} VoteId..........,`, message);
     }
   }
+
+  /**
+   *
+   * @param {*} stateData
+   * @param {number} block Current block height
+   * @returns {boolean} If can slash
+   */
+  // function checkProposeSlash(stateData, block) {
+  //   const trafficLogs = stateData.stateUpdate.trafficLogs;
+  //   return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  // }
 
   /**
    * Checks wether proposal is ranked or not
