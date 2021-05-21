@@ -7,7 +7,7 @@ const runNode = require("./main");
 const arweave = Arweave.init({
   host: "arweave.net",
   protocol: "https",
-  port: 443,
+  port: 443
 });
 // const koi_contract = "UGG1xAjpBU2gq66elzgiT_r1obYkwuoxO80YJ97n5dk";
 const koi_contract = "ljy4rdr6vKS6-jLgduBz_wlcad4GuKPEuhrRVaUd8tg";
@@ -21,7 +21,7 @@ const interactWrite = async (inputs) => {
     taskId: inputs.taskId,
     taskName: inputs.taskName,
     taskFileURL: inputs.taskFileURL,
-    KOI_Reward: inputs.KOI_Reward,
+    KOI_Reward: inputs.KOI_Reward
   };
   try {
     let wallet = await loadFile(input.walletFileLocation);
@@ -61,8 +61,8 @@ const init = async () => {
     choices: [
       { title: "Vote", value: "vote" },
       { title: "Show KOI Tasks", value: "showTasks" },
-      { title: "Add KOI Task", value: "addTask" },
-    ],
+      { title: "Add KOI Task", value: "addTask" }
+    ]
   });
   if (response.options == "showTasks") {
     const latestState = await getCurrentState();
@@ -83,7 +83,7 @@ const init = async () => {
     response = await prompts({
       type: "text",
       name: "KOI_TASK_ID",
-      message: "enter KOI Task ID or KOI Task Name?",
+      message: "enter KOI Task ID or KOI Task Name?"
     });
     let KOI_TASK_ID = response.KOI_TASK_ID;
     let KOI_Task = KOI_TASKS.filter(
@@ -98,25 +98,25 @@ const init = async () => {
     response = await prompts({
       type: "text",
       name: "taskName",
-      message: "enter KOI Task Name",
+      message: "enter KOI Task Name"
     });
     let taskName = response.taskName;
     response = await prompts({
       type: "text",
       name: "walletLocation",
-      message: "enter your Wallet Location",
+      message: "enter your Wallet Location"
     });
     let walletLocation = response.walletLocation;
     response = await prompts({
       type: "text",
       name: "taskUrl",
-      message: "enter KOI Task File Url (Uploaded on Arweave permaweb)",
+      message: "enter KOI Task File Url (Uploaded on Arweave permaweb)"
     });
     let taskUrl = response.taskUrl;
     response = await prompts({
       type: "text",
       name: "KOI_Reward",
-      message: "enter KOI_Reward for this task",
+      message: "enter KOI_Reward for this task"
     });
     let KOI_Reward = response.KOI_Reward;
 
@@ -126,7 +126,7 @@ const init = async () => {
       taskName: taskName,
       taskFileURL: taskUrl,
       KOI_Reward: KOI_Reward,
-      walletLocation: walletLocation,
+      walletLocation: walletLocation
     });
 
     // TODO: Add validation on smart contract and sdk
@@ -137,13 +137,13 @@ const init = async () => {
     response = await prompts({
       type: "text",
       name: "walletLocation",
-      message: "enter your Wallet Location",
+      message: "enter your Wallet Location"
     });
     let walletLocation = response.walletLocation;
     response = await prompts({
       type: "number",
       name: "Stake_Amount",
-      message: "enter Stake_Amount",
+      message: "enter Stake_Amount"
     });
     let stakeAmount = response.Stake_Amount;
     response = await prompts({
@@ -152,34 +152,34 @@ const init = async () => {
       message: "Select Option",
       choices: [
         { title: "Vote_Direct", value: "voteDirect" },
-        { title: "Vote_InDirect", value: "voteIndirect" },
-      ],
+        { title: "Vote_InDirect", value: "voteIndirect" }
+      ]
     });
     if (response.options == "voteDirect") {
       arg = {
         wallet: walletLocation,
         qty: stakeAmount,
-        direct: true,
+        direct: true
       };
     } else if (response.options == "voteIndirect") {
       arg = {
         wallet: walletLocation,
         qty: stakeAmount,
-        direct: false,
+        direct: false
       };
     }
     runNode(arg);
   }
 };
-executeKOITask = async (url, taskName) => {
+const executeKOITask = async (url, taskName) => {
   console.log(`STARTING ${taskName}`);
   let res = await fetch(url);
   let result = await res.text();
   eval(result);
-  let outputData = await handle();
-  if (outputData) {
-    console.log(outputData);
-  }
+  // let outputData = await handle();
+  // if (outputData) {
+  //   console.log(outputData);
+  // }
 };
 const getCurrentState = async () => {
   try {
