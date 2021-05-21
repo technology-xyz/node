@@ -35,8 +35,13 @@ const init = async () => {
     const contractState = await getCacheData(path);
 
     if (balance === "0") {
+      let faucetAr = "https://faucet.arweave.net/";
       console.log(
-        chalk.green("You are wallet doesnt have Ar, you can't vote direct.")
+        chalk.green(
+          "Your wallet doesn't have Ar token, you can't vote direct." +
+            "But you can claim free token here is the link." +
+            chalk.blue.underline.bold(`${faucetAr}`)
+        )
       );
       return;
     }
