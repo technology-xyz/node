@@ -85,10 +85,12 @@ function runNode(arg) {
    */
   function isProposalRanked(state, block) {
     const trafficLogs = state.stateUpdate.trafficLogs;
+    if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
 
+    console.log(currentTrafficLogs);
     if (currentTrafficLogs.isRanked || isRanked) return false;
 
     return block > trafficLogs.close - 75 && block < trafficLogs.close;
@@ -133,6 +135,7 @@ function runNode(arg) {
    */
   function isRewardDistributed(state, block) {
     const trafficLogs = state.stateUpdate.trafficLogs;
+    if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficlog) => trafficlog.block === trafficLogs.open
     );
