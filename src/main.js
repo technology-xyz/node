@@ -1,5 +1,7 @@
-const { getCacheData, ADDR_BUNDLER_CURRENT } = require("koi_tools/common");
+const { getCacheData, ADDR_BUNDLER } = require("koi_tools/common");
 const { Node } = require("koi_tools/node");
+
+const ADDR_BUNDLER_CURRENT = ADDR_BUNDLER + "/state/current"; // TODO replace this with common ADDR_BUNDLER_CURRENT import
 
 /**
  * Main entry point point
@@ -32,12 +34,15 @@ function runNode(arg) {
    * Run loop
    */
   async function work() {
+    console.log("here1");
     const stateData = (await getCacheData(ADDR_BUNDLER_CURRENT)).data;
+    console.log("here2");
     const block = await tools.getBlockHeight();
     console.log(tools.address, "is looking for a task to join");
 
+    console.log("here3");
     if (checkForVote(stateData, block)) await searchVote(stateData);
-
+    console.log("here4");
     // if (checkProposeSlash(stateData, block)) await tools.proposeSlash();
 
     if (isProposalRanked(stateData, block)) await rankProposal();
