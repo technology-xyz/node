@@ -4,7 +4,6 @@ const knode = require("@_koi/sdk/node");
 const tools = new knode.Node();
 const { runNode, runVote } = require("./main");
 // const { koi_tools } = require("koi_tools");
-const axios = require("axios");
 // const tools = new koi_tools();
 
 const prompts = require("prompts");
@@ -33,8 +32,7 @@ const init = async () => {
     await tools.nodeLoadWallet(walletLocation);
     const balance = await tools.getWalletBalance();
     const koiBalance = await tools.getKoiBalance();
-    const path = "https://bundler.openkoi.com:8888/state/current/";
-    const contractState = await getCacheData(path);
+    const contractState = await tools.getContractState();
 
     if (balance === "0") {
       let faucetAr = "https://faucet.arweave.net/";
@@ -47,7 +45,7 @@ const init = async () => {
       );
       return;
     }
-    if (!(tools.address in contractState.data.stakes)) {
+    if (!(tools.address in contractState.stakes)) {
       response = await prompts({
         type: "number",
         name: "Stake_Amount",
@@ -93,18 +91,6 @@ const init = async () => {
     runVote(arg);
   }
 };
-async function getCacheData(path) {
-  return new Promise(function (resolve, reject) {
-    axios
-      .get(path)
-      .then((res) => {
-        resolve(res);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
 
 (async function () {
   await init();
