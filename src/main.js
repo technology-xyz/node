@@ -55,12 +55,12 @@ function runNode(arg) {
     while (tools.totalVoted < state.votes.length - 1) {
       const id = tools.totalVoted;
       let voteId = id + 1;
-      const arg = {
+      const payload = {
         voteId,
         direct: arg.direct
       };
       console.log(voteId);
-      const { message } = await tools.vote(arg);
+      const { message } = await tools.vote(payload);
 
       console.log(`for ${voteId} VoteId..........,`, message);
     }
