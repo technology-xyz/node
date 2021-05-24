@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
+const knode = require("@_koi/sdk/node");
+const tools = new knode.Node();
 const { runNode, runVote } = require("./main");
-const { koi_tools } = require("koi_tools");
+// const { koi_tools } = require("koi_tools");
 const axios = require("axios");
-const tools = new koi_tools();
+// const tools = new koi_tools();
 
 const prompts = require("prompts");
 const chalk = require("chalk");

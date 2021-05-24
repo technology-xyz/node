@@ -16,11 +16,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@_koi/sdk": "^2.1.16-beta.14",
     "arweave": "^1.10.13",
     "axios": "^0.21.1",
     "chalk": "^4.1.1",
     "jsonfile": "^6.1.0",
-    "koi_tools": "git+https://github.com/open-koi/tools.git",
     "node-fetch": "^2.6.1",
     "prompt": "^1.1.0",
     "prompts": "^2.4.1",
