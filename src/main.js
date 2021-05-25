@@ -1,7 +1,5 @@
-const { getCacheData, ADDR_BUNDLER } = require("koi_tools/common");
-const { Node } = require("koi_tools/node");
-
-const ADDR_BUNDLER_CURRENT = ADDR_BUNDLER + "/state/current"; // TODO replace this with common ADDR_BUNDLER_CURRENT import
+const { getCacheData, ADDR_BUNDLER_CURRENT } = require("@_koi/sdk/common");
+const { Node } = require("@_koi/sdk/node");
 
 /**
  * Main entry point point
@@ -90,9 +88,7 @@ function runNode(arg) {
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
 
-    console.log(currentTrafficLogs);
     if (currentTrafficLogs.isRanked || isRanked) return false;
-
     return block > trafficLogs.close - 75 && block < trafficLogs.close;
   }
 
@@ -122,7 +118,8 @@ function runNode(arg) {
         console.log("transaction found");
         break;
       } catch (err) {
-        console.log(err.type);
+        if (err.type !== "TX_FAILED") throw err;
+        console.log("failed... retrying");
       }
     }
   }
