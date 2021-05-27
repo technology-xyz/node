@@ -1,8 +1,5 @@
 "use strict";
 
-const { getCacheData, ADDR_BUNDLER_CURRENT } = require("@_koi/sdk/common");
-const tools = new (require("@_koi/sdk/node").Node)();
-
 /**
  * Main entry point point for witness
  * @param {string} walletPath Path of wallet json
@@ -10,6 +7,10 @@ const tools = new (require("@_koi/sdk/node").Node)();
  * @param {number} stakeAmount Amount to stake
  */
 async function witness(walletPath, direct = false, stakeAmount = 0) {
+  // Load dependencies dynamically to reduce load times when selection other node mode
+  const { getCacheData, ADDR_BUNDLER_CURRENT } = require("@_koi/sdk/common");
+  const tools = new (require("@_koi/sdk/node").Node)();
+
   let isRanked = false,
     isDistributed = false;
 
@@ -76,86 +77,88 @@ async function witness(walletPath, direct = false, stakeAmount = 0) {
     await checkTxConfirmation(tx, task);
     isDistributed = true;
   }
-}
 
-/**
- * Checks if voting is available
- * @param {*} state Contract state data
- * @param {number} block Current block height
- * @returns {boolean} Whether voting is possible
- */
-function checkForVote(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.close - 250;
-}
-
-/**
- * Searches for vote and votes
- * @param {*} state Current contract state data
- * @param {boolean} direct Wether to transact directly with arweave or use bundler
- */
-async function searchVote(state, direct) {
-  while (tools.totalVoted < state.votes.length - 1) {
-    const id = tools.totalVoted;
-    let voteId = id + 1;
-    const payload = {
-      voteId,
-      direct
-    };
-    console.log(voteId);
-    const { message } = await tools.vote(payload);
-
-    console.log(`for ${voteId} VoteId..........,`, message);
+  /**
+   * Checks if voting is available
+   * @param {*} state Contract state data
+   * @param {number} block Current block height
+   * @returns {boolean} Whether voting is possible
+   */
+  function checkForVote(state, block) {
+    const trafficLogs = state.stateUpdate.trafficLogs;
+    return block < trafficLogs.close - 250;
   }
-}
 
-/**
- * Checks wether proposal is ranked or not
- * @param {*} state Current contract state data
- * @param {number} block Block height
- * @param {boolean} isRanked Current proposal rank state
- * @returns {boolean} Whether the proposal is ranked or not
- */
-function isProposalRanked(state, block, isRanked) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  if (!trafficLogs.dailyTrafficLog.length) return false;
-  const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-    (trafficLog) => trafficLog.block === trafficLogs.open
-  );
+  /**
+   * Searches for vote and votes
+   * @param {*} state Current contract state data
+   * @param {boolean} direct Wether to transact directly with arweave or use bundler
+   */
+  async function searchVote(state, direct) {
+    while (tools.totalVoted < state.votes.length - 1) {
+      const id = tools.totalVoted;
+      let voteId = id + 1;
+      const payload = {
+        voteId,
+        direct
+      };
+      console.log(voteId);
+      const { message } = await tools.vote(payload);
 
-  if (currentTrafficLogs.isRanked || isRanked) return false;
-  return block > trafficLogs.close - 75 && block < trafficLogs.close;
-}
-
-/**
- *
- * @param {string} txId // Transaction ID
- * @param {*} task
- */
-async function checkTxConfirmation(txId, task) {
-  let num = 0;
-  for (;;) {
-    console.log("tx is being added to blockchain ......" + ++num + "% " + task);
-    try {
-      await tools.getTransaction(txId);
-      console.log("transaction found");
-      break;
-    } catch (err) {
-      if (err.type !== "TX_FAILED") throw err;
-      console.log("failed... retrying");
+      console.log(`for ${voteId} VoteId..........,`, message);
     }
   }
-}
 
-/**
- *
- * @param {*} stateData
- * @param {number} block Current block height
- * @returns {boolean} If can slash
- */
-function checkProposeSlash(stateData, block) {
-  const trafficLogs = stateData.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  /**
+   * Checks wether proposal is ranked or not
+   * @param {*} state Current contract state data
+   * @param {number} block Block height
+   * @param {boolean} isRanked Current proposal rank state
+   * @returns {boolean} Whether the proposal is ranked or not
+   */
+  function isProposalRanked(state, block, isRanked) {
+    const trafficLogs = state.stateUpdate.trafficLogs;
+    if (!trafficLogs.dailyTrafficLog.length) return false;
+    const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
+      (trafficLog) => trafficLog.block === trafficLogs.open
+    );
+
+    if (currentTrafficLogs.isRanked || isRanked) return false;
+    return block > trafficLogs.close - 75 && block < trafficLogs.close;
+  }
+
+  /**
+   *
+   * @param {string} txId // Transaction ID
+   * @param {*} task
+   */
+  async function checkTxConfirmation(txId, task) {
+    let num = 0;
+    for (;;) {
+      console.log(
+        "tx is being added to blockchain ......" + ++num + "% " + task
+      );
+      try {
+        await tools.getTransaction(txId);
+        console.log("transaction found");
+        break;
+      } catch (err) {
+        if (err.type !== "TX_FAILED") throw err;
+        console.log("failed... retrying");
+      }
+    }
+  }
+
+  /**
+   *
+   * @param {*} stateData
+   * @param {number} block Current block height
+   * @returns {boolean} If can slash
+   */
+  function checkProposeSlash(stateData, block) {
+    const trafficLogs = stateData.stateUpdate.trafficLogs;
+    return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  }
 }
 
 module.exports = witness;
