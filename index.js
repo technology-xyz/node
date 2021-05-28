@@ -76,4 +76,4 @@ async function setupWitnessDirect() {
   await witness(true, stakeAmount);
 }
 
-main().then(console.log);
+main();

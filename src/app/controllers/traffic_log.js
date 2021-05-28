@@ -1,5 +1,5 @@
-const StatusCodes = require("../config/status_codes");
-const checkVote = require("../helpers/check_vote");
+// const StatusCodes = require("../config/status_codes");
+// const checkVote = require("../helpers/check_vote");
 const { access, readFile } = require("fs/promises");
 const fs = require("fs");
 
@@ -14,19 +14,19 @@ const fs = require("fs");
  * @param {*} res express.js result object
  * @returns
  */
-async function submitTrafficLog(req, res) {
-  const submission = req.body;
-  const receipt = await checkVote(submission);
+// async function submitTrafficLog(req, res) {
+//   const submission = req.body;
+//   const receipt = await checkVote(submission);
 
-  return receipt.accepted
-    ? res.json({
-        message: "success",
-        receipt: receipt
-      })
-    : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
-        message: "Invalid signature or insufficient stake."
-      });
-}
+//   return receipt.accepted
+//     ? res.json({
+//         message: "success",
+//         receipt: receipt
+//       })
+//     : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+//         message: "Invalid signature or insufficient stake."
+//       });
+// }
 
 /**
  * Responds with a JSON array containing votes
@@ -53,6 +53,6 @@ async function getVotesFile(fileId) {
 }
 
 module.exports = {
-  submitTrafficLog,
+  // submitTrafficLog,
   getTrafficLog
 };

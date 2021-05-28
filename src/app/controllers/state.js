@@ -57,34 +57,6 @@ async function getCurrentState(req, res) {
 // }
 
 /**
- * Responds with a cache of the latest top content
- * @param {*} req express.js request
- * @param {*} res express.js result object
- */
-async function getTopContent(req, res) {
-  try {
-    let topContent = await tools.retrieveTopContent();
-    console.log("GOT TOP CONTENT", topContent);
-    if (topContent) {
-      res.status(200).send(topContent);
-      if (redisSetAsync) {
-        await redisSetAsync(
-          "topContent",
-          JSON.stringify(topContent),
-          "EX",
-          5 * 60
-        );
-      }
-    } else {
-      res.status(500).send({ error: "top content not available" });
-    }
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({ error: "ERROR: " + e });
-  }
-}
-
-/**
  *
  * @param {*} req express.js request
  * @param {*} res express.js result object
@@ -99,4 +71,4 @@ async function getCurrentStateCached(req, res) {
   }
 }
 
-module.exports = { getCurrentState, getTopContent, getCurrentStateCached };
+module.exports = { getCurrentState, getCurrentStateCached };

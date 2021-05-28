@@ -6,7 +6,6 @@ module.exports = function (app) {
   app.get("/state/current/", cache, state.getCurrentState);
   // app.get("/state/projected/", state.getProjectedState);
   // app.get("/state/pending/", state.getPendingState);
-  app.get("/state/getTopContent/", cache, state.getTopContent);
   app.get("/state/getCurrentStateCached", state.getCurrentStateCached);
   app.post("/", vote);
 };
