@@ -1,4 +1,4 @@
-const tools = require("../../tools");
+const tools = require("../src/tools");
 const axios = require("axios");
 const Arweave = require("arweave");
 const arweave = Arweave.init({
