@@ -15,8 +15,8 @@ async function checkTxConfirmation(txId, task) {
       console.log("transaction found");
       break;
     } catch (err) {
-      if (err.type !== "TX_FAILED") throw err;
-      console.log("failed... retrying");
+      if (err.type !== "TX_FAILED" || err.type !== "TX_FAILED") throw err;
+      console.log(err.type, "retrying");
     }
   }
 }
