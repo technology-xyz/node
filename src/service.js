@@ -125,7 +125,7 @@ async function activeVoteId(contractState) {
 
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
-  const areVotesTracked = Promise.all(areVotesTrackedProms);
+  const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
   const activeVotes = [];
