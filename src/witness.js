@@ -22,19 +22,21 @@ async function witness(direct = false, stakeAmount = 0) {
    * Run loop
    */
   async function work() {
-    const stateData = (await getCacheData(ADDR_BUNDLER_CURRENT)).data;
+    const contractState = (await getCacheData(ADDR_BUNDLER_CURRENT)).data;
     const block = await tools.getBlockHeight();
     console.log(tools.address, "is looking for a task to join");
 
-    if (checkForVote(stateData, block)) await searchVote(stateData, direct);
+    if (checkForVote(contractState, block))
+      await searchVote(contractState, direct);
 
-    if (isProposalRanked(stateData, block, isRanked)) {
+    if (isProposalRanked(contractState, block, isRanked)) {
       await rankProposal();
       isRanked = true;
     }
-    if (isRewardDistributed(stateData, block)) await distribute();
 
-    if (!direct && checkProposeSlash(stateData, block))
+    if (isRewardDistributed(contractState, block)) await distribute();
+
+    if (!direct && checkProposeSlash(contractState, block))
       await tools.proposeSlash();
   }
 
@@ -118,12 +120,12 @@ function isProposalRanked(state, block, isRanked) {
 
 /**
  *
- * @param {*} stateData
+ * @param {*} contractState
  * @param {number} block Current block height
  * @returns {boolean} If can slash
  */
-function checkProposeSlash(stateData, block) {
-  const trafficLogs = stateData.stateUpdate.trafficLogs;
+function checkProposeSlash(contractState, block) {
+  const trafficLogs = contractState.stateUpdate.trafficLogs;
   return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
 }
 

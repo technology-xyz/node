@@ -14,9 +14,8 @@ async function checkTxConfirmation(txId, task) {
       await tools.getTransaction(txId);
       console.log("transaction found");
       break;
-    } catch (err) {
-      if (err.type !== "TX_FAILED" || err.type !== "TX_FAILED") throw err;
-      console.log(err.type, "retrying");
+    } catch (_err) {
+      // Silently catch error, might be dangerous
     }
   }
 }
