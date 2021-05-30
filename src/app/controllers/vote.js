@@ -5,7 +5,7 @@ const checkVote = require("../helpers/check_vote");
  * req.body.vote : {
  *   address : < valid arweave address with active state >,
  *   value : < boolean 'true' or 'false' vote >,
- *   vote_id : < a valid ID for a vote taking placce on the KOI contract >,
+ *   vote_id : < a valid ID for a vote taking place on the KOI contract >,
  *   signature : < valid signature matching the address and value above >
  * }
  * @param {*} req express.js request

@@ -48,7 +48,7 @@ async function witness(direct = false, stakeAmount = 0) {
     const trafficLogs = state.stateUpdate.trafficLogs;
     if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-      (trafficlog) => trafficlog.block === trafficLogs.open
+      (trafficLog) => trafficLog.block === trafficLogs.open
     );
     let distribute = currentTrafficLogs.isDistributed || isDistributed;
     if (block > trafficLogs.close && !distribute) {
