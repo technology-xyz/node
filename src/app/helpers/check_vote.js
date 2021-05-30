@@ -1,6 +1,6 @@
 const { access, writeFile, readFile, appendFile } = require("fs/promises");
 const { constants } = require("fs");
-const tools = require("../../tools");
+const { tools } = require("../../helpers");
 
 /**
  * Check the vote's signature

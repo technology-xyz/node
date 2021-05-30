@@ -1,4 +1,4 @@
-const tools = require("../../tools");
+const { tools } = require("../../helpers");
 const redisClient = tools.redisClient;
 const { promisify } = require("util");
 const redisGetAsync = promisify(redisClient.get).bind(redisClient);

@@ -1,4 +1,4 @@
-const tools = require("./tools");
+const { tools, checkTxConfirmation, rankProposal } = require("./helpers");
 
 /**
  * Main entry point point for witness
@@ -15,7 +15,7 @@ async function witness(direct = false, stakeAmount = 0) {
 
   console.log("Running node with address", tools.address);
 
-  await tools.stake(stakeAmount);
+  if (stakeAmount !== 0) await tools.stake(stakeAmount);
   for (;;) await work(); // Start run loop
 
   /**
@@ -26,24 +26,16 @@ async function witness(direct = false, stakeAmount = 0) {
     const block = await tools.getBlockHeight();
     console.log(tools.address, "is looking for a task to join");
 
-    if (checkForVote(stateData, block)) await searchVote(stateData);
+    if (checkForVote(stateData, block)) await searchVote(stateData, direct);
 
-    if (isProposalRanked(stateData, block, isRanked)) await rankProposal();
-
+    if (isProposalRanked(stateData, block, isRanked)) {
+      await rankProposal();
+      isRanked = true;
+    }
     if (isRewardDistributed(stateData, block)) await distribute();
 
     if (!direct && checkProposeSlash(stateData, block))
       await tools.proposeSlash();
-  }
-
-  /**
-   *
-   */
-  async function rankProposal() {
-    const task = "ranking reward";
-    const tx = await tools.rankProposal();
-    await checkTxConfirmation(tx, task);
-    isRanked = true;
   }
 
   /**
@@ -96,14 +88,12 @@ function checkForVote(state, block) {
 async function searchVote(state, direct) {
   while (tools.totalVoted < state.votes.length - 1) {
     const id = tools.totalVoted;
-    let voteId = id + 1;
+    const voteId = id + 1;
     const payload = {
       voteId,
       direct
     };
-    console.log(voteId);
     const { message } = await tools.vote(payload);
-
     console.log(`for ${voteId} VoteId..........,`, message);
   }
 }
@@ -124,26 +114,6 @@ function isProposalRanked(state, block, isRanked) {
 
   if (currentTrafficLogs.isRanked || isRanked) return false;
   return block > trafficLogs.close - 75 && block < trafficLogs.close;
-}
-
-/**
- *
- * @param {string} txId // Transaction ID
- * @param {*} task
- */
-async function checkTxConfirmation(txId, task) {
-  let num = 0;
-  for (;;) {
-    console.log("tx is being added to blockchain ......" + ++num + "% " + task);
-    try {
-      await tools.getTransaction(txId);
-      console.log("transaction found");
-      break;
-    } catch (err) {
-      if (err.type !== "TX_FAILED") throw err;
-      console.log("failed... retrying");
-    }
-  }
 }
 
 /**

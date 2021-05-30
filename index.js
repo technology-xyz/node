@@ -3,7 +3,7 @@
 const prompts = require("prompts");
 const chalk = require("chalk");
 
-const tools = require("./src/tools");
+const { tools } = require("./src/helpers");
 const service = require("./src/service");
 const witness = require("./src/witness");
 
