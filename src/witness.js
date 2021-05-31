@@ -19,7 +19,7 @@ async function witness(direct = false, stakeAmount = 0) {
    * Run loop
    */
   async function work() {
-    const contractState = tools.getContractState();
+    const contractState = await tools.getContractState();
     const block = await tools.getBlockHeight();
     console.log(tools.address, "is looking for a task to join");
 
@@ -76,7 +76,7 @@ async function witness(direct = false, stakeAmount = 0) {
  */
 function checkForVote(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.close - 250;
+  return block < trafficLogs.close - 320;
 }
 
 /**
@@ -112,7 +112,7 @@ function isProposalRanked(state, block, isRanked) {
   );
 
   if (currentTrafficLogs.isRanked || isRanked) return false;
-  return block > trafficLogs.close - 75 && block < trafficLogs.close;
+  return block > trafficLogs.close - 120 && block < trafficLogs.close;
 }
 
 /**
@@ -123,7 +123,7 @@ function isProposalRanked(state, block, isRanked) {
  */
 function checkProposeSlash(contractState, block) {
   const trafficLogs = contractState.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  return block > trafficLogs.close - 220 && block < trafficLogs.close - 120;
 }
 
 module.exports = witness;
