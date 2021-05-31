@@ -2,12 +2,12 @@
   "name": "koi-node",
   "version": "1.0.0",
   "description": "",
-  "main": "src/cli.js",
+  "main": "index.js",
   "bin": {
     "koi-node": "src/cli.js"
   },
   "scripts": {
-    "start": "node src/cli.js"
+    "start": "node . --use_strict"
   },
   "keywords": [
     "koi-node",
@@ -16,14 +16,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@_koi/sdk": "^2.1.16-beta.14",
-    "arweave": "^1.10.13",
-    "axios": "^0.21.1",
+    "@_koi/sdk": "^2.1.16-beta.26",
     "chalk": "^4.1.1",
-    "jsonfile": "^6.1.0",
-    "node-fetch": "^2.6.1",
-    "prompt": "^1.1.0",
-    "prompts": "^2.4.1",
-    "smartweave": "^0.4.29"
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "prompts": "^2.4.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0"
   }
 }
