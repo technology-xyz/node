@@ -18,6 +18,8 @@ const arweave = Arweave.init({
  * Main entry point for service (bundler) node
  */
 async function service() {
+  tools.loadRedisClient();
+
   // Require dynamically to reduce RAM and load times for witness
   require("dotenv").config();
   const express = require("express");

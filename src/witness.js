@@ -7,9 +7,6 @@ const { tools, checkTxConfirmation, rankProposal } = require("./helpers");
  * @param {number} stakeAmount Amount to stake
  */
 async function witness(direct = false, stakeAmount = 0) {
-  // Require dynamically to reduce RAM and load times for service
-  const { getCacheData, ADDR_BUNDLER_CURRENT } = require("@_koi/sdk/common");
-
   let isRanked = false,
     isDistributed = false;
 
@@ -22,7 +19,7 @@ async function witness(direct = false, stakeAmount = 0) {
    * Run loop
    */
   async function work() {
-    const contractState = (await getCacheData(ADDR_BUNDLER_CURRENT)).data;
+    const contractState = tools.getContractState();
     const block = await tools.getBlockHeight();
     console.log(tools.address, "is looking for a task to join");
 
