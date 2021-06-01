@@ -1,7 +1,8 @@
-// const StatusCodes = require("../config/status_codes");
 // const checkVote = require("../helpers/check_vote");
+
+const StatusCodes = require("../config/status_codes");
 const { access, readFile } = require("fs/promises");
-const fs = require("fs");
+const { constants } = require("fs");
 
 /**
  * req.vote : {
@@ -35,10 +36,16 @@ const fs = require("fs");
  * @returns Array of JSON votes
  */
 async function getTrafficLog(req, res) {
-  const submission = req.body;
-  const batch = await getVotesFile(submission.voteId);
-  const logs = batch.split("\r\n").map(JSON.parse);
-  return res.json(logs);
+  try {
+    const submission = req.body;
+    const batch = await getVotesFile(submission.voteId);
+    const logs = batch.split("\r\n").map(JSON.parse);
+    return res.json(logs);
+  } catch (e) {
+    return res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+      message: "Unable to read or parse traffic log"
+    });
+  }
 }
 
 /**
@@ -48,7 +55,7 @@ async function getTrafficLog(req, res) {
  */
 async function getVotesFile(fileId) {
   const batchFileName = __dirname + "/../bundles/" + fileId;
-  await access(batchFileName, fs.F_OK);
+  await access(batchFileName, constants.F_OK);
   return await readFile(batchFileName, "utf8");
 }
 
