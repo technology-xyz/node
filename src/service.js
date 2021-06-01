@@ -1,4 +1,4 @@
-const { tools, checkTxConfirmation, rankProposal } = require("./helpers");
+const { tools, Node } = require("./helpers");
 const { access } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
@@ -15,74 +15,121 @@ const arweave = Arweave.init({
 });
 
 /**
- * Main entry point for service (bundler) node
+ * Transparent interface to initialize and run service node
  */
 async function service() {
-  tools.loadRedisClient();
-
-  // Require dynamically to reduce RAM and load times for witness
-  require("dotenv").config();
-  const express = require("express");
-  const cors = require("cors");
-  const cookieParser = require("cookie-parser");
-
-  // Setup middleware and routes
-  const app = express();
-  app.use(cors());
-  app.use(express.urlencoded({ extended: true }));
-  app.use(express.json());
-  app.use(cookieParser());
-  require("./app/routes")(app);
-
-  // Start the server
-  const port = process.env.SERVER_PORT || 8887;
-  app.listen(port, () => {
-    console.log("Open http://localhost:" + port, "to view in browser");
-  });
-
-  // Update state cache every 5 minutes
-  const updateStateCache = require("./app/helpers/update_state_cache");
-  setInterval(updateStateCache, 300000);
-  updateStateCache().then(() => {
-    console.log("Initial state cache populated");
-  });
-
-  // Start service run loop
-  for (;;) await work();
+  const node = new Service();
+  node.run();
 }
 
-/**
- * Main run loop
- */
-async function work() {
-  console.log("Searching task....");
-  const contractState = await tools.getContractState();
-  const block = await tools.getBlockHeight();
+class Service extends Node {
+  constructor() {
+    super();
 
-  if (await isTrafficLogOutdate(contractState, block)) await submitTrafficLog();
+    tools.loadRedisClient();
 
-  if (voteSubmitActive(contractState, block)) {
-    const activeVotes = await activeVoteId(contractState);
-    await submitVote(activeVotes);
+    // Require lazily to reduce RAM and load times for witness
+    const express = require("express");
+    const cors = require("cors");
+    const cookieParser = require("cookie-parser");
+
+    // Setup middleware and routes
+    const app = express();
+    app.use(cors());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+    require("./app/routes")(app);
+
+    // Start the server
+    const port = process.env.SERVER_PORT || 8887;
+    app.listen(port, () => {
+      console.log("Open http://localhost:" + port, "to view in browser");
+    });
+
+    // Update state cache every 5 minutes
+    const updateStateCache = require("./app/helpers/update_state_cache");
+    setInterval(updateStateCache, 300000);
+    updateStateCache().then(() => {
+      console.log("Initial state cache populated");
+    });
   }
 
-  if (isProposalRanked(contractState, block)) await rankProposal();
+  /**
+   * Main run loop
+   */
+  async run() {
+    for (;;) {
+      const state = await tools.getContractState();
+      const block = await tools.getBlockHeight();
+      console.log(block, "Searching for a task");
 
-  if (isRewardDistributed(contractState, block)) await distribute();
+      if (await isTrafficLogOutdate(state, block))
+        await this.submitTrafficLog();
+
+      if (voteSubmitActive(state, block)) {
+        const activeVotes = await activeVoteId(state);
+        await this.submitVote(activeVotes);
+      }
+
+      await this.tryRankDistribute(state, block);
+    }
+  }
+
+  /**
+   *
+   */
+  async submitTrafficLog() {
+    var task = "submitting traffic log";
+    let arg = {
+      gateWayUrl: ADDR_GATEWAY_LOGS,
+      stakeAmount: 2
+    };
+
+    let tx = await tools.submitTrafficLog(arg);
+    await this.checkTxConfirmation(tx, task);
+    console.log("confirmed");
+  }
+
+  /**
+   * Interact with koi sdk to call contract batchAction to store/pass the votes in/to state
+   * @param {*} activeVotes
+   */
+  async submitVote(activeVotes) {
+    const task = "submitting votes";
+    while (activeVotes.length > 0) {
+      const voteId = activeVotes[activeVotes.length - 1];
+      const state = await tools.getContractState();
+      const bundlers = state.votes[voteId].bundlers;
+      const bundlerAddress = await tools.getWalletAddress();
+      if (!(bundlerAddress in bundlers)) {
+        const txId = (await batchUpdateContractState(voteId)).id;
+        await this.checkTxConfirmation(txId, task);
+        const arg = {
+          batchFile: txId,
+          voteId: voteId,
+          bundlerAddress: bundlerAddress
+        };
+        const resultTx = await tools.batchAction(arg);
+        await this.checkTxConfirmation(resultTx, task);
+        activeVotes.pop();
+      }
+      activeVotes.pop();
+    }
+  }
 }
 
 /**
  *
- * @param {*} contractState
+ * @param {*} state
  * @param {*} block
  * @returns
  */
-async function isTrafficLogOutdate(contractState, block) {
-  const trafficLogs = contractState.stateUpdate.trafficLogs;
-  const currentTrafficLogs =
-    contractState.stateUpdate.trafficLogs.dailyTrafficLog.find(
-      (log) => log.block === trafficLogs.open
-    );
+function isTrafficLogOutdate(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
+  const currentTrafficLogs = state.stateUpdate.trafficLogs.dailyTrafficLog.find(
+    (log) => log.block === trafficLogs.open
+  );
   const proposedLogs = currentTrafficLogs.proposedLogs;
   const bundlerAddress = tools.address;
   const proposedLog = proposedLogs.find((log) => log.owner === bundlerAddress);
@@ -92,38 +139,23 @@ async function isTrafficLogOutdate(contractState, block) {
 
 /**
  *
- */
-async function submitTrafficLog() {
-  var task = "submitting traffic log";
-  let arg = {
-    gateWayUrl: ADDR_GATEWAY_LOGS,
-    stakeAmount: 2
-  };
-
-  let tx = await tools.submitTrafficLog(arg);
-  await checkTxConfirmation(tx, task);
-  console.log("confirmed");
-}
-
-/**
- *
- * @param {*} contractState
+ * @param {*} state
  * @param {*} block
  * @returns
  */
-function voteSubmitActive(contractState, block) {
-  const trafficLogs = contractState.stateUpdate.trafficLogs;
+function voteSubmitActive(state, block) {
+  const trafficLogs = state.stateUpdate.trafficLogs;
   return block > trafficLogs.close - 420 && block < trafficLogs.close - 220;
 }
 
 /**
  *
- * @param {*} contractState
+ * @param {*} state
  * @returns
  */
-async function activeVoteId(contractState) {
-  const close = contractState.stateUpdate.trafficLogs.close;
-  const votes = contractState.votes;
+async function activeVoteId(state) {
+  const close = state.stateUpdate.trafficLogs.close;
+  const votes = state.votes;
 
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
@@ -149,33 +181,6 @@ async function isVoteTracked(voteId) {
     return true;
   } catch (_e) {
     return false;
-  }
-}
-
-/**
- * Interact with koi sdk to call contract batchAction to store/pass the votes in/to state
- * @param {*} activeVotes
- */
-async function submitVote(activeVotes) {
-  const task = "submitting votes";
-  while (activeVotes.length > 0) {
-    const voteId = activeVotes[activeVotes.length - 1];
-    const state = await tools.getContractState();
-    const bundlers = state.votes[voteId].bundlers;
-    const bundlerAddress = await tools.getWalletAddress();
-    if (!(bundlerAddress in bundlers)) {
-      const txId = (await batchUpdateContractState(voteId)).id;
-      await checkTxConfirmation(txId, task);
-      const arg = {
-        batchFile: txId,
-        voteId: voteId,
-        bundlerAddress: bundlerAddress
-      };
-      const resultTx = await tools.batchAction(arg);
-      await checkTxConfirmation(resultTx, task);
-      activeVotes.pop();
-    }
-    activeVotes.pop();
   }
 }
 
@@ -222,53 +227,6 @@ async function bundleAndExport(bundle) {
   const result = await arweave.transactions.post(myTx);
   result.id = myTx.id;
   return result;
-}
-
-/**
- *
- * @param {*} contractState
- * @param {*} block
- * @returns
- */
-function isProposalRanked(contractState, block) {
-  const trafficLogs = contractState.stateUpdate.trafficLogs;
-  const currentTrafficLogs =
-    contractState.stateUpdate.trafficLogs.dailyTrafficLog.find(
-      (trafficLog) => trafficLog.block === trafficLogs.open
-    );
-
-  return (
-    block > trafficLogs.close - 120 &&
-    block < trafficLogs.close &&
-    currentTrafficLogs.isRanked === false
-  );
-}
-
-/**
- *
- * @param {*} contractState
- * @param {*} block
- * @returns
- */
-function isRewardDistributed(contractState, block) {
-  const trafficLogs = contractState.stateUpdate.trafficLogs;
-  const currentTrafficLogs =
-    contractState.stateUpdate.trafficLogs.dailyTrafficLog.find(
-      (trafficLog) => trafficLog.block === trafficLogs.open
-    );
-
-  return (
-    block > trafficLogs.close && currentTrafficLogs.isDistributed === false
-  );
-}
-
-/**
- *
- */
-async function distribute() {
-  var task = "distributing reward";
-  let tx = await tools.distributeDailyRewards();
-  await checkTxConfirmation(tx, task);
 }
 
 module.exports = service;

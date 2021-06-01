@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+require("dotenv").config();
 const prompts = require("prompts");
 const chalk = require("chalk");
 
@@ -12,7 +12,8 @@ const PARSE_ARGS = ["REDIS_IP", "REDIS_PORT", "WALLET", "MODE", "STAKE"];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
-for (const arg of PARSE_ARGS) process.env[arg] = argv[arg];
+for (const arg of PARSE_ARGS)
+  if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
 /**
  * Main entry point
@@ -20,7 +21,7 @@ for (const arg of PARSE_ARGS) process.env[arg] = argv[arg];
 async function main() {
   // Get wallet path and load it
   const walletPath =
-    process.env.WALLET !== "undefined"
+    process.env.WALLET !== undefined
       ? process.env.WALLET
       : (
           await prompts({
@@ -32,9 +33,9 @@ async function main() {
 
   await tools.nodeLoadWallet(walletPath);
 
-  // Get operation mode and execute it
+  // Get operation mode
   const operationMode =
-    process.env.MODE !== "undefined"
+    process.env.MODE !== undefined
       ? eval(process.env.MODE)
       : (
           await prompts({
@@ -44,19 +45,20 @@ async function main() {
 
             choices: [
               { title: "Service", value: service },
-              { title: "Witness Direct", value: setupWitnessDirect },
+              { title: "Witness Direct", value: witnessDirect },
               { title: "Witness Indirect", value: witness }
             ]
           })
         ).mode;
+
+  // Run the node
   await operationMode();
 }
 
 /**
  * Setup witness direct node
- * @param {string} walletPath Wallet location
  */
-async function setupWitnessDirect() {
+async function witnessDirect() {
   const balance = await tools.getWalletBalance();
   const koiBalance = await tools.getKoiBalance();
   const contractState = await tools.getContractState();
@@ -86,7 +88,7 @@ async function setupWitnessDirect() {
 
     // Get and set stake amount
     stakeAmount =
-      process.env.STAKE !== "undefined"
+      process.env.STAKE !== undefined
         ? parseInt(process.env.STAKE)
         : (
             await prompts({
@@ -97,7 +99,7 @@ async function setupWitnessDirect() {
           ).stakeAmount;
   }
 
-  await witness(true, stakeAmount);
+  return witness(true, stakeAmount);
 }
 
 main();
