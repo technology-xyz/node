@@ -7,30 +7,49 @@ const { tools } = require("./src/helpers");
 const service = require("./src/service");
 const witness = require("./src/witness");
 
+// Parse cli params
+const PARSE_ARGS = ["REDIS_IP", "REDIS_PORT", "WALLET", "MODE", "STAKE"];
+let yargs = require("yargs");
+for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
+const argv = yargs.help().argv;
+for (const arg of PARSE_ARGS) process.env[arg] = argv[arg];
+
 /**
  * Main entry point
  */
 async function main() {
-  const inputWallet = await prompts({
-    type: "text",
-    name: "walletPath",
-    message: "Enter your wallet location"
-  });
-  await tools.nodeLoadWallet(inputWallet.walletPath);
+  // Get wallet path and load it
+  const walletPath =
+    process.env.WALLET !== "undefined"
+      ? process.env.WALLET
+      : (
+          await prompts({
+            type: "text",
+            name: "walletPath",
+            message: "Enter your wallet location"
+          })
+        ).walletPath;
 
-  const inputMode = await prompts({
-    type: "select",
-    name: "mode",
-    message: "Select operation mode",
+  await tools.nodeLoadWallet(walletPath);
 
-    choices: [
-      { title: "Service", value: service },
-      { title: "Witness Direct", value: setupWitnessDirect },
-      { title: "Witness Indirect", value: witness }
-    ]
-  });
+  // Get operation mode and execute it
+  const operationMode =
+    process.env.MODE !== "undefined"
+      ? eval(process.env.MODE)
+      : (
+          await prompts({
+            type: "select",
+            name: "mode",
+            message: "Select operation mode",
 
-  await inputMode.mode();
+            choices: [
+              { title: "Service", value: service },
+              { title: "Witness Direct", value: setupWitnessDirect },
+              { title: "Witness Indirect", value: witness }
+            ]
+          })
+        ).mode;
+  await operationMode();
 }
 
 /**
@@ -65,12 +84,17 @@ async function setupWitnessDirect() {
       return;
     }
 
-    const inputStake = await prompts({
-      type: "number",
-      name: "stakeAmount",
-      message: "Please stake to Vote unless you can’t make a vote"
-    });
-    stakeAmount = inputStake.stakeAmount;
+    // Get and set stake amount
+    stakeAmount =
+      process.env.STAKE !== "undefined"
+        ? parseInt(process.env.STAKE)
+        : (
+            await prompts({
+              type: "number",
+              name: "stakeAmount",
+              message: "Please stake to Vote unless you can’t make a vote"
+            })
+          ).stakeAmount;
   }
 
   await witness(true, stakeAmount);
