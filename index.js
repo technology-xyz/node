@@ -8,7 +8,13 @@ const service = require("./src/service");
 const witness = require("./src/witness");
 
 // Parse cli params
-const PARSE_ARGS = ["REDIS_IP", "REDIS_PORT", "WALLET", "MODE", "STAKE"];
+const PARSE_ARGS = [
+  "REDIS_IP",
+  "REDIS_PORT",
+  "AR_WALLET",
+  "NODE_MODE",
+  "STAKE"
+];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
@@ -21,8 +27,8 @@ for (const arg of PARSE_ARGS)
 async function main() {
   // Get wallet path and load it
   const walletPath =
-    process.env.WALLET !== undefined
-      ? process.env.WALLET
+    process.env.AR_WALLET !== undefined
+      ? process.env.AR_WALLET
       : (
           await prompts({
             type: "text",
@@ -35,8 +41,8 @@ async function main() {
 
   // Get operation mode
   const operationMode =
-    process.env.MODE !== undefined
-      ? eval(process.env.MODE)
+    process.env.NODE_MODE !== undefined
+      ? eval(process.env.NODE_MODE)
       : (
           await prompts({
             type: "select",
