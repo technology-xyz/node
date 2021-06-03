@@ -7,7 +7,7 @@
     "koi-node": "src/cli.js"
   },
   "scripts": {
-    "start": "node . --use_strict"
+    "start": "node index.js --use_strict"
   },
   "keywords": [
     "koi-node",
@@ -16,13 +16,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@_koi/sdk": "^2.1.16-beta.30",
+    "@_koi/sdk": "^2.1.16-beta.31",
     "chalk": "^4.1.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "prompts": "^2.4.1"
+    "prompts": "^2.4.1",
+    "yargs": "^17.0.1"
   },
   "devDependencies": {
     "eslint": "^7.27.0",

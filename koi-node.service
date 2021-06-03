@@ -1,0 +1,15 @@
+[Unit]
+Description=Koi Node
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/koi-node \
+    --REDIS_IP=localhost \
+    --REDIS_PORT=6379 \
+    --MODE=Witness \
+    --WALLET=/var/lib/koi/wallet.json
+Type=simple
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
