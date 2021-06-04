@@ -1,7 +1,16 @@
-// Tools singleton
-const tools = new (require("@_koi/sdk/node").Node)();
-
 const DURATION_PROPOSAL = 120;
+
+// Tools singleton
+const tools = new (require("@_koi/sdk/node").Node)(process.env.BUNDLER_ADDR);
+
+// Arweave singleton
+const arweave = require("arweave").init({
+  host: "arweave.dev",
+  protocol: "https",
+  port: 443,
+  timeout: 20000, // Network request timeouts in milliseconds
+  logging: false // Enable network request logging
+});
 
 /**
  * Common node functions for witness and service
@@ -19,7 +28,6 @@ class Node {
    */
   async tryRankDistribute(contractState, block) {
     if (this.canRankProposal(contractState, block)) await this.rankProposal();
-
     if (this.canDistribute(contractState, block)) await this.distribute();
   }
 
@@ -65,7 +73,8 @@ class Node {
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
 
-    let isDistributed = currentTrafficLogs.isDistributed || this.isDistributed;
+    const isDistributed =
+      currentTrafficLogs.isDistributed || this.isDistributed;
     if (block > trafficLogs.close && !isDistributed) {
       this.isRanked = false;
       return true;
@@ -108,5 +117,6 @@ class Node {
 
 module.exports = {
   tools,
+  arweave,
   Node
 };

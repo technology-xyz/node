@@ -7,10 +7,10 @@ const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 
 /**
  *
- * @param {*} req
+ * @param {*} _req
  * @param {*} res
  */
-async function getCurrentState(req, res) {
+async function getCurrentState(_req, res) {
   try {
     let currentState = await tools.getContractState();
     console.log("RECEIVED CURRENT STATE", currentState);
@@ -58,10 +58,10 @@ async function getCurrentState(req, res) {
 
 /**
  *
- * @param {*} req express.js request
+ * @param {*} _req express.js request
  * @param {*} res express.js result object
  */
-async function getCurrentStateCached(req, res) {
+async function getCurrentStateCached(_req, res) {
   try {
     let currentStateCached = await redisGetAsync("currentStateCached");
     res.status(200).send(currentStateCached || []);

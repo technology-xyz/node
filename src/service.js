@@ -1,18 +1,11 @@
-const { tools, Node } = require("./helpers");
+const { tools, Node, arweave } = require("./helpers");
 const { access } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
-const Arweave = require("arweave");
+const { promisify } = require("util");
 
-const ADDR_GATEWAY_LOGS = "https://arweave.dev/logs/";
-
-const arweave = Arweave.init({
-  host: "arweave.dev",
-  protocol: "https",
-  port: 443,
-  timeout: 20000, // Network request timeouts in milliseconds
-  logging: false // Enable network request logging
-});
+const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
+const BUNDLER_REGISTER = "/register-node";
 
 /**
  * Transparent interface to initialize and run service node
@@ -26,33 +19,25 @@ class Service extends Node {
   constructor() {
     super();
 
+    // Initialize redis client
     tools.loadRedisClient();
+    this.redisSetAsync = promisify(tools.redisClient.set).bind(
+      tools.redisClient
+    );
+    this.redisGetAsync = promisify(tools.redisClient.get).bind(
+      tools.redisClient
+    );
 
-    // Require lazily to reduce RAM and load times for witness
-    const express = require("express");
-    const cors = require("cors");
-    const cookieParser = require("cookie-parser");
+    // On startup, only do discovery with primary service node.
 
-    // Setup middleware and routes
-    const app = express();
-    app.use(cors());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(cookieParser());
-    require("./app/routes")(app);
+    // Start webserver
+    this.startWebserver();
 
-    // Start the server
-    const port = process.env.SERVER_PORT || 8887;
-    app.listen(port, () => {
-      console.log("Open http://localhost:" + port, "to view in browser");
-    });
+    // Run periodic tasks for the first time
+    this.run_periodic();
 
-    // Update state cache every 5 minutes
-    const updateStateCache = require("./app/helpers/update_state_cache");
-    setInterval(updateStateCache, 300000);
-    updateStateCache().then(() => {
-      console.log("Initial state cache populated");
-    });
+    // Start periodic run loop
+    setInterval(this.run_periodic, 300000);
   }
 
   /**
@@ -77,12 +62,101 @@ class Service extends Node {
   }
 
   /**
+   * Run loop that executes every 5 minutes
+   */
+  async run_periodic() {
+    console.log("Running periodic tasks");
+
+    // Propagate service nodes
+    try {
+      await this.propagateRegistry();
+    } catch (e) {
+      console.log("Error while propagating", e);
+    }
+
+    // Redis update current state
+    try {
+      await this.updateRedisStateCached();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  /**
+   * Fetch and propagate node registry
+   * TODO: separate into smaller functions that can be used in /register-node endpoint
+   */
+  async propagateRegistry() {
+    // Unless this node is a primary node
+    if (tools.bundler_url === null || tools.bundler_url === "null") return;
+
+    let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
+    let nodes = getNodes();
+
+    // Select a target
+    let target;
+    if (nodes.length === 0) target = this.bundler_url;
+    else {
+      const selection = nodes[Math.floor(Math.random() * nodes.length)];
+      target = selection.data.url;
+    }
+
+    // Get targets node registry and add it to ours
+    const newNodes = await tools.getNodes(target);
+    registerNodes(newNodes);
+
+    // Sign payload
+    const payload = {
+      data: {
+        url: "??????",
+        timestamp: Date.now()
+      }
+    };
+    tools.signPayload(payload);
+
+    // Register self in target registry
+    axios.post(target + BUNDLER_REGISTER, payload, {
+      headers: { "content-type": "application/json" }
+    });
+  }
+
+  /**
+   *
+   */
+  async updateRedisStateCached() {
+    const currentState = await tools.getContractState();
+    await this.redisSetAsync(
+      "currentStateCached",
+      JSON.stringify(currentState)
+    );
+  }
+
+  startWebserver() {
+    // Require lazily to reduce RAM and load times for witness
+    const express = require("express");
+    const cors = require("cors");
+    const cookieParser = require("cookie-parser");
+
+    // Setup middleware and routes then start server
+    const app = express();
+    app.use(cors());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+    require("./app/routes")(app);
+    const port = process.env.SERVER_PORT || 8887;
+    app.listen(port, () => {
+      console.log("Open http://localhost:" + port, "to view in browser");
+    });
+  }
+
+  /**
    *
    */
   async submitTrafficLog() {
     var task = "submitting traffic log";
     let arg = {
-      gateWayUrl: ADDR_GATEWAY_LOGS,
+      gateWayUrl: URL_GATEWAY_LOGS,
       stakeAmount: 2
     };
 
