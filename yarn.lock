@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.16-beta.31":
-  version "2.1.16-beta.31"
-  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.31.tgz#744beb32f40d1868535be9e26bdee9fbaa51ca0a"
-  integrity sha512-37+YSM+immt6mcF5PnMo6Uw7PP3UG8qtWRrYGFuRXsBTrdzlzz0Kem/EKg/41aV4ui0igqj9I+LFhIUucKIVig==
+"@_koi/sdk@^2.1.16-beta.38":
+  version "2.1.16-beta.38"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.38.tgz#a712b4b52f0d4c668db45c01473d42107709eb01"
+  integrity sha512-cD9Wp686OY0bDLmhnf18L/MCxkVB3iRxxAQmvkQzJ6SFJAk++51Utj/qEOMDo3xkWovqmmKifJcp7UU4xTaSyg==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.9"
     arweave "^1.10.13"
@@ -187,9 +187,9 @@
   integrity sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==
 
 "@types/node@*", "@types/node@>=13.7.0":
-  version "15.6.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.6.1.tgz#32d43390d5c62c5b6ec486a9bc9c59544de39a08"
-  integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
+  version "15.12.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.0.tgz#6a459d261450a300e6865faeddb5af01c3389bb3"
+  integrity sha512-+aHJvoCsVhO2ZCuT4o5JtcPrCPyDE3+1nvbDprYes+pPkEsbjH7AGUCNtjMOXS0fqH14t+B7yLzaqSz92FPWyw==
 
 "@types/node@11.11.6":
   version "11.11.6"
