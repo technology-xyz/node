@@ -17,9 +17,7 @@ async function nodes(_req, res) {
  * @param {*} res express.js result object
  */
 async function registerNode(req, res) {
-  const registration = req.body;
-  if (!registration.data.url) registration.data.url = `http://${req.ip}:8887`;
-  const regRes = registerNodes([registration]);
+  const regRes = registerNodes(req.body);
 
   return regRes
     ? res.status(200)
