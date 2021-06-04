@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@_koi/sdk": "^2.1.16-beta.36",
     "arweave": "^1.10.13",
     "jsonfile": "^6.1.0",
     "koi_tools": "git+https://github.com/open-koi/tools.git",
