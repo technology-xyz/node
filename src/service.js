@@ -19,7 +19,7 @@ const arweave = Arweave.init({
  */
 async function service() {
   const node = new Service();
-  node.run();
+  await node.run();
 }
 
 class Service extends Node {
