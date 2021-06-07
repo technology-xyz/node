@@ -6,7 +6,7 @@ const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 
 /**
  * Gets the node registry from Redis cache
- * @returns {Array<NodeRegistration>}
+ * @returns {Array<BundlerPayload<data:RegistrationData>>}
  */
 async function getNodes() {
   // Get nodes from cache
@@ -30,20 +30,16 @@ async function registerNodes(newNodes) {
   // Verify each registration
   const enc = new TextEncoder();
   newNodes = newNodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.publicModulus);
+    const address = arweave.wallets.ownerToAddress(node.owner);
     if (!(address in state.stakes)) return false; // Filter addresses that don't have a stake
     const dataBuffer = enc.encode(JSON.stringify(node.data));
-    return arweave.crypto.verify(
-      node.publicModulus,
-      dataBuffer,
-      node.signature
-    );
+    return arweave.crypto.verify(node.owner, dataBuffer, node.signature);
   });
 
   // Filter stale nodes from registry
   let nodes = getNodes();
   nodes = nodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.publicModulus);
+    const address = arweave.wallets.ownerToAddress(node.owner);
     return address in state.stakes; // Filter addresses that don't have a stake
   });
 
@@ -60,8 +56,7 @@ async function registerNodes(newNodes) {
     const oldNode = nodes[i];
     const matches = newNodes.filter(
       (newNode) =>
-        newNode.publicModulus === oldNode.publicModulus ||
-        newNode.data.url === oldNode.data.url
+        newNode.owner === oldNode.owner || newNode.data.url === oldNode.data.url
     );
     newNodes = newNodes.filter((newNode) => !(newNode in matches));
 

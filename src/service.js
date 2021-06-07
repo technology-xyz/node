@@ -87,15 +87,19 @@ class Service extends Node {
    * TODO: separate into smaller functions that can be used in /register-node endpoint
    */
   async propagateRegistry() {
-    // Unless this node is a primary node
-    if (tools.bundler_url === null || tools.bundler_url === "null") return;
+    // Don't propagate if
+    if (
+      tools.bundler_url === null || // this node is a primary node
+      tools.bundler_url === "null"
+    )
+      return;
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
-    let nodes = getNodes();
+    let nodes = await getNodes();
 
     // Select a target
     let target;
-    if (nodes.length === 0) target = this.bundler_url;
+    if (!nodes || nodes.length === 0) target = this.bundler_url;
     else {
       const selection = nodes[Math.floor(Math.random() * nodes.length)];
       target = selection.data.url;
@@ -103,7 +107,13 @@ class Service extends Node {
 
     // Get targets node registry and add it to ours
     const newNodes = await tools.getNodes(target);
-    registerNodes(newNodes);
+    await registerNodes(newNodes);
+
+    // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
+    if (!process.env.SERVICE_URL) {
+      console.log("SERVICE_URL not set, skipping registration");
+      return;
+    }
 
     // Sign payload
     const payload = {
