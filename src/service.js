@@ -4,8 +4,9 @@ const { constants } = require("fs");
 const axios = require("axios");
 const { promisify } = require("util");
 
-const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
 const BUNDLER_REGISTER = "/register-node";
+const OFFSET_BATCH_SUBMIT = 400;
+const OFFSET_PROPOSE_SLASH = 600;
 
 /**
  * Transparent interface to initialize and run service node
@@ -49,7 +50,7 @@ class Service extends Node {
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
 
-      if (await isTrafficLogOutdate(state, block))
+      if (await this.canSubmitTrafficLog(state, block))
         await this.submitTrafficLog();
 
       if (voteSubmitActive(state, block)) {
@@ -118,7 +119,7 @@ class Service extends Node {
     // Sign payload
     const payload = {
       data: {
-        url: "??????",
+        url: process.env.SERVICE_URL,
         timestamp: Date.now()
       }
     };
@@ -161,21 +162,6 @@ class Service extends Node {
   }
 
   /**
-   *
-   */
-  async submitTrafficLog() {
-    var task = "submitting traffic log";
-    let arg = {
-      gateWayUrl: URL_GATEWAY_LOGS,
-      stakeAmount: 2
-    };
-
-    let tx = await tools.submitTrafficLog(arg);
-    await this.checkTxConfirmation(tx, task);
-    console.log("confirmed");
-  }
-
-  /**
    * Interact with koi sdk to call contract batchAction to store/pass the votes in/to state
    * @param {*} activeVotes
    */
@@ -209,27 +195,12 @@ class Service extends Node {
  * @param {*} block
  * @returns
  */
-function isTrafficLogOutdate(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  const currentTrafficLogs = state.stateUpdate.trafficLogs.dailyTrafficLog.find(
-    (log) => log.block === trafficLogs.open
-  );
-  const proposedLogs = currentTrafficLogs.proposedLogs;
-  const bundlerAddress = tools.address;
-  const proposedLog = proposedLogs.find((log) => log.owner === bundlerAddress);
-
-  return block < trafficLogs.close - 420 && proposedLog === undefined;
-}
-
-/**
- *
- * @param {*} state
- * @param {*} block
- * @returns
- */
 function voteSubmitActive(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 420 && block < trafficLogs.close - 220;
+  return (
+    trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
+    block < trafficLogs.open + OFFSET_PROPOSE_SLASH
+  );
 }
 
 /**

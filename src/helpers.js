@@ -1,4 +1,6 @@
-const DURATION_PROPOSAL = 120;
+const OFFSET_SUBMIT_END = 300;
+const OFFSET_RANK = 600;
+const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
 
 // Tools singleton
 const tools = new (require("@_koi/sdk/node").Node)(process.env.BUNDLER_ADDR);
@@ -17,6 +19,7 @@ const arweave = require("arweave").init({
  */
 class Node {
   constructor() {
+    this.isSubmitted = false;
     this.isRanked = false;
     this.isDistributed = false;
   }
@@ -32,22 +35,79 @@ class Node {
   }
 
   /**
+   *
+   * @param {*} state
+   * @param {*} block
+   * @returns
+   */
+  canSubmitTrafficLog(state, block) {
+    // Check if we're an indirect witness
+    if (this.direct === false) return false;
+
+    // Check if we're in the time frame, if not reset isSubmitted and return false
+    const trafficLogs = state.stateUpdate.trafficLogs;
+    if (
+      block < trafficLogs.open ||
+      trafficLogs.open + OFFSET_SUBMIT_END < block
+    ) {
+      this.isSubmitted = false;
+      return false;
+    }
+
+    // We haven't submitted yet
+    if (this.isSubmitted) return false;
+
+    // Check that our log isn't on the state yet
+
+    const currentTrafficLogs =
+      state.stateUpdate.trafficLogs.dailyTrafficLog.find(
+        (log) => log.block === trafficLogs.open
+      );
+    const proposedLogs = currentTrafficLogs.proposedLogs;
+    const proposedLog = proposedLogs.find((log) => log.owner === tools.address);
+    return proposedLog === undefined;
+  }
+
+  /**
+   *
+   */
+  async submitTrafficLog() {
+    var task = "submitting traffic log";
+    let arg = {
+      gateWayUrl: URL_GATEWAY_LOGS,
+      stakeAmount: 2
+    };
+
+    let tx = await tools.submitTrafficLog(arg);
+    await this.checkTxConfirmation(tx, task);
+    console.log("Traffic log submission confirmed");
+    this.isSubmitted = true;
+  }
+
+  /**
    * Checks wether proposal is ranked or not
    * @param {*} state Current contract state data
    * @param {number} block Block height
    * @returns {boolean} Wether we can rank
    */
   canRankProposal(state, block) {
+    // Check if we're in the time frame, if not reset isRanked and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
+    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close > block) {
+      this.isRanked = false;
+      return false;
+    }
+
+    // If we've ranked, return false
+    if (this.isRanked) return false;
+
+    // If our rank isn't on the state yet
+
     if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
-
-    if (currentTrafficLogs.isRanked || this.isRanked) return false;
-    return (
-      trafficLogs.close - DURATION_PROPOSAL < block && block < trafficLogs.close
-    );
+    return !currentTrafficLogs.isRanked;
   }
 
   /**
@@ -67,20 +127,23 @@ class Node {
    * @returns {boolean} Wether we can distribute
    */
   canDistribute(state, block) {
+    // Check if it's time to distribute, if not reset isDistributed and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
+    if (block < trafficLogs.close) {
+      this.isDistributed = false;
+      return false;
+    }
+
+    // If we've locally distributed, return false
+    if (this.isDistributed) return false;
+
+    // If our distribution isn't on the state yet
+
     if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
-
-    const isDistributed =
-      currentTrafficLogs.isDistributed || this.isDistributed;
-    if (block > trafficLogs.close && !isDistributed) {
-      this.isRanked = false;
-      return true;
-    } else if (block < trafficLogs.close) this.isDistributed = false;
-
-    return false;
+    return !currentTrafficLogs.isDistributed;
   }
 
   /**
