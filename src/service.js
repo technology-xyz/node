@@ -145,7 +145,7 @@ function isTrafficLogOutdate(state, block) {
  */
 function voteSubmitActive(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 420 && block < trafficLogs.close - 220;
+  return block > trafficLogs.close - 250 && block < trafficLogs.close - 150;
 }
 
 /**
@@ -154,9 +154,15 @@ function voteSubmitActive(state, block) {
  * @returns
  */
 async function activeVoteId(state) {
+  const activeVotes = []
   const close = state.stateUpdate.trafficLogs.close;
   const votes = state.votes;
-
+  const trackedVotes = votes.filter((vote)=> vote.end == close);
+  for(let vote of trackVotes){
+    activeVotes.push(vote.id);
+  }
+  return activeVotes;
+  /*
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
@@ -167,6 +173,7 @@ async function activeVoteId(state) {
     if (votes[i].end === close && areVotesTracked[i])
       activeVotes.push(votes[i].id);
   return activeVotes;
+  */
 }
 
 /**
@@ -205,7 +212,7 @@ async function batchUpdateContractState(voteId) {
  * @returns
  */
 async function getData(proposal) {
-  const res = axios.post("https://bundler.openkoi.com/getVotes/", proposal);
+  const res = axios.post("https://bundler.openkoi.com/getBatch/", proposal);
   return res.data;
 }
 

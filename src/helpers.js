@@ -1,7 +1,7 @@
 // Tools singleton
 const tools = new (require("@_koi/sdk/node").Node)();
 
-const DURATION_PROPOSAL = 120;
+const DURATION_PROPOSAL = 75;
 
 /**
  * Common node functions for witness and service
