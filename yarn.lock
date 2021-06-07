@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.16-beta.38":
+"@_koi/sdk@^2.1.16-beta.40":
   version "2.1.16-beta.40"
   resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.40.tgz#ffdfe658299bcbba3b7417de801e7f6dfb9e30fa"
   integrity sha512-ktWkHUi9AFvDaGSYOAU75dZikt3G7P4AqM4eTzmlMjpSqZC5nUE29wzNfbAbjnIN6LChTfPbnue2B48Dy0t1jw==
