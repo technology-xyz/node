@@ -6,7 +6,7 @@ const { tools, Node } = require("./helpers");
  */
 async function witness(...args) {
   const node = new Witness(...args);
-  node.run();
+  await node.run();
 }
 
 class Witness extends Node {
