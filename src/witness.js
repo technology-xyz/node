@@ -68,7 +68,7 @@ class Witness extends Node {
  */
 function checkForVote(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.close - 320;
+  return block < trafficLogs.close - 250;
 }
 
 /**
@@ -79,7 +79,7 @@ function checkForVote(state, block) {
  */
 function checkProposeSlash(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 220 && block < trafficLogs.close - 120;
+  return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
 }
 
 module.exports = witness;
