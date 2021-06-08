@@ -90,8 +90,8 @@ class Service extends Node {
   async propagateRegistry() {
     // Don't propagate if
     if (
-      tools.bundler_url === null || // this node is a primary node
-      tools.bundler_url === "null"
+      tools.bundlerUrl === null || // this node is a primary node
+      tools.bundlerUrl === "null"
     )
       return;
 
@@ -100,7 +100,7 @@ class Service extends Node {
 
     // Select a target
     let target;
-    if (!nodes || nodes.length === 0) target = this.bundler_url;
+    if (!nodes || nodes.length === 0) target = this.bundlerUrl;
     else {
       const selection = nodes[Math.floor(Math.random() * nodes.length)];
       target = selection.data.url;

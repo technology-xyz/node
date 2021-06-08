@@ -3,23 +3,25 @@ require("dotenv").config();
 const prompts = require("prompts");
 const chalk = require("chalk");
 
-const { tools } = require("./src/helpers");
-const service = require("./src/service");
-const witness = require("./src/witness");
-
 // Parse cli params
 const PARSE_ARGS = [
   "REDIS_IP",
   "REDIS_PORT",
   "AR_WALLET",
   "NODE_MODE",
-  "STAKE"
+  "STAKE",
+  "SERVICE_URL",
+  "TRUSTED_SERVICE_URL"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
+
+const { tools } = require("./src/helpers");
+const service = require("./src/service");
+const witness = require("./src/witness");
 
 /**
  * Main entry point

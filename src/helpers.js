@@ -3,7 +3,9 @@ const OFFSET_RANK = 600;
 const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
 
 // Tools singleton
-const tools = new (require("@_koi/sdk/node").Node)(process.env.BUNDLER_ADDR);
+const tools = new (require("@_koi/sdk/node").Node)(
+  process.env.TRUSTED_SERVICE_URL
+);
 
 // Arweave singleton
 const arweave = require("arweave").init({
