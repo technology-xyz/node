@@ -17,7 +17,7 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     echo "Pushed koi_node:dev-$SHORTSHA"
 
-    ./deploy.sh
+    ./build/deploy.sh
 
   else
     echo "Skipping deploy because branch is not 'dev'"
