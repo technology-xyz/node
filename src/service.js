@@ -69,7 +69,7 @@ class Service extends Node {
 
       if (voteSubmitActive(state, block)) {
         const activeVotes = await activeVoteId(state);
-        await this.submitVote(activeVotes);
+        //await this.submitVote(activeVotes);
       }
 
       await this.tryRankDistribute(state, block);
@@ -171,13 +171,10 @@ function voteSubmitActive(state, block) {
  * @returns
  */
 async function activeVoteId(state) {
-  const activeVotes = [];
   const close = state.stateUpdate.trafficLogs.close;
   const votes = state.votes;
   const trackedVotes = votes.filter((vote) => vote.end == close);
-  for (let vote of trackedVotes) {
-    activeVotes.push(vote.id);
-  }
+  const activeVotes = trackedVotes.map((vote) => vote.id);
   return activeVotes;
   /*
   // Check if votes are tracked simultaneously
