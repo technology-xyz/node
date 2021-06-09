@@ -226,16 +226,11 @@ async function batchUpdateContractState(voteId) {
  * @returns
  */
 async function getData(proposal) {
-  return new Promise(function (resolve, reject) {
-    axios
-      .post("https://bundler.openkoi.com:8888/getBatch/", proposal)
-      .then((res) => {
-        resolve(res.data);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+  const res = await axios.post(
+    "https://bundler.openkoi.com:8888/getBatch/",
+    proposal
+  );
+  return res.data;
 }
 
 /**
