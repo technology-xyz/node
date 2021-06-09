@@ -6,6 +6,9 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   pip install awscli
   export PATH=$PATH:$HOME/.local/bin
 
+  # print aws config
+  aws configure list
+
   eval $(aws ecr-public get-login-password --region us-east-1)
   # Push only if we're testing the main branch
   if [ "$TRAVIS_BRANCH" == "dev" ]; then
