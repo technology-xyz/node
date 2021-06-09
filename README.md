@@ -30,7 +30,7 @@ Additionally, if you would like to like to run a service node, do the following 
 chmod a+x koi-node
 sudo mkdir -p /var/lib/koi
 sudo ln -sf /path/to/wallet.json /var/lib/koi/wallet.json
-sudo ln -sf /home/user/Development/openkoi/node/koi-node /usr/local/bin/
+sudo ln -sf "$(pwd)/koi-node" /usr/local/bin/
 sudo cp -f koi-node.service /etc/systemd/system/
 sudo systemctl enable koi-node # Enables koi-node to auto start
 ```
