@@ -30,6 +30,16 @@ sudo systemctl enable koi-node                            # start the service on
 sudo systemctl disable koi-node                           # don't start the service on boot
 sudo journalctl --unit=koi-node --since='-5 min' --follow # look at recent logs and await more
 ```
+
+## Run using docker-compose
+Start the stack with `docker compose up --build`. The stack runs two services:
+
+1. Redis
+2. Koi node
+
+Redis will save its rdb snapshots to the `data` folder in this repo. If this folder doesn't exist you will need to create it. 
+
+You can modify the functionality of the koi node by changing the environment variables in `docker-compose.yaml`. You will need to change the wallet volume mount (default is `/path/to/wallet.json`) to the path of your wallet on the machine this stack is running on. 
 ## TODO
 
 - Setup KOI Tasks: If you select `Show KOI Tasks` to view the list of available tasks. Then you can enter the Id or name of any task which you want to run.The KOI associated with that task will get transferred to your wallet once the task is successfully completed and submitted to bundler(TODO: Need to combine this smart contract with original one).

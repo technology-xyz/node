@@ -1,0 +1,14 @@
+# ---- Base Node ----
+FROM node:16-slim AS base
+
+RUN node -v
+RUN yarn -v
+
+WORKDIR /app
+COPY package.json ./
+COPY yarn.lock ./
+
+RUN apt-get update
+
+RUN yarn install
+COPY . .
