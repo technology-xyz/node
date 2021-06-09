@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.16-beta.41":
-  version "2.1.16-beta.41"
-  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.41.tgz#8a6625f9ad7dfa86927e972d5935b6affa4903a6"
-  integrity sha512-cJyOXC/VBcJj7zKp/g5MX4tXQEPJNd2X/yFDj2HqpYJLAX3SCy6f6Om1eCyIq+DPRLuYxs+44jzICaRI3hA4JA==
+"@_koi/sdk@^2.1.16-beta.44":
+  version "2.1.16-beta.44"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.44.tgz#f6dbc4101860b6559a332e45e38eee6122df41ab"
+  integrity sha512-l9E3pcGmn3t0GH+T3A4dxfPLpRavaputBpRWVtGbK8TvDrcrFaGfXTsn/v00W07koIQPnt7GVzNIL8ciVGTP+Q==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.9"
     arweave "^1.10.13"
@@ -69,10 +69,10 @@
   resolved "https://registry.yarnpkg.com/@kyve/contract/-/contract-0.1.0-alpha.4.tgz#5bfed0b16566d828d71bc967695a493027507b84"
   integrity sha512-xJVOl29RnQyB7MJHpul1INlBdkZLrDkQzSoC+RHCaHk6fPgCuqCofh7aRfpu0jWS41eP7P/LBE4u5IcSUmDysA==
 
-"@kyve/core@0.0.0-alpha.8":
-  version "0.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@kyve/core/-/core-0.0.0-alpha.8.tgz#93eebd6aa05273045c8509fbd9e0571efcb9c5b7"
-  integrity sha512-OqguWjiY98eC4UDLJiqXNtTA+Mcuq7kd9vaQyGKCA8fMQ+T1jbPIxp7xIo0wLUcrF6GAaL1RVwz5Mj28TQhGHQ==
+"@kyve/core@0.0.0-alpha.10":
+  version "0.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@kyve/core/-/core-0.0.0-alpha.10.tgz#9213328f3aeb5e515a2a99ec5f1b7b67c287f723"
+  integrity sha512-GirXYDuiaRwfT6bSPVsIIGGvJQUujKPBQ/GJEkE7gyWbwggZF8qh3el0/9rtGAEMxaJOC1pCI9muqVnPBW+nrQ==
   dependencies:
     "@kyve/contract-lib" "0.1.0-alpha.7"
     ardb "^1.0.8"
@@ -82,12 +82,12 @@
     smartweave "^0.4.27"
 
 "@kyve/query@^0.0.0-alpha.9":
-  version "0.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/@kyve/query/-/query-0.0.0-alpha.10.tgz#9782068ad7c670f569aeb167778f525c0ce3a12d"
-  integrity sha512-6eD77Ha+DexenT7AqBIZ3NTh+W7Z5E+VdLgSf09fE/MocrEzfYQzoiKp5Nk4xGXUdh0pCHVkqGoFt2iAUS3/iw==
+  version "0.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/@kyve/query/-/query-0.0.0-alpha.13.tgz#99d7cef662875f9e1e2bd4989cf42d895540dd69"
+  integrity sha512-Ypqs3DHrc4dXhBHQrNGeUDlmqSPkTGNNxEeU35JqAC12jMbsymS54uNnGBXIuyMarx07HIQ8/t/jXMRoNYVM7w==
   dependencies:
     "@kyve/contract-lib" "0.1.0-alpha.7"
-    "@kyve/core" "0.0.0-alpha.8"
+    "@kyve/core" "0.0.0-alpha.10"
     ardb "^1.0.8"
     arweave "^1.10.11"
     arweave-bundles "^1.0.3"
@@ -187,9 +187,9 @@
   integrity sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==
 
 "@types/node@*", "@types/node@>=13.7.0":
-  version "15.12.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.1.tgz#9b60797dee1895383a725f828a869c86c6caa5c2"
-  integrity sha512-zyxJM8I1c9q5sRMtVF+zdd13Jt6RU4r4qfhTd7lQubyThvLfx6yYekWSQjGCGV2Tkecgxnlpl/DNlb6Hg+dmEw==
+  version "15.12.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.2.tgz#1f2b42c4be7156ff4a6f914b2fb03d05fa84e38d"
+  integrity sha512-zjQ69G564OCIWIOHSXyQEEDpdpGl+G348RAKY0XXy9Z5kU9Vzv1GMNnkar/ZJ8dzXB3COzD9Mo9NtRZ4xfgUww==
 
 "@types/node@11.11.6":
   version "11.11.6"
