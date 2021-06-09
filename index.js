@@ -11,7 +11,8 @@ const PARSE_ARGS = [
   "NODE_MODE",
   "STAKE",
   "SERVICE_URL",
-  "TRUSTED_SERVICE_URL"
+  "TRUSTED_SERVICE_URL",
+  "SERVER_PORT"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
