@@ -1,4 +1,10 @@
-const { tools, Node } = require("./helpers");
+const {
+  tools,
+  Node,
+  OFFSET_BATCH_SUBMIT,
+  OFFSET_RANK,
+  OFFSET_PROPOSE_SLASH
+} = require("./helpers");
 
 /**
  * Transparent interface to initialize and run witness node
@@ -71,7 +77,7 @@ class Witness extends Node {
  */
 function checkForVote(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.close - 250;
+  return block < trafficLogs.open + OFFSET_BATCH_SUBMIT;
 }
 
 /**
@@ -82,7 +88,10 @@ function checkForVote(state, block) {
  */
 function checkProposeSlash(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  return (
+    trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
+    block < trafficLogs.open + OFFSET_RANK
+  );
 }
 
 module.exports = witness;

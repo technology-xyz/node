@@ -1,12 +1,16 @@
-const { tools, Node, arweave } = require("./helpers");
+const {
+  tools,
+  Node,
+  arweave,
+  OFFSET_BATCH_SUBMIT,
+  OFFSET_PROPOSE_SLASH
+} = require("./helpers");
 // const { access } = require("fs/promises");
 // const { constants } = require("fs");
 const axios = require("axios");
 const { promisify } = require("util");
 
 const BUNDLER_REGISTER = "/register-node";
-const OFFSET_BATCH_SUBMIT = 470;
-const OFFSET_PROPOSE_SLASH = 570;
 
 /**
  * Transparent interface to initialize and run service node
@@ -19,6 +23,7 @@ async function service() {
 class Service extends Node {
   constructor() {
     super();
+    this.nextPeriod = 0;
 
     // Initialize redis client
     tools.loadRedisClient();
@@ -29,16 +34,8 @@ class Service extends Node {
       tools.redisClient
     );
 
-    // On startup, only do discovery with primary service node.
-
     // Start webserver
     this.startWebserver();
-
-    // Run periodic tasks for the first time
-    this.run_periodic();
-
-    // Start periodic run loop
-    setInterval(this.run_periodic, 300000);
   }
 
   /**
@@ -46,6 +43,8 @@ class Service extends Node {
    */
   async run() {
     for (;;) {
+      await this.run_periodic();
+
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
@@ -66,6 +65,10 @@ class Service extends Node {
    * Run loop that executes every 5 minutes
    */
   async run_periodic() {
+    const currTime = Date.now();
+    if (this.nextPeriod > currTime) return;
+    this.nextPeriod = currTime + 300000;
+
     console.log("Running periodic tasks");
 
     // Propagate service nodes
