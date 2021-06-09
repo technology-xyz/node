@@ -1,5 +1,5 @@
 const OFFSET_SUBMIT_END = 300;
-const OFFSET_RANK = 600;
+const OFFSET_RANK = 645;
 const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
 
 // Tools singleton

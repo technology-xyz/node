@@ -1,19 +1,19 @@
 const { tools, Node, arweave } = require("./helpers");
-const { access } = require("fs/promises");
-const { constants } = require("fs");
+// const { access } = require("fs/promises");
+// const { constants } = require("fs");
 const axios = require("axios");
 const { promisify } = require("util");
 
 const BUNDLER_REGISTER = "/register-node";
-const OFFSET_BATCH_SUBMIT = 400;
-const OFFSET_PROPOSE_SLASH = 600;
+const OFFSET_BATCH_SUBMIT = 470;
+const OFFSET_PROPOSE_SLASH = 570;
 
 /**
  * Transparent interface to initialize and run service node
  */
 async function service() {
   const node = new Service();
-  node.run();
+  await node.run();
 }
 
 class Service extends Node {
@@ -211,7 +211,10 @@ function voteSubmitActive(state, block) {
 async function activeVoteId(state) {
   const close = state.stateUpdate.trafficLogs.close;
   const votes = state.votes;
-
+  const trackedVotes = votes.filter((vote) => vote.end === close);
+  const activeVotes = trackedVotes.map((vote) => vote.id);
+  return activeVotes;
+  /*
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
@@ -222,22 +225,23 @@ async function activeVoteId(state) {
     if (votes[i].end === close && areVotesTracked[i])
       activeVotes.push(votes[i].id);
   return activeVotes;
+  */
 }
 
-/**
- * Checks if vote file is present to verify it exists
- * @param {*} voteId
- * @returns {boolean} Whether vote exists
- */
-async function isVoteTracked(voteId) {
-  const batchFileName = __dirname + "/../app/bundles/" + voteId;
-  try {
-    await access(batchFileName, constants.F_OK);
-    return true;
-  } catch (_e) {
-    return false;
-  }
-}
+// /**
+//  * Checks if vote file is present to verify it exists
+//  * @param {*} voteId
+//  * @returns {boolean} Whether vote exists
+//  */
+// async function isVoteTracked(voteId) {
+//   const batchFileName = __dirname + "/../app/bundles/" + voteId;
+//   try {
+//     await access(batchFileName, constants.F_OK);
+//     return true;
+//   } catch (_e) {
+//     return false;
+//   }
+// }
 
 /**
  * Koi contract vote
@@ -260,7 +264,7 @@ async function batchUpdateContractState(voteId) {
  * @returns
  */
 async function getData(proposal) {
-  const res = axios.post("https://bundler.openkoi.com/getVotes/", proposal);
+  const res = axios.post("https://bundler.openkoi.com/getBatch/", proposal);
   return res.data;
 }
 
