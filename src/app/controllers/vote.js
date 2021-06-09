@@ -1,5 +1,5 @@
 const StatusCodes = require("../config/status_codes");
-const checkVote = require("../helpers/check_vote");
+const checkVote = require("../helpers/votes");
 
 /**
  * req.body.vote : {

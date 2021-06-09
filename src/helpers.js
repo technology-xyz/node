@@ -23,7 +23,7 @@ const arweave = require("arweave").init({
  */
 class Node {
   constructor() {
-    this.isSubmitted = false;
+    this.isLogsSubmitted = false;
     this.isRanked = false;
     this.isDistributed = false;
   }
@@ -48,28 +48,30 @@ class Node {
     // Check if we're an indirect witness
     if (this.direct === false) return false;
 
-    // Check if we're in the time frame, if not reset isSubmitted and return false
+    // Check if we're in the time frame, if not reset isLogsSubmitted and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
     if (
       block < trafficLogs.open ||
       trafficLogs.open + OFFSET_SUBMIT_END < block
     ) {
-      this.isSubmitted = false;
+      this.isLogsSubmitted = false;
       return false;
     }
 
     // We haven't submitted yet
-    if (this.isSubmitted) return false;
+    if (this.isLogsSubmitted) return false;
 
-    // Check that our log isn't on the state yet
-
+    // Check that our log isn't on the state yet and that our gateway hasn't been submitted yet
     const currentTrafficLogs =
       state.stateUpdate.trafficLogs.dailyTrafficLog.find(
         (log) => log.block === trafficLogs.open
       );
     const proposedLogs = currentTrafficLogs.proposedLogs;
-    const proposedLog = proposedLogs.find((log) => log.owner === tools.address);
-    return proposedLog === undefined;
+    const matchingLog = proposedLogs.find(
+      (log) => log.owner === tools.address || log.gateWayId === URL_GATEWAY_LOGS
+    );
+
+    return matchingLog === undefined;
   }
 
   /**
@@ -85,7 +87,7 @@ class Node {
     let tx = await tools.submitTrafficLog(arg);
     await this.checkTxConfirmation(tx, task);
     console.log("Traffic log submission confirmed");
-    this.isSubmitted = true;
+    this.isLogsSubmitted = true;
   }
 
   /**

@@ -1,8 +1,5 @@
-// const checkVote = require("../helpers/check_vote");
-
+const { getVotesFile } = require("../helpers/votes");
 const StatusCodes = require("../config/status_codes");
-const { access, readFile } = require("fs/promises");
-const { constants } = require("fs");
 
 /**
  * req.vote : {
@@ -46,17 +43,6 @@ async function getTrafficLog(req, res) {
       message: "Unable to read or parse traffic log"
     });
   }
-}
-
-/**
- *
- * @param {*} fileId ID of vote file to read
- * @returns {string} Vote file contents in utf8
- */
-async function getVotesFile(fileId) {
-  const batchFileName = __dirname + "/../bundles/" + fileId;
-  await access(batchFileName, constants.F_OK);
-  return await readFile(batchFileName, "utf8");
 }
 
 module.exports = {

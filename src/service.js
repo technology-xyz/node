@@ -5,8 +5,8 @@ const {
   OFFSET_BATCH_SUBMIT,
   OFFSET_PROPOSE_SLASH
 } = require("./helpers");
-// const { access } = require("fs/promises");
-// const { constants } = require("fs");
+const { access } = require("fs/promises");
+const { constants } = require("fs");
 const axios = require("axios");
 const { promisify } = require("util");
 
@@ -52,7 +52,7 @@ class Service extends Node {
       if (await this.canSubmitTrafficLog(state, block))
         await this.submitTrafficLog();
 
-      if (voteSubmitActive(state, block)) {
+      if (canSubmitBatch(state, block)) {
         const activeVotes = await activeVoteId(state);
         await this.submitVote(activeVotes);
       }
@@ -169,7 +169,7 @@ class Service extends Node {
    * @param {*} activeVotes
    */
   async submitVote(activeVotes) {
-    const task = "submitting votes";
+    let task = "submitting votes";
     while (activeVotes.length > 0) {
       const voteId = activeVotes[activeVotes.length - 1];
       const state = await tools.getContractState();
@@ -184,6 +184,7 @@ class Service extends Node {
           bundlerAddress: bundlerAddress
         };
         const resultTx = await tools.batchAction(arg);
+        task = "batch";
         await this.checkTxConfirmation(resultTx, task);
         activeVotes.pop();
       }
@@ -198,7 +199,7 @@ class Service extends Node {
  * @param {*} block
  * @returns
  */
-function voteSubmitActive(state, block) {
+function canSubmitBatch(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
   return (
     trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
@@ -212,39 +213,34 @@ function voteSubmitActive(state, block) {
  * @returns
  */
 async function activeVoteId(state) {
-  const close = state.stateUpdate.trafficLogs.close;
-  const votes = state.votes;
-  const trackedVotes = votes.filter((vote) => vote.end === close);
-  const activeVotes = trackedVotes.map((vote) => vote.id);
-  return activeVotes;
-  /*
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
+  const close = state.stateUpdate.trafficLogs.close;
+  const votes = state.votes;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])
       activeVotes.push(votes[i].id);
   return activeVotes;
-  */
 }
 
-// /**
-//  * Checks if vote file is present to verify it exists
-//  * @param {*} voteId
-//  * @returns {boolean} Whether vote exists
-//  */
-// async function isVoteTracked(voteId) {
-//   const batchFileName = __dirname + "/../app/bundles/" + voteId;
-//   try {
-//     await access(batchFileName, constants.F_OK);
-//     return true;
-//   } catch (_e) {
-//     return false;
-//   }
-// }
+/**
+ * Checks if vote file is present to verify it exists
+ * @param {*} voteId
+ * @returns {boolean} Whether vote exists
+ */
+async function isVoteTracked(voteId) {
+  const batchFileName = __dirname + "/../app/bundles/" + voteId;
+  try {
+    await access(batchFileName, constants.F_OK);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
 
 /**
  * Koi contract vote
@@ -252,23 +248,11 @@ async function activeVoteId(state) {
  * @returns
  */
 async function batchUpdateContractState(voteId) {
-  const proposal = {
-    bundlerId: 10,
-    voteId: voteId
-  };
+  let { getVotesFile } = require("./app/helpers/votes");
 
-  const data = await getData(proposal);
-  return await bundleAndExport(data);
-}
-
-/**
- *
- * @param {*} proposal
- * @returns
- */
-async function getData(proposal) {
-  const res = axios.post("https://bundler.openkoi.com/getBatch/", proposal);
-  return res.data;
+  const batchStr = await getVotesFile(voteId);
+  const batch = batchStr.split("\r\n").map(JSON.parse);
+  return await bundleAndExport(batch);
 }
 
 /**
@@ -277,7 +261,6 @@ async function getData(proposal) {
  * @returns
  */
 async function bundleAndExport(bundle) {
-  console.log("Generating bundle with", bundle, tools.wallet);
   let myTx = await arweave.createTransaction(
     {
       data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
