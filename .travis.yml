@@ -12,6 +12,7 @@ services:
 branches:
   only:
     - main
+    - dev
 
 jobs:
   include:
