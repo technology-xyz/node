@@ -4,10 +4,25 @@ The following repo contains a CLI interface to interact with contract and also g
 
 ## Install
 
+For a minimally working witness node:
+
 1. `git clone https://github.com/open-koi/node_cli.git`
-2. Setup `.env`
-3. `yarn install`
-4. `yarn start`
+2. `yarn install`
+3. `yarn start`
+
+Additionally, if you would like to like to run a service node, do the following before `yarn start`:
+
+1. Setup `.env` specifying at least `REDIS_IP` and `REDIS_PORT`
+2. Ensure Redis is running
+3. Ensure wallet contains some AR token
+
+## CLI Params and Env vars
+
+- **REDIS_IP** - Redis IP to connect to
+- **REDIS_PORT** - Redis port to connect to
+- **AR_WALLET** - Path to Arweave wallet json
+- **NODE_MODE** - [service|witness|witnessDirect] Node mode to use
+- **STAKE** - Amount of AR token to stake
 
 ## Service setup
 
@@ -15,8 +30,8 @@ The following repo contains a CLI interface to interact with contract and also g
 chmod a+x koi-node
 sudo mkdir -p /var/lib/koi
 sudo ln -sf /path/to/wallet.json /var/lib/koi/wallet.json
-sudo ln -sf /home/user/Development/openkoi/node/koi-node /usr/local/bin/
-sudo ln -sf /home/user/Development/openkoi/node/koi-node.service /etc/systemd/system/
+sudo ln -sf "$(pwd)/koi-node" /usr/local/bin/
+sudo cp -f koi-node.service /etc/systemd/system/
 sudo systemctl enable koi-node # Enables koi-node to auto start
 ```
 
