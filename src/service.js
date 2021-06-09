@@ -96,7 +96,7 @@ class Service extends Node {
    * @param {*} activeVotes
    */
   async submitVote(activeVotes) {
-    const task = "submitting votes";
+    let task = "submitting votes";
     while (activeVotes.length > 0) {
       const voteId = activeVotes[activeVotes.length - 1];
       const state = await tools.getContractState();
@@ -111,6 +111,7 @@ class Service extends Node {
           bundlerAddress: bundlerAddress
         };
         const resultTx = await tools.batchAction(arg);
+        task = "batch";
         await this.checkTxConfirmation(resultTx, task);
         activeVotes.pop();
       }
@@ -133,8 +134,15 @@ function isTrafficLogOutdate(state, block) {
   const proposedLogs = currentTrafficLogs.proposedLogs;
   const bundlerAddress = tools.address;
   const proposedLog = proposedLogs.find((log) => log.owner === bundlerAddress);
+  const proposedGateWay = proposedLogs.find(
+    (log) => log.gateWayId === "https://arweave.dev/logs/"
+  );
 
-  return block < trafficLogs.close - 420 && proposedLog === undefined;
+  return (
+    block < trafficLogs.close - 420 &&
+    proposedLog === undefined &&
+    proposedGateWay
+  );
 }
 
 /**
@@ -145,7 +153,16 @@ function isTrafficLogOutdate(state, block) {
  */
 function voteSubmitActive(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 250 && block < trafficLogs.close - 150;
+  const close = trafficLogs.close;
+  const activeVotes = state.votes.filter((vote) => vote.end == close);
+  for (let vote of activeVotes) {
+    return (
+      block > trafficLogs.close - 250 &&
+      block < trafficLogs.close - 150 &&
+      JSON.stringify(vote.bundlers) === "{}"
+    );
+  }
+  return false;
 }
 
 /**
@@ -154,11 +171,11 @@ function voteSubmitActive(state, block) {
  * @returns
  */
 async function activeVoteId(state) {
-  const activeVotes = []
+  const activeVotes = [];
   const close = state.stateUpdate.trafficLogs.close;
   const votes = state.votes;
-  const trackedVotes = votes.filter((vote)=> vote.end == close);
-  for(let vote of trackVotes){
+  const trackedVotes = votes.filter((vote) => vote.end == close);
+  for (let vote of trackedVotes) {
     activeVotes.push(vote.id);
   }
   return activeVotes;
@@ -212,8 +229,16 @@ async function batchUpdateContractState(voteId) {
  * @returns
  */
 async function getData(proposal) {
-  const res = axios.post("https://bundler.openkoi.com/getBatch/", proposal);
-  return res.data;
+  return new Promise(function (resolve, reject) {
+    axios
+      .post("https://bundler.openkoi.com:8888/getBatch/", proposal)
+      .then((res) => {
+        resolve(res.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 /**
@@ -222,7 +247,6 @@ async function getData(proposal) {
  * @returns
  */
 async function bundleAndExport(bundle) {
-  console.log("Generating bundle with", bundle, tools.wallet);
   let myTx = await arweave.createTransaction(
     {
       data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
