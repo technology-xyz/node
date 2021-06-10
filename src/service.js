@@ -1,18 +1,16 @@
-const { tools, Node } = require("./helpers");
+const {
+  tools,
+  Node,
+  arweave,
+  OFFSET_BATCH_SUBMIT,
+  OFFSET_PROPOSE_SLASH
+} = require("./helpers");
 const { access } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
-const Arweave = require("arweave");
+const { promisify } = require("util");
 
-const ADDR_GATEWAY_LOGS = "https://arweave.dev/logs/";
-
-const arweave = Arweave.init({
-  host: "arweave.dev",
-  protocol: "https",
-  port: 443,
-  timeout: 20000, // Network request timeouts in milliseconds
-  logging: false // Enable network request logging
-});
+const BUNDLER_REGISTER = "/register-node";
 
 /**
  * Transparent interface to initialize and run service node
@@ -25,34 +23,19 @@ async function service() {
 class Service extends Node {
   constructor() {
     super();
+    this.nextPeriod = 0;
 
+    // Initialize redis client
     tools.loadRedisClient();
+    this.redisSetAsync = promisify(tools.redisClient.set).bind(
+      tools.redisClient
+    );
+    this.redisGetAsync = promisify(tools.redisClient.get).bind(
+      tools.redisClient
+    );
 
-    // Require lazily to reduce RAM and load times for witness
-    const express = require("express");
-    const cors = require("cors");
-    const cookieParser = require("cookie-parser");
-
-    // Setup middleware and routes
-    const app = express();
-    app.use(cors());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(cookieParser());
-    require("./app/routes")(app);
-
-    // Start the server
-    const port = process.env.SERVER_PORT || 8887;
-    app.listen(port, () => {
-      console.log("Open http://localhost:" + port, "to view in browser");
-    });
-
-    // Update state cache every 5 minutes
-    const updateStateCache = require("./app/helpers/update_state_cache");
-    setInterval(updateStateCache, 300000);
-    updateStateCache().then(() => {
-      console.log("Initial state cache populated");
-    });
+    // Start webserver
+    this.startWebserver();
   }
 
   /**
@@ -60,14 +43,16 @@ class Service extends Node {
    */
   async run() {
     for (;;) {
+      await this.run_periodic();
+
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
 
-      if (await isTrafficLogOutdate(state, block))
+      if (await this.canSubmitTrafficLog(state, block))
         await this.submitTrafficLog();
 
-      if (voteSubmitActive(state, block)) {
+      if (canSubmitBatch(state, block)) {
         const activeVotes = await activeVoteId(state);
         await this.submitVote(activeVotes);
       }
@@ -77,18 +62,106 @@ class Service extends Node {
   }
 
   /**
+   * Run loop that executes every 5 minutes
+   */
+  async run_periodic() {
+    const currTime = Date.now();
+    if (this.nextPeriod > currTime) return;
+    this.nextPeriod = currTime + 300000;
+
+    console.log("Running periodic tasks");
+
+    // Propagate service nodes
+    try {
+      await this.propagateRegistry();
+    } catch (e) {
+      console.log("Error while propagating", e);
+    }
+
+    // Redis update current state
+    try {
+      await this.updateRedisStateCached();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  /**
+   * Fetch and propagate node registry
+   * TODO: separate into smaller functions that can be used in /register-node endpoint
+   */
+  async propagateRegistry() {
+    // Don't propagate if
+    if (
+      tools.bundlerUrl === null || // this node is a primary node
+      tools.bundlerUrl === "null"
+    )
+      return;
+
+    let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
+    let nodes = await getNodes();
+
+    // Select a target
+    let target;
+    if (!nodes || nodes.length === 0) target = this.bundlerUrl;
+    else {
+      const selection = nodes[Math.floor(Math.random() * nodes.length)];
+      target = selection.data.url;
+    }
+
+    // Get targets node registry and add it to ours
+    const newNodes = await tools.getNodes(target);
+    await registerNodes(newNodes);
+
+    // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
+    if (!process.env.SERVICE_URL) {
+      console.log("SERVICE_URL not set, skipping registration");
+      return;
+    }
+
+    // Sign payload
+    const payload = {
+      data: {
+        url: process.env.SERVICE_URL,
+        timestamp: Date.now()
+      }
+    };
+    tools.signPayload(payload);
+
+    // Register self in target registry
+    axios.post(target + BUNDLER_REGISTER, payload, {
+      headers: { "content-type": "application/json" }
+    });
+  }
+
+  /**
    *
    */
-  async submitTrafficLog() {
-    var task = "submitting traffic log";
-    let arg = {
-      gateWayUrl: ADDR_GATEWAY_LOGS,
-      stakeAmount: 2
-    };
+  async updateRedisStateCached() {
+    const currentState = await tools.getContractState();
+    await this.redisSetAsync(
+      "currentStateCached",
+      JSON.stringify(currentState)
+    );
+  }
 
-    let tx = await tools.submitTrafficLog(arg);
-    await this.checkTxConfirmation(tx, task);
-    console.log("confirmed");
+  startWebserver() {
+    // Require lazily to reduce RAM and load times for witness
+    const express = require("express");
+    const cors = require("cors");
+    const cookieParser = require("cookie-parser");
+
+    // Setup middleware and routes then start server
+    const app = express();
+    app.use(cors());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+    require("./app/routes")(app);
+    const port = process.env.SERVER_PORT || 8887;
+    app.listen(port, () => {
+      console.log("Open http://localhost:" + port, "to view in browser");
+    });
   }
 
   /**
@@ -96,7 +169,7 @@ class Service extends Node {
    * @param {*} activeVotes
    */
   async submitVote(activeVotes) {
-    const task = "submitting votes";
+    let task = "submitting votes";
     while (activeVotes.length > 0) {
       const voteId = activeVotes[activeVotes.length - 1];
       const state = await tools.getContractState();
@@ -111,6 +184,7 @@ class Service extends Node {
           bundlerAddress: bundlerAddress
         };
         const resultTx = await tools.batchAction(arg);
+        task = "batch";
         await this.checkTxConfirmation(resultTx, task);
         activeVotes.pop();
       }
@@ -125,27 +199,12 @@ class Service extends Node {
  * @param {*} block
  * @returns
  */
-function isTrafficLogOutdate(state, block) {
+function canSubmitBatch(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  const currentTrafficLogs = state.stateUpdate.trafficLogs.dailyTrafficLog.find(
-    (log) => log.block === trafficLogs.open
+  return (
+    trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
+    block < trafficLogs.open + OFFSET_PROPOSE_SLASH
   );
-  const proposedLogs = currentTrafficLogs.proposedLogs;
-  const bundlerAddress = tools.address;
-  const proposedLog = proposedLogs.find((log) => log.owner === bundlerAddress);
-
-  return block < trafficLogs.close - 420 && proposedLog === undefined;
-}
-
-/**
- *
- * @param {*} state
- * @param {*} block
- * @returns
- */
-function voteSubmitActive(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 250 && block < trafficLogs.close - 150;
 }
 
 /**
@@ -154,26 +213,18 @@ function voteSubmitActive(state, block) {
  * @returns
  */
 async function activeVoteId(state) {
-  const activeVotes = []
-  const close = state.stateUpdate.trafficLogs.close;
-  const votes = state.votes;
-  const trackedVotes = votes.filter((vote)=> vote.end == close);
-  for(let vote of trackVotes){
-    activeVotes.push(vote.id);
-  }
-  return activeVotes;
-  /*
   // Check if votes are tracked simultaneously
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
+  const close = state.stateUpdate.trafficLogs.close;
+  const votes = state.votes;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])
       activeVotes.push(votes[i].id);
   return activeVotes;
-  */
 }
 
 /**
@@ -197,23 +248,11 @@ async function isVoteTracked(voteId) {
  * @returns
  */
 async function batchUpdateContractState(voteId) {
-  const proposal = {
-    bundlerId: 10,
-    voteId: voteId
-  };
+  let { getVotesFile } = require("./app/helpers/votes");
 
-  const data = await getData(proposal);
-  return await bundleAndExport(data);
-}
-
-/**
- *
- * @param {*} proposal
- * @returns
- */
-async function getData(proposal) {
-  const res = axios.post("https://bundler.openkoi.com/getBatch/", proposal);
-  return res.data;
+  const batchStr = await getVotesFile(voteId);
+  const batch = batchStr.split("\r\n").map(JSON.parse);
+  return await bundleAndExport(batch);
 }
 
 /**
@@ -222,7 +261,6 @@ async function getData(proposal) {
  * @returns
  */
 async function bundleAndExport(bundle) {
-  console.log("Generating bundle with", bundle, tools.wallet);
   let myTx = await arweave.createTransaction(
     {
       data: Buffer.from(JSON.stringify(bundle, null, 2), "utf8")
