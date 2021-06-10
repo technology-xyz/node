@@ -3,6 +3,7 @@ const { promisify } = require("util");
 
 const redisClient = tools.redisClient;
 const redisGetAsync = promisify(redisClient.get).bind(redisClient);
+const redisSetAsync = promisify(redisClient.set).bind(redisClient);
 
 /**
  * Gets the node registry from Redis cache
@@ -72,7 +73,7 @@ async function registerNodes(newNodes) {
   nodes = nodes.concat(newNodes);
 
   // Update registry
-  await this.redisGetAsync("nodeRegistry", JSON.stringify(nodes));
+  await redisSetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
 }
