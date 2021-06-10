@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.16-beta.44":
-  version "2.1.16-beta.44"
-  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.44.tgz#f6dbc4101860b6559a332e45e38eee6122df41ab"
-  integrity sha512-l9E3pcGmn3t0GH+T3A4dxfPLpRavaputBpRWVtGbK8TvDrcrFaGfXTsn/v00W07koIQPnt7GVzNIL8ciVGTP+Q==
+"@_koi/sdk@^2.1.16-beta.47":
+  version "2.1.16-beta.47"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.47.tgz#10642dbc4f3e0dd69dae128e9e295da904ce30ed"
+  integrity sha512-ai/qRB5s73NQ/rnQcrR5jgv9F1RNstlSTKY1fYyM5UQSpUrc69RiAr1bM6kvkBC/PW3qxYECo7kdQOdOmSGLpQ==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.9"
     arweave "^1.10.13"
