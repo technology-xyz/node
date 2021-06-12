@@ -4,7 +4,7 @@ const { constants } = require("fs");
 const axios = require("axios");
 const Arweave = require("arweave");
 
-const ADDR_GATEWAY_LOGS = "https://arweave.dev/logs/";
+const ADDR_GATEWAY_LOGS = "https://gateway-n2.amplify.host/logs";
 
 const arweave = Arweave.init({
   host: "arweave.dev",
