@@ -49,8 +49,7 @@ class Service extends Node {
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
 
-      if (await this.canSubmitTrafficLog(state, block))
-        await this.submitTrafficLog();
+      if (this.canSubmitTrafficLog(state, block)) await this.submitTrafficLog();
 
       if (canSubmitBatch(state, block)) {
         const activeVotes = await activeVoteId(state);
