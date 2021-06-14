@@ -102,7 +102,7 @@ class Service extends Node {
 
     // Select a target
     let target;
-    if (!nodes || nodes.length === 0) target = this.bundlerUrl;
+    if (!nodes || nodes.length === 0) target = tools.bundlerUrl;
     else {
       const selection = nodes[Math.floor(Math.random() * nodes.length)];
       target = selection.data.url;
