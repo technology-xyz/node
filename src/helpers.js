@@ -99,7 +99,7 @@ class Node {
   canRankProposal(state, block) {
     // Check if we're in the time frame, if not reset isRanked and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close > block) {
+    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close < block) {
       this.isRanked = false;
       return false;
     }
