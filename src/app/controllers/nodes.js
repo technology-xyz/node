@@ -17,7 +17,7 @@ async function nodes(_req, res) {
  * @param {*} res express.js result object
  */
 async function registerNode(req, res) {
-  const regRes = registerNodes(req.body);
+  const regRes = registerNodes([req.body]);
 
   return regRes
     ? res.status(200)
