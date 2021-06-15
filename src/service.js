@@ -87,19 +87,13 @@ class Service extends Node {
 
   /**
    * Fetch and propagate node registry
-   * TODO: separate into smaller functions that can be used in /register-node endpoint
    */
   async propagateRegistry() {
     // Don't propagate if this node is a primary node
-    if (tools.bundlerUrl === null || tools.bundlerUrl === "null") return;
-
-    console.log("Propagating registry");
+    if (tools.bundlerUrl === "none") return;
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
     let nodes = await getNodes();
-
-    console.log("Trusted node:", tools.bundlerUrl);
-    console.log("Registered nodes:", nodes);
 
     // Select a target
     let target;
