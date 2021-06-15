@@ -1,6 +1,5 @@
 const { tools } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
-const { promisify } = require("util");
 const moment = require("moment");
 
 // TODO, remove dependency on AWS
@@ -25,11 +24,6 @@ const CORRUPTED_NFT = [
   "ZTZDEPuAfh2Nsv9Ad46zJ4k6coHbZcmi7BcJgt126wU"
 ];
 
-// Setup redis
-const redisClient = tools.redisClient;
-const redisSetAsync = promisify(redisClient.set).bind(redisClient);
-const redisGetAsync = promisify(redisClient.get).bind(redisClient);
-
 // Setup s3 bucket
 const s3 = new aws.S3();
 const upload = multer({
@@ -50,64 +44,6 @@ const upload = multer({
   })
 });
 const singleUpload = upload.single("file");
-
-/**
- *
- * @param {*} _req
- * @param {*} res
- */
-async function getCurrentState(_req, res) {
-  try {
-    const currentState = await tools.getContractState();
-    console.log("RECEIVED CURRENT STATE", currentState);
-    if (currentState) {
-      res.status(200).send(currentState);
-      if (redisSetAsync) {
-        await redisSetAsync(
-          "currentState",
-          JSON.stringify(currentState),
-          "EX",
-          5 * 60
-        );
-      }
-    } else {
-      res.status(500).send({ error: "state not available" });
-    }
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({ error: "ERROR: " + e });
-  }
-}
-
-/**
- *
- * @param {*} _req express.js request
- * @param {*} res express.js result object
- */
-async function getCurrentStateCached(_req, res) {
-  try {
-    const currentStateCached = await redisGetAsync("currentStateCached");
-    res.status(200).send(currentStateCached || []);
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({ error: "ERROR: " + e });
-  }
-}
-
-/**
- *
- * @param {*} req express.js request
- * @param {*} res express.js result object
- */
-async function getCurrentStatePredicted(req, res) {
-  try {
-    const currentStateCached = await redisGetAsync("TempPredictedState");
-    res.status(200).send(currentStateCached || []);
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({ error: "ERROR: " + e });
-  }
-}
 
 /**
  *
@@ -206,7 +142,12 @@ async function getNFTState(req, res) {
     const state = await tools._readContract();
     const content = await tools.contentView(tranxId, state);
     if (content)
-      redisSetAsync(tranxId, JSON.stringify(content), "EX", 60 * 60 * 6);
+      await tools.redisSetAsync(
+        tranxId,
+        JSON.stringify(content),
+        "EX",
+        60 * 60 * 6
+      );
     res.status(200).send(content);
   } catch (e) {
     console.log(e);
@@ -222,7 +163,7 @@ async function handleNFTUpload(req, res) {
         return res.json(err);
       }
       req.body = JSON.parse(req.body.data);
-      let pendingStateArray = await redisGetAsync("pendingStateArray");
+      let pendingStateArray = await tools.redisGetAsync("pendingStateArray");
       if (!pendingStateArray) pendingStateArray = [];
       else pendingStateArray = JSON.parse(pendingStateArray);
       pendingStateArray.push({
@@ -232,14 +173,14 @@ async function handleNFTUpload(req, res) {
         owner: req.body.registerDataParams.ownerAddress
         // dryRunState:response.state,
       });
-      await redisSetAsync(
+      await tools.redisSetAsync(
         "pendingStateArray",
         JSON.stringify(pendingStateArray)
       );
       const txId = req.body.registerDataParams.id;
       delete req.body.registerDataParams;
       req.body.fileLocation = req.file.location;
-      await redisSetAsync(txId, JSON.stringify(req.body));
+      await tools.redisSetAsync(txId, JSON.stringify(req.body));
       await tools.loadRedisClient();
       await tools.recalculatePredictedState(tools.wallet);
       res.json({ url: req.file.location });
@@ -260,7 +201,7 @@ async function filterContent(paramOutputArr, days) {
   console.log(days, "RECEIVED TOTAL", paramOutputArr.length);
   try {
     const outputArr = paramOutputArr.map((e) => {
-      return redisGetAsync(e);
+      return tools.redisGetAsync(e);
     });
     let populatedOutputArr = await Promise.all(outputArr);
     populatedOutputArr = populatedOutputArr.map((e, index) => {
@@ -297,33 +238,7 @@ async function filterContent(paramOutputArr, days) {
   }
 }
 
-/**
- * Responds with a cache of the projected future state
- *   including all pending updates, from all nodes
- * @param {*} req express.js request
- * @param {*} res express.js result object
- */
-// async function getProjectedState(req, res) {
-//   console.log("current state", cache.state);
-//   await updateStateCache();
-//   if (cache.state) {
-//     res.status(200).send(cache.state);
-//   } else res.status(500).send({ error: "state not available" });
-// }
-
-/**
- * Responds with a cache of pending states
- * @param {*} req express.js request
- * @param {*} res express.js result object
- */
-// async function getPendingState(req, res) {
-//   console.log("current state");
-// }
-
 module.exports = {
-  getCurrentState,
-  getCurrentStateCached,
-  getCurrentStatePredicted,
   getTopContentPredicted,
   getNFTState,
   handleNFTUpload

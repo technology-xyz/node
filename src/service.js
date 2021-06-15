@@ -7,7 +7,6 @@ const {
 } = require("./helpers");
 const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
-const { promisify } = require("util");
 const axios = require("axios");
 
 const BUNDLER_REGISTER = "/register-node";
@@ -26,12 +25,6 @@ class Service extends Node {
 
     // Initialize redis client and webserver
     tools.loadRedisClient();
-    this.redisSetAsync = promisify(tools.redisClient.set).bind(
-      tools.redisClient
-    );
-    this.redisGetAsync = promisify(tools.redisClient.get).bind(
-      tools.redisClient
-    );
     this.startWebserver();
     this.nextPeriod = 0;
   }
@@ -76,9 +69,9 @@ class Service extends Node {
       console.log("Error while propagating", e);
     }
 
-    // Redis update current state
+    // Redis update predicted state cache
     try {
-      await this.updateRedisStateCached();
+      await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
       console.log(e);
     }
@@ -89,12 +82,10 @@ class Service extends Node {
    * TODO: separate into smaller functions that can be used in /register-node endpoint
    */
   async propagateRegistry() {
-    // Don't propagate if
-    if (
-      tools.bundlerUrl === null || // this node is a primary node
-      tools.bundlerUrl === "null"
-    )
-      return;
+    // Don't propagate if this node is a primary node
+    if (tools.bundlerUrl === null || tools.bundlerUrl === "null") return;
+
+    console.log("Propagating Registry");
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
     let nodes = await getNodes();
@@ -130,17 +121,6 @@ class Service extends Node {
     axios.post(target + BUNDLER_REGISTER, payload, {
       headers: { "content-type": "application/json" }
     });
-  }
-
-  /**
-   *
-   */
-  async updateRedisStateCached() {
-    const currentState = await tools.getContractState();
-    await this.redisSetAsync(
-      "currentStateCached",
-      JSON.stringify(currentState)
-    );
   }
 
   startWebserver() {

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.16-beta.44":
-  version "2.1.16-beta.44"
-  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.44.tgz#f6dbc4101860b6559a332e45e38eee6122df41ab"
-  integrity sha512-l9E3pcGmn3t0GH+T3A4dxfPLpRavaputBpRWVtGbK8TvDrcrFaGfXTsn/v00W07koIQPnt7GVzNIL8ciVGTP+Q==
+"@_koi/sdk@^2.1.16-beta.52":
+  version "2.1.16-beta.52"
+  resolved "https://registry.yarnpkg.com/@_koi/sdk/-/sdk-2.1.16-beta.52.tgz#ff382da6268fd260a953cf5ae624db56bd8de3ee"
+  integrity sha512-qRJ5jmhOygkcxulQlc0+hyzpjpqXHy67uGIuOLHdueb74Kq3gay5OGRsPig/v6hu/ZF5+gnOwXoMpg1eXqj82w==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.9"
     arweave "^1.10.13"
@@ -17,7 +17,6 @@
     node-polyfill-webpack-plugin "^1.1.1"
     redis "^3.1.2"
     smartweave "^0.4.29"
-    underscore "1.12.1"
 
 "@babel/code-frame@7.12.11":
   version "7.12.11"
@@ -3047,11 +3046,6 @@ unbox-primitive@^1.0.1:
     has-bigints "^1.0.1"
     has-symbols "^1.0.2"
     which-boxed-primitive "^1.0.2"
-
-underscore@1.12.1:
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.1.tgz#7bb8cc9b3d397e201cf8553336d262544ead829e"
-  integrity sha512-hEQt0+ZLDVUMhebKxL4x1BTtDY7bavVofhZ9KZ4aI26X9SRaE+Y3m83XUL1UP2jn8ynjndwCCpEHdUG+9pP1Tw==
 
 underscore@>=1.3.1:
   version "1.13.1"
