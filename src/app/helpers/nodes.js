@@ -13,6 +13,7 @@ async function getNodes() {
   let nodes;
   try {
     nodes = JSON.parse(await redisGetAsync("nodeRegistry"));
+    if (nodes === null) nodes = [];
   } catch (e) {
     nodes = [];
   }
