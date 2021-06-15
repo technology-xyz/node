@@ -23,7 +23,7 @@ async function nodes(_req, res) {
  */
 async function registerNode(req, res) {
   try {
-    const regRes = registerNodes(req.body);
+    const regRes = registerNodes([req.body]);
 
     return regRes
       ? res.status(200)

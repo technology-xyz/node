@@ -40,8 +40,7 @@ class Service extends Node {
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
 
-      if (await this.canSubmitTrafficLog(state, block))
-        await this.submitTrafficLog();
+      if (this.canSubmitTrafficLog(state, block)) await this.submitTrafficLog();
 
       if (canSubmitBatch(state, block)) {
         const activeVotes = await activeVoteId(state);
@@ -79,20 +78,17 @@ class Service extends Node {
 
   /**
    * Fetch and propagate node registry
-   * TODO: separate into smaller functions that can be used in /register-node endpoint
    */
   async propagateRegistry() {
     // Don't propagate if this node is a primary node
-    if (tools.bundlerUrl === null || tools.bundlerUrl === "null") return;
-
-    console.log("Propagating Registry");
+    if (tools.bundlerUrl === "none") return;
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
     let nodes = await getNodes();
 
     // Select a target
     let target;
-    if (!nodes || nodes.length === 0) target = this.bundlerUrl;
+    if (!nodes || nodes.length === 0) target = tools.bundlerUrl;
     else {
       const selection = nodes[Math.floor(Math.random() * nodes.length)];
       target = selection.data.url;
