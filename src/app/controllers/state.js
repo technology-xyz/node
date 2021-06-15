@@ -141,20 +141,20 @@ async function getNFTState(req, res) {
     const tranxId = req.query.tranxId;
     const state = await tools._readContract();
     const content = await tools.contentView(tranxId, state);
-    if (content)
-      await tools.redisSetAsync(
-        tranxId,
-        JSON.stringify(content),
-        "EX",
-        60 * 60 * 6
-      );
-    res.status(200).send(content);
+    content.timestamp = moment().unix() * 1000;
+    if (content) tools.redisSetAsync(tranxId, JSON.stringify(content));
+    if (!res.headersSent) res.status(200).send(content);
   } catch (e) {
     console.log(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
 
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 async function handleNFTUpload(req, res) {
   try {
     singleUpload(req, res, async (err) => {
