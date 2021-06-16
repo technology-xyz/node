@@ -38,9 +38,11 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
 fi
 
+export HELM_EXPERIMENTAL_OCI=1
+helm chart pull public.ecr.aws/r3r0i7b9/koi_node_helm:latest
+helm chart export public.ecr.aws/r3r0i7b9/koi_node_helm:latest
+
 for node in ${nodes[@]}; do
-    (cd koi-node && \
-    sops -d ../values.$node.yaml > ../values.$node.dec.yaml && \
-    helm upgrade --install koi-$node . -f ../values.$node.dec.yaml `echo $TAG` \
-    )
+    sops -d values.$node.yaml > values.$node.dec.yaml
+    helm upgrade --install koi-$node ./koi-node -n koi -f values.$node.dec.yaml `echo $TAG`
 done
