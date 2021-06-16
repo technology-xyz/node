@@ -2,7 +2,7 @@ const OFFSET_SUBMIT_END = 300;
 const OFFSET_BATCH_SUBMIT = 470;
 const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
-const URL_GATEWAY_LOGS = "https://arweave.dev/logs/";
+const URL_GATEWAY_LOGS = "https://gateway-n2.amplify.host/logs";
 
 // Tools singleton
 const tools = new (require("@_koi/sdk/node").Node)(
@@ -99,7 +99,7 @@ class Node {
   canRankProposal(state, block) {
     // Check if we're in the time frame, if not reset isRanked and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close > block) {
+    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close < block) {
       this.isRanked = false;
       return false;
     }

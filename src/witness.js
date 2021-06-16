@@ -40,7 +40,7 @@ class Witness extends Node {
       console.log(block, "Searching for a task");
 
       if (this.direct && this.canSubmitTrafficLog(state, block))
-        this.submitTrafficLog(state, block);
+        await this.submitTrafficLog(state, block);
 
       if (checkForVote(state, block)) await this.searchVote(state);
 

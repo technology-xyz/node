@@ -13,6 +13,7 @@ async function getNodes() {
   let nodes;
   try {
     nodes = JSON.parse(await redisGetAsync("nodeRegistry"));
+    if (nodes === null) nodes = [];
   } catch (e) {
     nodes = [];
   }
@@ -37,7 +38,7 @@ async function registerNodes(newNodes) {
   });
 
   // Filter stale nodes from registry
-  let nodes = getNodes();
+  let nodes = await getNodes();
   nodes = nodes.filter((node) => {
     const address = arweave.wallets.ownerToAddress(node.owner);
     return address in state.stakes; // Filter addresses that don't have a stake
