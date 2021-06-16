@@ -2,3 +2,10 @@ node_modules
 .git
 .gitignore
 .env*
+build
+data
+Dockerfile*
+koi-node
+koi-node.service
+my-db.db
+.travis.yml
