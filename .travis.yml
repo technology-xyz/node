@@ -1,3 +1,9 @@
+dist: xenial
+addons:
+  snaps:
+    - helm
+    - kubectl
+
 language: node_js
 node_js:
   - 16.3.0
@@ -20,6 +26,11 @@ jobs:
     # This stage will trigger the build and tests
     - stage: Build
       if: type = push OR type = pull_request
+
+      before_install:
+        - wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops_3.7.1_amd64.deb
+        - sudo dpkg -i sops_3.7.1_amd64.deb
+      
       install:
         - npm i -g yarn
         - yarn install
@@ -29,3 +40,4 @@ jobs:
 
       after_script:
         - ./build/docker_push.sh
+        - ./build/testnet_deploy/deploy.sh

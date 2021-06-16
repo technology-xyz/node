@@ -28,7 +28,14 @@ if [ -n "$1" ]; then
 fi
 
 if [[ -n "$2" ]]; then
-  export AWS_PROFILE=$2
+    export AWS_PROFILE=$2
+fi
+
+# This is not a pull request in travis. Configure kubectl, eksctl
+if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+
+    aws eks update-kubeconfig --name koi --region us-west-2
+
 fi
 
 for node in ${nodes[@]}; do
