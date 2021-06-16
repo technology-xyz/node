@@ -1,10 +1,14 @@
 dist: xenial
 addons:
-  snaps:
-    - name: helm
-      confinement: classic
-    - name: kubectl
-      confinement: classic
+  apt:
+    sources:
+    - sourceline: 'deb https://baltocdn.com/helm/stable/debian/ all main'
+      key_url: 'https://baltocdn.com/helm/signing.asc'
+    - sourceline: 'https://apt.kubernetes.io/ kubernetes-xenial main'
+      key_url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+    packages:
+      - helm
+      - kubectl
 
 language: node_js
 node_js:
