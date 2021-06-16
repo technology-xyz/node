@@ -1,8 +1,10 @@
 dist: xenial
 addons:
   snaps:
-    - helm
-    - kubectl
+    - name: helm
+      confinement: classic
+    - name: kubectl
+      confinement: classic
 
 language: node_js
 node_js:
