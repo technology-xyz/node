@@ -4,7 +4,7 @@ addons:
     sources:
     - sourceline: 'deb https://baltocdn.com/helm/stable/debian/ all main'
       key_url: 'https://baltocdn.com/helm/signing.asc'
-    - sourceline: 'https://apt.kubernetes.io/ kubernetes-xenial main'
+    - sourceline: 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
       key_url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
     packages:
       - helm
