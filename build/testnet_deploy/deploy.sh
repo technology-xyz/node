@@ -14,8 +14,11 @@ nodes=(
     "node8"
 )
 
+
+
 if [ "$TRAVIS_BRANCH" == "dev" ]; then
 
+    cd $TRAVIS_BUILD_DIR/build/testnet_deploy
     SHORTSHA=`git log --pretty=format:'%h' -n 1`
     TAG="--set image.tag=$SHORTSHA"
 
