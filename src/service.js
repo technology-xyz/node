@@ -208,12 +208,12 @@ function canSubmitBatch(state, block) {
  */
 async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
+  const votes = state.votes;
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
   const close = state.stateUpdate.trafficLogs.close;
-  const votes = state.votes;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])

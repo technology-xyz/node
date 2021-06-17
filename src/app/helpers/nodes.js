@@ -73,7 +73,7 @@ async function registerNodes(newNodes) {
   nodes = nodes.concat(newNodes);
 
   // Update registry
-  await this.redisGetAsync("nodeRegistry", JSON.stringify(nodes));
+  await redisGetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
 }
