@@ -74,14 +74,14 @@ class Service extends Node {
     try {
       await this.propagateRegistry();
     } catch (e) {
-      console.log("Error while propagating", e);
+      console.error("Error while propagating", e);
     }
 
     // Redis update current state
     try {
       await this.updateRedisStateCached();
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -109,7 +109,7 @@ class Service extends Node {
 
     // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
     if (!process.env.SERVICE_URL) {
-      console.log("SERVICE_URL not set, skipping registration");
+      console.error("SERVICE_URL not set, skipping registration");
       return;
     }
 

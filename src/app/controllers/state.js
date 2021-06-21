@@ -13,7 +13,7 @@ const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 async function getCurrentState(_req, res) {
   try {
     let currentState = await tools.getContractState();
-    console.log("RECEIVED CURRENT STATE", currentState);
+    console.log("Received current state", currentState);
     if (currentState) {
       res.status(200).send(currentState);
       if (redisSetAsync) {
@@ -28,7 +28,7 @@ async function getCurrentState(_req, res) {
       res.status(500).send({ error: "state not available" });
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
@@ -66,7 +66,7 @@ async function getCurrentStateCached(_req, res) {
     let currentStateCached = await redisGetAsync("currentStateCached");
     res.status(200).send(currentStateCached || []);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }

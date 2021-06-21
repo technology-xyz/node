@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
       let currentState = await redisGetAsync("currentState");
       if (currentState) return res.status(200).send(JSON.parse(currentState));
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
   next();

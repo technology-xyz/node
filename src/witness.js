@@ -64,7 +64,7 @@ class Witness extends Node {
         direct: this.direct
       };
       const { message } = await tools.vote(payload);
-      console.log(`for ${voteId} VoteId..........,`, message);
+      console.log(`VoteId ${voteId}: ${message}`);
     }
   }
 }
