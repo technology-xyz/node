@@ -173,7 +173,8 @@ class Node {
   async checkTxConfirmation(txId, task) {
     const start = new Date().getTime() - 1;
     const update_period = MS_TO_MIN * 10;
-    let next_update = start;
+    let next_update = start + update_period;
+    process.stdout.write(`Waiting for "${task}" TX to be mined`);
     for (;;) {
       const now = new Date().getTime();
       if (now > next_update) {
