@@ -13,7 +13,7 @@ const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 async function getCurrentState(_req, res) {
   try {
     let currentState = await tools.getContractState();
-    console.log("Received current state", currentState);
+    console.log("Received current state");
     if (currentState) {
       res.status(200).send(currentState);
       if (redisSetAsync) {

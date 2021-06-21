@@ -145,13 +145,14 @@ class Node {
     // If we've locally distributed, return false
     if (this.isDistributed) return false;
 
-    // If our distribution isn't on the state yet
-
+    // If there are no traffic logs, return false
     if (!trafficLogs.dailyTrafficLog.length) return false;
+
+    // If our distribution isn't on the state yet
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
-    return !currentTrafficLogs.isDistributed;
+    return currentTrafficLogs.isDistributed === false; // Could be undefined, must check false
   }
 
   /**
@@ -179,7 +180,7 @@ class Node {
         next_update = now + update_period;
         const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
         process.stdout.write(
-          `\n${elapsed_mins}m waiting for "${task}" TX to be mined`
+          `\n${elapsed_mins}m waiting for "${task}" TX to be mined `
         );
       } else process.stdout.write(".");
       try {
