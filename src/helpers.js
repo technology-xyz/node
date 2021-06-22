@@ -4,6 +4,8 @@ const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
 const URL_GATEWAY_LOGS = "https://gateway-n2.amplify.host/logs";
 
+const MS_TO_MIN = 60000;
+
 // Tools singleton
 const tools = new (require("@_koi/sdk/node").Node)(
   process.env.TRUSTED_SERVICE_URL
@@ -143,13 +145,14 @@ class Node {
     // If we've locally distributed, return false
     if (this.isDistributed) return false;
 
-    // If our distribution isn't on the state yet
-
+    // If there are no traffic logs, return false
     if (!trafficLogs.dailyTrafficLog.length) return false;
+
+    // If our distribution isn't on the state yet
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
-    return !currentTrafficLogs.isDistributed;
+    return currentTrafficLogs.isDistributed === false; // Could be undefined, must check false
   }
 
   /**
@@ -168,14 +171,23 @@ class Node {
    * @param {*} task
    */
   async checkTxConfirmation(txId, task) {
-    let num = 0;
+    const start = new Date().getTime() - 1;
+    const update_period = MS_TO_MIN * 10;
+    let next_update = start + update_period;
+    process.stdout.write(`Waiting for "${task}" TX to be mined`);
     for (;;) {
-      console.log(
-        "tx is being added to blockchain ......" + ++num + "% " + task
-      );
+      const now = new Date().getTime();
+      if (now > next_update) {
+        next_update = now + update_period;
+        const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+        process.stdout.write(
+          `\n${elapsed_mins}m waiting for "${task}" TX to be mined `
+        );
+      } else process.stdout.write(".");
       try {
         await tools.getTransaction(txId);
-        console.log("transaction found");
+        const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+        console.log(`\nTransaction found in ${elapsed_mins}m`);
         break;
       } catch (_err) {
         // Silently catch error, might be dangerous

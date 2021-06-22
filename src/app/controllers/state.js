@@ -126,7 +126,7 @@ async function getTopContentPredicted(req, res) {
     });
     res.status(200).send(outputArr);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
@@ -145,7 +145,7 @@ async function getNFTState(req, res) {
     if (content) tools.redisSetAsync(tranxId, JSON.stringify(content));
     if (!res.headersSent) res.status(200).send(content);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
@@ -159,7 +159,7 @@ async function handleNFTUpload(req, res) {
   try {
     singleUpload(req, res, async (err) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         return res.json(err);
       }
       req.body = JSON.parse(req.body.data);
@@ -186,7 +186,7 @@ async function handleNFTUpload(req, res) {
       res.json({ url: req.file.location });
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.sendStatus(StatusCodes.RESPONSE_IMAGE_ERROR);
   }
 }
@@ -234,7 +234,7 @@ async function filterContent(paramOutputArr, days) {
 
     return paramOutputArr;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

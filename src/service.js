@@ -65,14 +65,14 @@ class Service extends Node {
     try {
       await this.propagateRegistry();
     } catch (e) {
-      console.log("Error while propagating", e);
+      console.error("Error while propagating", e);
     }
 
     // Redis update predicted state cache
     try {
       await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -100,7 +100,7 @@ class Service extends Node {
 
     // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
     if (!process.env.SERVICE_URL) {
-      console.log("SERVICE_URL not set, skipping registration");
+      console.error("SERVICE_URL not set, skipping registration");
       return;
     }
 
@@ -188,12 +188,12 @@ function canSubmitBatch(state, block) {
  */
 async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
+  const votes = state.votes;
   const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
   const close = state.stateUpdate.trafficLogs.close;
-  const votes = state.votes;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])

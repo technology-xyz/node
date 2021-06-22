@@ -73,7 +73,7 @@ async function witnessDirect() {
   const contractState = await tools.getContractState();
 
   if (balance === "0") {
-    console.log(
+    console.error(
       chalk.green(
         "Your wallet doesn't have any Ar, you can't vote direct, " +
           "but you can claim free Ar here: " +
@@ -86,7 +86,7 @@ async function witnessDirect() {
   let stakeAmount = 0;
   if (!(tools.address in contractState.stakes)) {
     if (koiBalance === 0) {
-      console.log(
+      console.error(
         chalk.green(
           "Your wallet doesn’t have koi balance, claim some free Koi here: " +
             chalk.blue.underline.bold("https://koi.rocks/faucet")

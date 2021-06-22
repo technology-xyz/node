@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
     const contentStr = await tools.redisGetAsync(tranxId);
     const content = JSON.parse(contentStr);
     if (content && content.owner && !content.fileLocation) {
-      console.log("CONTENT NOT FOUND");
+      console.error("CACHE CONTENT NOT FOUND");
       next();
       return;
     }
@@ -35,7 +35,7 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (e) {
-    console.log(e);
+    console.error(e);
     next();
   }
 };

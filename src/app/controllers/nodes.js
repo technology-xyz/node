@@ -11,7 +11,7 @@ async function nodes(_req, res) {
     const nodes = await getNodes();
     res.status(200).send(nodes);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
@@ -31,7 +31,7 @@ async function registerNode(req, res) {
           message: "Registration is duplicate, outdated, or invalid"
         });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
   }
 }
