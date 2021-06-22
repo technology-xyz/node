@@ -3,23 +3,26 @@ require("dotenv").config();
 const prompts = require("prompts");
 const chalk = require("chalk");
 
-const { tools } = require("./src/helpers");
-const service = require("./src/service");
-const witness = require("./src/witness");
-
 // Parse cli params
 const PARSE_ARGS = [
   "REDIS_IP",
   "REDIS_PORT",
   "AR_WALLET",
   "NODE_MODE",
-  "STAKE"
+  "STAKE",
+  "SERVICE_URL",
+  "TRUSTED_SERVICE_URL",
+  "SERVER_PORT"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
+
+const { tools } = require("./src/helpers");
+const service = require("./src/service");
+const witness = require("./src/witness");
 
 /**
  * Main entry point
@@ -70,7 +73,7 @@ async function witnessDirect() {
   const contractState = await tools.getContractState();
 
   if (balance === "0") {
-    console.log(
+    console.error(
       chalk.green(
         "Your wallet doesn't have any Ar, you can't vote direct, " +
           "but you can claim free Ar here: " +
@@ -83,7 +86,7 @@ async function witnessDirect() {
   let stakeAmount = 0;
   if (!(tools.address in contractState.stakes)) {
     if (koiBalance === 0) {
-      console.log(
+      console.error(
         chalk.green(
           "Your wallet doesn’t have koi balance, claim some free Koi here: " +
             chalk.blue.underline.bold("https://koi.rocks/faucet")

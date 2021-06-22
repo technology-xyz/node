@@ -1,4 +1,10 @@
-const { tools, Node } = require("./helpers");
+const {
+  tools,
+  Node,
+  OFFSET_BATCH_SUBMIT,
+  OFFSET_RANK,
+  OFFSET_PROPOSE_SLASH
+} = require("./helpers");
 
 /**
  * Transparent interface to initialize and run witness node
@@ -33,6 +39,9 @@ class Witness extends Node {
       const block = await tools.getBlockHeight();
       console.log(block, "Searching for a task");
 
+      if (this.direct && this.canSubmitTrafficLog(state, block))
+        await this.submitTrafficLog(state, block);
+
       if (checkForVote(state, block)) await this.searchVote(state);
 
       await this.tryRankDistribute(state, block);
@@ -55,7 +64,7 @@ class Witness extends Node {
         direct: this.direct
       };
       const { message } = await tools.vote(payload);
-      console.log(`for ${voteId} VoteId..........,`, message);
+      console.log(`VoteId ${voteId}: ${message}`);
     }
   }
 }
@@ -68,7 +77,7 @@ class Witness extends Node {
  */
 function checkForVote(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block < trafficLogs.close - 250;
+  return block < trafficLogs.open + OFFSET_BATCH_SUBMIT;
 }
 
 /**
@@ -79,7 +88,10 @@ function checkForVote(state, block) {
  */
 function checkProposeSlash(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
-  return block > trafficLogs.close - 150 && block < trafficLogs.close - 75;
+  return (
+    trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
+    block < trafficLogs.open + OFFSET_RANK
+  );
 }
 
 module.exports = witness;

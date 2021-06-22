@@ -3,6 +3,17 @@ const { constants } = require("fs");
 const { tools } = require("../../helpers");
 
 /**
+ *
+ * @param {*} fileId ID of vote file to read
+ * @returns {string} Vote file contents in utf8
+ */
+async function getVotesFile(fileId) {
+  const batchFileName = __dirname + "/../bundles/" + fileId;
+  await access(batchFileName, constants.F_OK);
+  return await readFile(batchFileName, "utf8");
+}
+
+/**
  * Check the vote's signature
  * @param {*} payload
  * @returns
@@ -52,4 +63,4 @@ async function generateReceipt(payload) {
   });
 }
 
-module.exports = checkVote;
+module.exports = { getVotesFile, checkVote };
