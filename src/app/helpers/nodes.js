@@ -24,13 +24,17 @@ async function getNodes() {
 async function registerNodes(newNodes) {
   const state = tools.getContractState();
 
+  console.log("Registering nodes:", newNodes);
+
   // Verify each registration
   const enc = new TextEncoder();
   newNodes = newNodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.owner);
+    const owner = node.owner;
+    if (typeof owner !== "string" || !owner) return false;
+    const address = arweave.wallets.ownerToAddress(owner);
     if (!(address in state.stakes)) return false; // Filter addresses that don't have a stake
     const dataBuffer = enc.encode(JSON.stringify(node.data));
-    return arweave.crypto.verify(node.owner, dataBuffer, node.signature);
+    return arweave.crypto.verify(owner, dataBuffer, node.signature);
   });
 
   // Filter stale nodes from registry
