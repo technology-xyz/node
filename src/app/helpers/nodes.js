@@ -49,14 +49,14 @@ async function registerNodes(newNodes) {
     const owner = node.owner;
     if (
       typeof owner !== "string" ||
-      node.data !== undefined ||
+      node.data === undefined ||
       typeof node.data.url !== "string" ||
       typeof node.data.timestamp !== "number"
     )
       continue;
 
     // Filter addresses that don't have a stake
-    const address = await arweave.wallets.ownerToAddress(node.owner);
+    const address = await arweave.wallets.ownerToAddress(owner);
     if (!(address in state.stakes)) continue;
 
     const latest = latestNodes[owner];
