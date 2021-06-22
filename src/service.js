@@ -105,13 +105,13 @@ class Service extends Node {
     }
 
     // Sign payload
-    const payload = {
+    let payload = {
       data: {
         url: process.env.SERVICE_URL,
         timestamp: Date.now()
       }
     };
-    tools.signPayload(payload);
+    payload = await tools.signPayload(payload);
 
     // Register self in target registry
     axios.post(target + BUNDLER_REGISTER, payload, {
