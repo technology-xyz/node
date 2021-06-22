@@ -22,25 +22,30 @@ async function getNodes() {
  * @returns {boolean} Wether some new nodes were added or not
  */
 async function registerNodes(newNodes) {
-  const state = tools.getContractState();
+  const state = await tools.getContractState();
 
   console.log("Registering nodes:", newNodes);
 
   // Verify each registration
   const enc = new TextEncoder();
-  newNodes = newNodes.filter((node) => {
+  // TODO process promises in parallel
+  newNodes = newNodes.filter(async (node) => {
+    // Filter addresses that don't have a stake
     const owner = node.owner;
     if (typeof owner !== "string" || !owner) return false;
-    const address = arweave.wallets.ownerToAddress(owner);
-    if (!(address in state.stakes)) return false; // Filter addresses that don't have a stake
+    const address = await arweave.wallets.ownerToAddress(owner);
+    // Filter addresses that don't have a stake
+    if (!(address in state.stakes)) return false;
     const dataBuffer = enc.encode(JSON.stringify(node.data));
-    return arweave.crypto.verify(owner, dataBuffer, node.signature);
+    // Filter addresses with an invalid signature
+    return await arweave.crypto.verify(owner, dataBuffer, node.signature);
   });
 
   // Filter stale nodes from registry
   let nodes = await getNodes();
-  nodes = nodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.owner);
+  // TODO process promises in parallel
+  nodes = nodes.filter(async (node) => {
+    const address = await arweave.wallets.ownerToAddress(node.owner);
     return address in state.stakes; // Filter addresses that don't have a stake
   });
 
