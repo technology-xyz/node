@@ -36,9 +36,7 @@ async function registerNodes(newNodes) {
   newNodes = newNodes.filter(async (node) => {
     // Filter registrations that don't have an owner or url
     const owner = node.owner;
-    const url = node.data.url;
-    if (typeof owner !== "string" || !owner || typeof url !== "string" || !url)
-      return false;
+    if (typeof owner !== "string" || !owner) return false;
     // Filter addresses with an invalid signature
     const dataBuffer = enc.encode(JSON.stringify(node.data));
     return await arweave.crypto.verify(owner, dataBuffer, node.signature);
@@ -47,6 +45,12 @@ async function registerNodes(newNodes) {
   // Filter out duplicate entries
   let latestNodes = {};
   for (const node in nodes.concat(newNodes)) {
+    // Filter registrations that don't have an owner or url
+    const owner = node.owner;
+    const url = node.data.url;
+    if (typeof owner !== "string" || !owner || typeof url !== "string" || !url)
+      return false;
+
     // Filter addresses that don't have a stake
     const address = await arweave.wallets.ownerToAddress(node.owner);
     if (!(address in state.stakes)) continue;
