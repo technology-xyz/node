@@ -53,7 +53,7 @@ async function registerNodes(newNodes) {
       typeof node.data.url !== "string" ||
       typeof node.data.timestamp !== "number"
     )
-      return false;
+      continue;
 
     // Filter addresses that don't have a stake
     const address = await arweave.wallets.ownerToAddress(node.owner);
