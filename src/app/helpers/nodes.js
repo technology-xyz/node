@@ -24,7 +24,11 @@ async function getNodes() {
 async function registerNodes(newNodes) {
   const state = await tools.getContractState();
 
-  console.log("Registering nodes:", newNodes);
+  // Filter stale nodes from registry
+  let nodes = await getNodes();
+  console.log(
+    `Registry contains ${nodes.length} nodes. Registering ${newNodes.length} more`
+  );
 
   // Verify each registration
   const enc = new TextEncoder();
@@ -41,8 +45,6 @@ async function registerNodes(newNodes) {
     return await arweave.crypto.verify(owner, dataBuffer, node.signature);
   });
 
-  // Filter stale nodes from registry
-  let nodes = await getNodes();
   // TODO process promises in parallel
   nodes = nodes.filter(async (node) => {
     const address = await arweave.wallets.ownerToAddress(node.owner);
@@ -78,6 +80,9 @@ async function registerNodes(newNodes) {
   nodes = nodes.concat(newNodes);
 
   // Update registry
+  console.log(
+    `Registry now contains ${nodes.length} nodes, including ${newNodes.length} new ones`
+  );
   await tools.redisSetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
