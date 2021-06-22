@@ -5,10 +5,9 @@ const {
   OFFSET_BATCH_SUBMIT,
   OFFSET_PROPOSE_SLASH
 } = require("./helpers");
-const { access } = require("fs/promises");
+const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
-const { promisify } = require("util");
 
 const BUNDLER_REGISTER = "/register-node";
 
@@ -23,19 +22,11 @@ async function service() {
 class Service extends Node {
   constructor() {
     super();
-    this.nextPeriod = 0;
 
-    // Initialize redis client
+    // Initialize redis client and webserver
     tools.loadRedisClient();
-    this.redisSetAsync = promisify(tools.redisClient.set).bind(
-      tools.redisClient
-    );
-    this.redisGetAsync = promisify(tools.redisClient.get).bind(
-      tools.redisClient
-    );
-
-    // Start webserver
     this.startWebserver();
+    this.nextPeriod = 0;
   }
 
   /**
@@ -43,7 +34,7 @@ class Service extends Node {
    */
   async run() {
     for (;;) {
-      await this.run_periodic();
+      await this.runPeriodic();
 
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
@@ -63,7 +54,7 @@ class Service extends Node {
   /**
    * Run loop that executes every 5 minutes
    */
-  async run_periodic() {
+  async runPeriodic() {
     const currTime = Date.now();
     if (this.nextPeriod > currTime) return;
     this.nextPeriod = currTime + 300000;
@@ -77,9 +68,9 @@ class Service extends Node {
       console.error("Error while propagating", e);
     }
 
-    // Redis update current state
+    // Redis update predicted state cache
     try {
-      await this.updateRedisStateCached();
+      await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
       console.error(e);
     }
@@ -126,17 +117,6 @@ class Service extends Node {
     axios.post(target + BUNDLER_REGISTER, payload, {
       headers: { "content-type": "application/json" }
     });
-  }
-
-  /**
-   *
-   */
-  async updateRedisStateCached() {
-    const currentState = await tools.getContractState();
-    await this.redisSetAsync(
-      "currentStateCached",
-      JSON.stringify(currentState)
-    );
   }
 
   startWebserver() {
@@ -242,11 +222,20 @@ async function isVoteTracked(voteId) {
  * @returns
  */
 async function batchUpdateContractState(voteId) {
-  let { getVotesFile } = require("./app/helpers/votes");
-
   const batchStr = await getVotesFile(voteId);
   const batch = batchStr.split("\r\n").map(JSON.parse);
   return await bundleAndExport(batch);
+}
+
+/**
+ *
+ * @param {*} fileId ID of vote file to read
+ * @returns {string} Vote file contents in utf8
+ */
+async function getVotesFile(fileId) {
+  const batchFileName = __dirname + "/../bundles/" + fileId;
+  await access(batchFileName, constants.F_OK);
+  return await readFile(batchFileName, "utf8");
 }
 
 /**

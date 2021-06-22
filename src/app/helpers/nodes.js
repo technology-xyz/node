@@ -1,8 +1,4 @@
 const { tools, arweave } = require("../../helpers");
-const { promisify } = require("util");
-
-const redisClient = tools.redisClient;
-const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 
 /**
  * Gets the node registry from Redis cache
@@ -12,7 +8,7 @@ async function getNodes() {
   // Get nodes from cache
   let nodes;
   try {
-    nodes = JSON.parse(await redisGetAsync("nodeRegistry"));
+    nodes = JSON.parse(await tools.redisGetAsync("nodeRegistry"));
     if (nodes === null) nodes = [];
   } catch (e) {
     nodes = [];
@@ -73,7 +69,7 @@ async function registerNodes(newNodes) {
   nodes = nodes.concat(newNodes);
 
   // Update registry
-  await redisGetAsync("nodeRegistry", JSON.stringify(nodes));
+  await tools.redisSetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
 }

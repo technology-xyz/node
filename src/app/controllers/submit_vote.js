@@ -1,16 +1,42 @@
+const StatusCodes = require("../config/status_codes");
 const { access, writeFile, readFile, appendFile } = require("fs/promises");
 const { constants } = require("fs");
 const { tools } = require("../../helpers");
 
 /**
- *
- * @param {*} fileId ID of vote file to read
- * @returns {string} Vote file contents in utf8
+ * req.body.vote : {
+ *   address : < valid arweave address with active state >,
+ *   value : < boolean 'true' or 'false' vote >,
+ *   vote_id : < a valid ID for a vote taking place on the KOI contract >,
+ *   signature : < valid signature matching the address and value above >
+ * }
+ * @param {*} req express.js request
+ * @param {*} res express.js result object
+ * @returns
  */
-async function getVotesFile(fileId) {
-  const batchFileName = __dirname + "/../bundles/" + fileId;
-  await access(batchFileName, constants.F_OK);
-  return await readFile(batchFileName, "utf8");
+async function submitVote(req, res) {
+  const submission = req.body;
+  if (
+    !submission.vote ||
+    !submission.senderAddress ||
+    !submission.vote.userVote ||
+    !submission.signature
+  ) {
+    return res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+      message: "Invalid vote format"
+    });
+  }
+
+  const receipt = await checkVote(submission);
+
+  return receipt.accepted
+    ? res.json({
+        message: "success",
+        receipt: receipt
+      })
+    : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+        message: "Invalid signature or insufficient stake."
+      });
 }
 
 /**
@@ -63,4 +89,4 @@ async function generateReceipt(payload) {
   });
 }
 
-module.exports = { getVotesFile, checkVote };
+module.exports = submitVote;

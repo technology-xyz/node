@@ -7,8 +7,13 @@ const { getNodes, registerNodes } = require("../helpers/nodes");
  * @param {*} res express.js result object
  */
 async function nodes(_req, res) {
-  const nodes = await getNodes();
-  res.status(200).send(nodes);
+  try {
+    const nodes = await getNodes();
+    res.status(200).send(nodes);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: "ERROR: " + e });
+  }
 }
 
 /**
@@ -17,13 +22,18 @@ async function nodes(_req, res) {
  * @param {*} res express.js result object
  */
 async function registerNode(req, res) {
-  const regRes = registerNodes([req.body]);
+  try {
+    const regRes = registerNodes([req.body]);
 
-  return regRes
-    ? res.status(200)
-    : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
-        message: "Registration is duplicate, outdated, or invalid"
-      });
+    return regRes
+      ? res.status(200)
+      : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+          message: "Registration is duplicate, outdated, or invalid"
+        });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: "ERROR: " + e });
+  }
 }
 
 module.exports = { nodes, registerNode };
