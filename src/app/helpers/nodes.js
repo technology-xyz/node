@@ -34,55 +34,32 @@ async function registerNodes(newNodes) {
   const enc = new TextEncoder();
   // TODO process promises in parallel
   newNodes = newNodes.filter(async (node) => {
-    // Filter addresses that don't have a stake
+    // Filter registrations that don't have an owner or url
     const owner = node.owner;
-    if (typeof owner !== "string" || !owner) return false;
-    const address = await arweave.wallets.ownerToAddress(owner);
-    // Filter addresses that don't have a stake
-    if (!(address in state.stakes)) return false;
-    const dataBuffer = enc.encode(JSON.stringify(node.data));
+    const url = node.data.url;
+    if (typeof owner !== "string" || !owner || typeof url !== "string" || !url)
+      return false;
     // Filter addresses with an invalid signature
+    const dataBuffer = enc.encode(JSON.stringify(node.data));
     return await arweave.crypto.verify(owner, dataBuffer, node.signature);
   });
 
-  // TODO process promises in parallel
-  nodes = nodes.filter(async (node) => {
+  // Filter out duplicate entries
+  let latestNodes = {};
+  for (const node in nodes.concat(newNodes)) {
+    // Filter addresses that don't have a stake
     const address = await arweave.wallets.ownerToAddress(node.owner);
-    return address in state.stakes; // Filter addresses that don't have a stake
-  });
+    if (!(address in state.stakes)) continue;
 
-  // Filter exact matches from new nodes
-  newNodes = newNodes.filter((newNode) => {
-    const match = nodes.find(
-      (oldNode) => newNode.signature === oldNode.signature
-    );
-    return match === undefined; // If signature match not found, registration is unique
-  });
-
-  // If public modulus or url matches remove it from newNodes
-  for (let i = 0; i < nodes.length; ++i) {
-    const oldNode = nodes[i];
-    const matches = newNodes.filter(
-      (newNode) =>
-        newNode.owner === oldNode.owner || newNode.data.url === oldNode.data.url
-    );
-    newNodes = newNodes.filter((newNode) => !(newNode in matches));
-
-    // Use the one with the newest timestamp
-    matches.push(oldNode);
-    const latest = matches.reduce(function (prev, current) {
-      return prev.data.timestamp > current.data.timestamp ? prev : current;
-    });
-    nodes[i] = latest;
+    const latest = latestNodes[node.owner];
+    if (latest === undefined || node.data.timestamp > latest.data.timestamp)
+      latestNodes[node.owner] = node;
   }
 
-  // Remaining nodes in newNodes are unique, merge lists
-  nodes = nodes.concat(newNodes);
+  nodes = Object.values(latestNodes);
 
   // Update registry
-  console.log(
-    `Registry now contains ${nodes.length} nodes, including ${newNodes.length} new ones`
-  );
+  console.log(`Registry now contains ${nodes.length} nodes`);
   await tools.redisSetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
