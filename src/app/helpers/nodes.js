@@ -52,13 +52,19 @@ async function registerNodes(newNodes) {
       node.data === undefined ||
       typeof node.data.url !== "string" ||
       typeof node.data.timestamp !== "number"
-    )
+    ) {
+      console.error("Invalid node input:", node);
       continue;
+    }
 
     // Filter addresses that don't have a stake
     const address = await arweave.wallets.ownerToAddress(owner);
-    if (!(address in state.stakes)) continue;
+    if (!(address in state.stakes)) {
+      console.error("Node tried registering without stake:", address);
+      continue;
+    }
 
+    // Make this node the latest if the timestamp is more recent
     const latest = latestNodes[owner];
     if (latest === undefined || node.data.timestamp > latest.data.timestamp)
       latestNodes[owner] = node;
