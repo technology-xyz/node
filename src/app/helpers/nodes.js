@@ -36,10 +36,20 @@ async function registerNodes(newNodes) {
   newNodes = newNodes.filter(async (node) => {
     // Filter registrations that don't have an owner or url
     const owner = node.owner;
-    if (typeof owner !== "string") return false;
+    if (typeof owner !== "string") {
+      console.error("Invalid node input:", node);
+      return false;
+    }
+
     // Filter addresses with an invalid signature
     const dataBuffer = enc.encode(JSON.stringify(node.data));
-    return await arweave.crypto.verify(owner, dataBuffer, node.signature);
+    const verification = await arweave.crypto.verify(
+      owner,
+      dataBuffer,
+      node.signature
+    );
+    console.log("Verification result:", verification);
+    return verification;
   });
 
   // Filter out duplicate entries
