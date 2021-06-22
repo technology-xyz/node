@@ -30,9 +30,7 @@ async function registerNodes(newNodes) {
     `Registry contains ${nodes.length} nodes. Registering ${newNodes.length} more`
   );
 
-  // Verify each registration
-  const enc = new TextEncoder();
-  // TODO process promises in parallel
+  // Verify each registration TODO process promises in parallel
   newNodes = newNodes.filter(async (node) => {
     // Filter registrations that don't have an owner or url
     const owner = node.owner;
@@ -42,12 +40,7 @@ async function registerNodes(newNodes) {
     }
 
     // Filter addresses with an invalid signature
-    const dataBuffer = enc.encode(JSON.stringify(node.data));
-    const verification = await arweave.crypto.verify(
-      owner,
-      dataBuffer,
-      node.signature
-    );
+    const verification = await tools.verifySignature(node);
     console.log("Verification result:", verification);
     return verification;
   });
