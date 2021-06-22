@@ -126,9 +126,13 @@ async function verifyStake(nodeClass) {
             await prompts({
               type: "number",
               name: "stakeAmount",
-              message: "Please stake to Vote unless you can’t make a vote"
+              message: "Please stake to Vote"
             })
           ).stakeAmount;
+    if (stakeAmount < 1) {
+      console.error("Stake amount too low. Aborting.");
+      return;
+    }
   }
 
   const node = new nodeClass(stakeAmount, true);
