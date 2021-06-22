@@ -47,7 +47,7 @@ async function registerNodes(newNodes) {
 
   // Filter out duplicate entries
   let latestNodes = {};
-  for (const node in nodes.concat(newNodes)) {
+  for (const node of nodes.concat(newNodes)) {
     // Filter registrations that don't have an owner or url
     const owner = node.owner;
     if (
