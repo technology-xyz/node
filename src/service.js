@@ -11,17 +11,10 @@ const axios = require("axios");
 
 const BUNDLER_REGISTER = "/register-node";
 
-/**
- * Transparent interface to initialize and run service node
- */
-async function service() {
-  const node = new Service();
-  await node.run();
-}
-
 class Service extends Node {
-  constructor() {
+  constructor(stakeAmount = 0) {
     super();
+    this.stakeAmount = stakeAmount;
 
     // Initialize redis client and webserver
     tools.loadRedisClient();
@@ -33,6 +26,8 @@ class Service extends Node {
    * Main run loop
    */
   async run() {
+    if (this.stakeAmount !== 0) await tools.stake(this.stakeAmount);
+
     for (;;) {
       await this.runPeriodic();
 
@@ -257,4 +252,4 @@ async function bundleAndExport(bundle) {
   return result;
 }
 
-module.exports = service;
+module.exports = Service;

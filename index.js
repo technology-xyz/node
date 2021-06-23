@@ -21,8 +21,8 @@ for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
 const { tools } = require("./src/helpers");
-const service = require("./src/service");
-const witness = require("./src/witness");
+const Service = require("./src/service");
+const Witness = require("./src/witness");
 
 /**
  * Main entry point
@@ -67,7 +67,30 @@ async function main() {
 /**
  * Setup witness direct node
  */
+async function service() {
+  await verifyStake(Service);
+}
+
+/**
+ * Setup witness direct node
+ */
 async function witnessDirect() {
+  await verifyStake(Witness);
+}
+
+/**
+ * Setup witness direct node
+ */
+async function witness() {
+  const node = new Witness();
+  await node.run();
+}
+
+/**
+ * Verify the address has staked
+ * @param {*} nodeClass
+ */
+async function verifyStake(nodeClass) {
   const balance = await tools.getWalletBalance();
   const koiBalance = await tools.getKoiBalance();
   const contractState = await tools.getContractState();
@@ -75,7 +98,7 @@ async function witnessDirect() {
   if (balance === "0") {
     console.error(
       chalk.green(
-        "Your wallet doesn't have any Ar, you can't vote direct, " +
+        "Your wallet doesn't have any Ar, you can't interact directly, " +
           "but you can claim free Ar here: " +
           chalk.blue.underline.bold("https://faucet.arweave.net/")
       )
@@ -103,12 +126,17 @@ async function witnessDirect() {
             await prompts({
               type: "number",
               name: "stakeAmount",
-              message: "Please stake to Vote unless you can’t make a vote"
+              message: "Please stake to Vote"
             })
           ).stakeAmount;
+    if (stakeAmount < 1) {
+      console.error("Stake amount too low. Aborting.");
+      return;
+    }
   }
 
-  return witness(true, stakeAmount);
+  const node = new nodeClass(stakeAmount, true);
+  await node.run();
 }
 
 main();
