@@ -19,8 +19,6 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     ./build/testnet_deploy/deploy.sh
 
-  else
-    echo "Skipping deploy because branch is not 'dev'"
   fi
 
   if [ "$TRAVIS_BRANCH" == "main" ]; then
@@ -34,8 +32,6 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     ./build/staging_deploy/deploy.sh
 
-  else
-    echo "Skipping prod image build/push because branch is not 'main' or 'dev'"
   fi
 
 else

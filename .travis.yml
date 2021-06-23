@@ -9,6 +9,8 @@ addons:
     packages:
       - helm
       - kubectl
+      - python3
+      - python3-pip
 
 language: node_js
 node_js:
