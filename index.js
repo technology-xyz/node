@@ -41,6 +41,7 @@ async function main() {
         ).walletPath;
 
   await tools.nodeLoadWallet(walletPath);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
 
   // Get operation mode
   const operationMode =
@@ -94,6 +95,7 @@ async function verifyStake(nodeClass) {
   const balance = await tools.getWalletBalance();
   const koiBalance = await tools.getKoiBalance();
   const contractState = await tools.getContractState();
+  console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
 
   if (balance === "0") {
     console.error(
