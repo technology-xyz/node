@@ -26,6 +26,8 @@ Additionally, if you would like to like to run a service node, do the following 
 - **SERVER_PORT** - Port for the express server to operate on
 - **SERVICE_URL** - URL to propagate to other nodes to discover this node. Skips registration if left empty.
 - **TRUSTED_SERVICE_URL** - Initial service node to bootstrap propagation, set to `none` to disable propagation, or if this is a trusted node. Uses SDK default if left empty (https://bundler.openkoi.com:8888)
+- **S3_ACCESS_KEY_ID** - ID used for AWS S3
+- **S3_SECRET_ACCESS_KEY** - Access key for AWS s3
 
 ## Service setup
 

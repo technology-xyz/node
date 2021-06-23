@@ -25,6 +25,10 @@ const CORRUPTED_NFT = [
 ];
 
 // Setup s3 bucket
+aws.config = new aws.Config();
+aws.config.accessKeyId = process.env.S3_ACCESS_KEY_ID;
+aws.config.secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+aws.config.region = "us-east-1";
 const s3 = new aws.S3();
 const upload = multer({
   storage: multerS3({
