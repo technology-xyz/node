@@ -36,6 +36,7 @@ class Node {
    */
   async stake() {
     if (this.stakeAmount > 0) {
+      console.log("Staking", this.stakeAmount);
       const txId = await tools.stake(this.stakeAmount);
       await this.checkTxConfirmation(txId, "staking");
     }
