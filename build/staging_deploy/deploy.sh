@@ -15,11 +15,7 @@ nodes=(
 
 
 
-if [ "$TRAVIS_BRANCH" == "dev" ]; then
-
-    cd $TRAVIS_BUILD_DIR/build/testnet_deploy
-    SHORTSHA=`git log --pretty=format:'%h' -n 1`
-    TAG="--set image.tag=dev-$SHORTSHA"
+if [ "$TRAVIS_BRANCH" == "main" ]; then
 
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
@@ -32,7 +28,7 @@ if [ "$TRAVIS_BRANCH" == "dev" ]; then
 
         for node in ${nodes[@]}; do
             sops -d values.$node.yaml > values.$node.dec.yaml
-            helm upgrade --install koi-$node ./koi-node -n koi -f values.$node.dec.yaml `echo $TAG`
+            helm upgrade --install koi-$node ./koi-node -n koi -f values.$node.dec.yaml
         done
 
     fi
