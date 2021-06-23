@@ -97,11 +97,11 @@ async function getTopContentPredicted(req, res) {
       };
 
       for (let j = 0; j < rewardReport.length; j++) {
-        const ele = rewardReport[i];
+        const ele = rewardReport[j];
         const logSummary = ele.logsSummary;
 
         for (const txId in logSummary) {
-          if (txId == contentTxId) {
+          if (txId === contentTxId) {
             if (rewardReport.indexOf(ele) == rewardReport.length - 1) {
               contentViews.twentyFourHrViews = logSummary[contentTxId];
             }
