@@ -46,4 +46,3 @@ jobs:
 
       after_script:
         - ./build/docker_push.sh
-        - ./build/testnet_deploy/deploy.sh
