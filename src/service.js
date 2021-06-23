@@ -26,7 +26,7 @@ class Service extends Node {
    * Main run loop
    */
   async run() {
-    this.stake();
+    await this.stake();
 
     for (;;) {
       await this.runPeriodic();
