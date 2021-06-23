@@ -1,4 +1,4 @@
-const { tools } = require("../../helpers");
+const { tools, arweave } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
 const moment = require("moment");
 
@@ -255,9 +255,7 @@ async function contentView(contentTxId, state) {
   } catch (e) {
     rewardReport = [];
   }
-  const arweaveTxStatus = await tools.arweave.transactions.getStatus(
-    contentTxId
-  );
+  const arweaveTxStatus = await arweave.transactions.getStatus(contentTxId);
   const nftState =
     arweaveTxStatus.status === 200
       ? await tools.readNftState(contentTxId)
