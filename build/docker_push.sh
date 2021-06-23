@@ -3,7 +3,7 @@
 # Push only if it's not a pull request
 if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
-  pip3 install awscli
+  pip install awscli
   export PATH=$PATH:$HOME/.local/bin
 
   aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/r3r0i7b9
