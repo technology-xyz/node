@@ -29,7 +29,7 @@ class Service extends Node {
     await this.stake();
 
     for (;;) {
-      await this.runPeriodic();
+      await this.runPeriodic(); // Remove await to run in parallel
 
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
@@ -67,7 +67,7 @@ class Service extends Node {
     try {
       await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
-      console.error(e);
+      console.error("Error while recalculating predicted state", e);
     }
   }
 
