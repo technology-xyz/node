@@ -28,6 +28,17 @@ class Node {
     this.isLogsSubmitted = false;
     this.isRanked = false;
     this.isDistributed = false;
+    this.stakeAmount = 0;
+  }
+
+  /**
+   * Stakes and waits for stake to appear on chain
+   */
+  async stake() {
+    if (this.stakeAmount > 0) {
+      const txId = await tools.stake(this.stakeAmount);
+      await this.checkTxConfirmation(txId, "staking");
+    }
   }
 
   /**

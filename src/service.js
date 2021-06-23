@@ -26,7 +26,7 @@ class Service extends Node {
    * Main run loop
    */
   async run() {
-    if (this.stakeAmount !== 0) await tools.stake(this.stakeAmount);
+    this.stake();
 
     for (;;) {
       await this.runPeriodic();
