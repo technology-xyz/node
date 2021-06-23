@@ -29,7 +29,7 @@ class Service extends Node {
     await this.stake();
 
     for (;;) {
-      await this.runPeriodic(); // Remove await to run in parallel
+      this.runPeriodic(); // Remove await to run in parallel
 
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
