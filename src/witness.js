@@ -23,7 +23,7 @@ class Witness extends Node {
    */
   async run() {
     console.log("Running witness node with address", tools.address);
-    if (this.stakeAmount !== 0) await tools.stake(this.stakeAmount);
+    await this.stake();
 
     for (;;) {
       const state = await tools.getContractState();
