@@ -17,6 +17,8 @@ nodes=(
 
 if [ "$TRAVIS_BRANCH" == "main" ]; then
 
+    cd $TRAVIS_BUILD_DIR/build/testnet_deploy
+
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
