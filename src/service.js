@@ -65,6 +65,7 @@ class Service extends Node {
 
     // Redis update predicted state cache
     try {
+      console.log("Recalculating predicted state");
       await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
       console.error("Error while recalculating predicted state", e);
@@ -77,6 +78,7 @@ class Service extends Node {
   async propagateRegistry() {
     // Don't propagate if this node is a primary node
     if (tools.bundlerUrl === "none") return;
+    console.log("Propagating Registry");
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
     let nodes = await getNodes();
