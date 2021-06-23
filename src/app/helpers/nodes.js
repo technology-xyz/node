@@ -1,8 +1,4 @@
 const { tools, arweave } = require("../../helpers");
-const { promisify } = require("util");
-
-const redisClient = tools.redisClient;
-const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 
 /**
  * Gets the node registry from Redis cache
@@ -12,7 +8,7 @@ async function getNodes() {
   // Get nodes from cache
   let nodes;
   try {
-    nodes = JSON.parse(await redisGetAsync("nodeRegistry"));
+    nodes = JSON.parse(await tools.redisGetAsync("nodeRegistry"));
     if (nodes === null) nodes = [];
   } catch (e) {
     nodes = [];
@@ -26,54 +22,62 @@ async function getNodes() {
  * @returns {boolean} Wether some new nodes were added or not
  */
 async function registerNodes(newNodes) {
-  const state = tools.getContractState();
-
-  // Verify each registration
-  const enc = new TextEncoder();
-  newNodes = newNodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.owner);
-    if (!(address in state.stakes)) return false; // Filter addresses that don't have a stake
-    const dataBuffer = enc.encode(JSON.stringify(node.data));
-    return arweave.crypto.verify(node.owner, dataBuffer, node.signature);
-  });
+  const state = await tools.getContractState();
 
   // Filter stale nodes from registry
   let nodes = await getNodes();
-  nodes = nodes.filter((node) => {
-    const address = arweave.wallets.ownerToAddress(node.owner);
-    return address in state.stakes; // Filter addresses that don't have a stake
+  console.log(
+    `Registry contains ${nodes.length} nodes. Registering ${newNodes.length} more`
+  );
+
+  // Verify each registration TODO process promises in parallel
+  newNodes = newNodes.filter(async (node) => {
+    // Filter registrations that don't have an owner or url
+    const owner = node.owner;
+    if (typeof owner !== "string") {
+      console.error("Invalid node input:", node);
+      return false;
+    }
+
+    // Filter addresses with an invalid signature
+    const verification = await tools.verifySignature(node);
+    console.log("Verification result:", verification);
+    return verification;
   });
 
-  // Filter exact matches from new nodes
-  newNodes = newNodes.filter((newNode) => {
-    const match = nodes.find(
-      (oldNode) => newNode.signature === oldNode.signature
-    );
-    return match === undefined; // If signature match not found, registration is unique
-  });
+  // Filter out duplicate entries
+  let latestNodes = {};
+  for (const node of nodes.concat(newNodes)) {
+    // Filter registrations that don't have an owner or url
+    const owner = node.owner;
+    if (
+      typeof owner !== "string" ||
+      node.data === undefined ||
+      typeof node.data.url !== "string" ||
+      typeof node.data.timestamp !== "number"
+    ) {
+      console.error("Invalid node input:", node);
+      continue;
+    }
 
-  // If public modulus or url matches remove it from newNodes
-  for (let i = 0; i < nodes.length; ++i) {
-    const oldNode = nodes[i];
-    const matches = newNodes.filter(
-      (newNode) =>
-        newNode.owner === oldNode.owner || newNode.data.url === oldNode.data.url
-    );
-    newNodes = newNodes.filter((newNode) => !(newNode in matches));
+    // Filter addresses that don't have a stake
+    const address = await arweave.wallets.ownerToAddress(owner);
+    if (!(address in state.stakes)) {
+      console.error("Node tried registering without stake:", address);
+      continue;
+    }
 
-    // Use the one with the newest timestamp
-    matches.push(oldNode);
-    const latest = matches.reduce(function (prev, current) {
-      return prev.data.timestamp > current.data.timestamp ? prev : current;
-    });
-    nodes[i] = latest;
+    // Make this node the latest if the timestamp is more recent
+    const latest = latestNodes[owner];
+    if (latest === undefined || node.data.timestamp > latest.data.timestamp)
+      latestNodes[owner] = node;
   }
 
-  // Remaining nodes in newNodes are unique, merge lists
-  nodes = nodes.concat(newNodes);
+  nodes = Object.values(latestNodes);
 
   // Update registry
-  await redisGetAsync("nodeRegistry", JSON.stringify(nodes));
+  console.log(`Registry now contains ${nodes.length} nodes`);
+  await tools.redisSetAsync("nodeRegistry", JSON.stringify(nodes));
 
   return newNodes.length > 0;
 }

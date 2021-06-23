@@ -6,22 +6,13 @@ const {
   OFFSET_PROPOSE_SLASH
 } = require("./helpers");
 
-/**
- * Transparent interface to initialize and run witness node
- * @param  {...any} args
- */
-async function witness(...args) {
-  const node = new Witness(...args);
-  await node.run();
-}
-
 class Witness extends Node {
   /**
    * Main entry point point for witness
    * @param {boolean} direct Wether to transact directly with arweave or use bundler
    * @param {number} stakeAmount Amount to stake
    */
-  constructor(direct = false, stakeAmount = 0) {
+  constructor(stakeAmount = 0, direct = false) {
     super();
     this.direct = direct;
     this.stakeAmount = stakeAmount;
@@ -32,7 +23,7 @@ class Witness extends Node {
    */
   async run() {
     console.log("Running witness node with address", tools.address);
-    if (this.stakeAmount !== 0) await tools.stake(this.stakeAmount);
+    await this.stake();
 
     for (;;) {
       const state = await tools.getContractState();
@@ -94,4 +85,4 @@ function checkProposeSlash(state, block) {
   );
 }
 
-module.exports = witness;
+module.exports = Witness;
