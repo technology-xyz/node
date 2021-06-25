@@ -2,7 +2,8 @@ const OFFSET_SUBMIT_END = 300;
 const OFFSET_BATCH_SUBMIT = 470;
 const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
-const URL_GATEWAY_LOGS = "https://gateway-n2.amplify.host/logs";
+const HOST_GATEWAY = "gateway.koi.rocks";
+const URL_GATEWAY_LOGS = `https://${HOST_GATEWAY}/logs`;
 
 const MS_TO_MIN = 60000;
 
@@ -13,7 +14,7 @@ const tools = new (require("@_koi/sdk/node").Node)(
 
 // Arweave singleton
 const arweave = require("arweave").init({
-  host: "arweave.dev",
+  host: HOST_GATEWAY,
   protocol: "https",
   port: 443,
   timeout: 20000, // Network request timeouts in milliseconds
