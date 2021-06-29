@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@_koi/sdk": "^2.1.20-beta.0",
+    "@_koi/sdk": "^2.1.20",
     "aws-sdk": "^2.925.0",
     "chalk": "^4.1.1",
     "cookie-parser": "^1.4.5",
