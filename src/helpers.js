@@ -2,7 +2,6 @@ const OFFSET_SUBMIT_END = 300;
 const OFFSET_BATCH_SUBMIT = 470;
 const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
-const URL_GATEWAY_LOGS = "https://gateway.koi.rocks/logs";
 
 const MS_TO_MIN = 60000;
 
@@ -76,7 +75,8 @@ class Node {
       );
     const proposedLogs = currentTrafficLogs.proposedLogs;
     const matchingLog = proposedLogs.find(
-      (log) => log.owner === tools.address || log.gateWayId === URL_GATEWAY_LOGS
+      (log) =>
+        log.owner === tools.address || log.gateWayId === tools.URL_GATEWAY_LOGS
     );
 
     return matchingLog === undefined;
@@ -88,7 +88,7 @@ class Node {
   async submitTrafficLog() {
     var task = "submitting traffic log";
     let arg = {
-      gateWayUrl: URL_GATEWAY_LOGS,
+      gateWayUrl: tools.URL_GATEWAY_LOGS,
       stakeAmount: 2
     };
 
