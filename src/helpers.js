@@ -6,9 +6,8 @@ const OFFSET_RANK = 645;
 const MS_TO_MIN = 60000;
 
 // Tools singleton
-const tools = new (require("@_koi/sdk/node").Node)(
-  process.env.TRUSTED_SERVICE_URL
-);
+let koiSdk = require("@_koi/sdk/node");
+const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
 
 // Arweave singleton
 const arweave = tools.arweave;
@@ -76,7 +75,7 @@ class Node {
     const proposedLogs = currentTrafficLogs.proposedLogs;
     const matchingLog = proposedLogs.find(
       (log) =>
-        log.owner === tools.address || log.gateWayId === tools.URL_GATEWAY_LOGS
+        log.owner === tools.address || log.gateWayId === koiSdk.URL_GATEWAY_LOGS
     );
 
     return matchingLog === undefined;
@@ -88,7 +87,7 @@ class Node {
   async submitTrafficLog() {
     var task = "submitting traffic log";
     let arg = {
-      gateWayUrl: tools.URL_GATEWAY_LOGS,
+      gateWayUrl: koiSdk.URL_GATEWAY_LOGS,
       stakeAmount: 2
     };
 
