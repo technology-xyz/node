@@ -22,6 +22,28 @@ class Service extends Node {
     this.nextPeriod = 0;
   }
 
+  startWebserver() {
+    // Require lazily to reduce RAM and load times for witness
+    const express = require("express");
+    const cors = require("cors");
+    const cookieParser = require("cookie-parser");
+    const path = require("path");
+
+    // Setup middleware and routes then start server
+    const app = express();
+    app.use(cors());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+    let txPath = path.join(__dirname, "app/tx");
+    app.use("/tx", express.static(txPath));
+    require("./app/routes")(app);
+    const port = process.env.SERVER_PORT || 8887;
+    app.listen(port, () => {
+      console.log("Open http://localhost:" + port, "to view in browser");
+    });
+  }
+  
   /**
    * Main run loop
    */
@@ -113,29 +135,6 @@ class Service extends Node {
     // Register self in target registry
     axios.post(target + BUNDLER_REGISTER, payload, {
       headers: { "content-type": "application/json" }
-    });
-  }
-
-  startWebserver() {
-    // Require lazily to reduce RAM and load times for witness
-    const express = require("express");
-    const cors = require("cors");
-    const cookieParser = require("cookie-parser");
-    const path = require("path");
-
-    // Setup middleware and routes then start server
-    const app = express();
-    app.use(cors());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(cookieParser());
-    let txPath = path.join(__dirname, "app/tx");
-    console.error(txPath);
-    app.use("/tx", express.static(txPath));
-    require("./app/routes")(app);
-    const port = process.env.SERVER_PORT || 8887;
-    app.listen(port, () => {
-      console.log("Open http://localhost:" + port, "to view in browser");
     });
   }
 
