@@ -21,18 +21,10 @@ module.exports = async (req, res, next) => {
     const contentStr = await tools.redisGetAsync(tranxId);
     const content = JSON.parse(contentStr);
     if (content && content.owner && !content.fileLocation) {
-      console.error("CACHE CONTENT NOT FOUND");
-      next();
-      return;
-    }
-
-    if (
-      content &&
-      moment().subtract(15, "minutes").isAfter(moment(content.timestamp))
-    )
-      res.status(200).send(content);
-    else return res.status(200).send(content);
-
+      if (moment().subtract(15, "minutes").isAfter(moment(content.timestamp)))
+        res.status(200).send(content);
+      else return res.status(200).send(content);
+    } else console.error("NFT not found in cache");
     next();
   } catch (e) {
     console.error(e);

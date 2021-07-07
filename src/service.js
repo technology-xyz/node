@@ -22,6 +22,28 @@ class Service extends Node {
     this.nextPeriod = 0;
   }
 
+  startWebserver() {
+    // Require lazily to reduce RAM and load times for witness
+    const express = require("express");
+    const cors = require("cors");
+    const cookieParser = require("cookie-parser");
+    const path = require("path");
+
+    // Setup middleware and routes then start server
+    const app = express();
+    app.use(cors());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+    let txPath = path.join(__dirname, "app/tx");
+    app.use("/tx", express.static(txPath));
+    require("./app/routes")(app);
+    const port = process.env.SERVER_PORT || 8887;
+    app.listen(port, () => {
+      console.log("Open http://localhost:" + port, "to view in browser");
+    });
+  }
+  
   /**
    * Main run loop
    */
@@ -29,7 +51,7 @@ class Service extends Node {
     await this.stake();
 
     for (;;) {
-      await this.runPeriodic();
+      this.runPeriodic(); // Remove await to run in parallel
 
       const state = await tools.getContractState();
       const block = await tools.getBlockHeight();
@@ -65,9 +87,10 @@ class Service extends Node {
 
     // Redis update predicted state cache
     try {
+      console.log("Recalculating predicted state");
       await tools.recalculatePredictedState(tools.wallet);
     } catch (e) {
-      console.error(e);
+      console.error("Error while recalculating predicted state", e);
     }
   }
 
@@ -77,6 +100,7 @@ class Service extends Node {
   async propagateRegistry() {
     // Don't propagate if this node is a primary node
     if (tools.bundlerUrl === "none") return;
+    console.log("Propagating Registry");
 
     let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
     let nodes = await getNodes();
@@ -111,25 +135,6 @@ class Service extends Node {
     // Register self in target registry
     axios.post(target + BUNDLER_REGISTER, payload, {
       headers: { "content-type": "application/json" }
-    });
-  }
-
-  startWebserver() {
-    // Require lazily to reduce RAM and load times for witness
-    const express = require("express");
-    const cors = require("cors");
-    const cookieParser = require("cookie-parser");
-
-    // Setup middleware and routes then start server
-    const app = express();
-    app.use(cors());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(cookieParser());
-    require("./app/routes")(app);
-    const port = process.env.SERVER_PORT || 8887;
-    app.listen(port, () => {
-      console.log("Open http://localhost:" + port, "to view in browser");
     });
   }
 

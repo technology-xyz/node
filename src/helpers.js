@@ -2,23 +2,15 @@ const OFFSET_SUBMIT_END = 300;
 const OFFSET_BATCH_SUBMIT = 470;
 const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
-const URL_GATEWAY_LOGS = "https://gateway-n2.amplify.host/logs";
 
 const MS_TO_MIN = 60000;
 
 // Tools singleton
-const tools = new (require("@_koi/sdk/node").Node)(
-  process.env.TRUSTED_SERVICE_URL
-);
+let koiSdk = require("@_koi/sdk/node");
+const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
 
 // Arweave singleton
-const arweave = require("arweave").init({
-  host: "arweave.dev",
-  protocol: "https",
-  port: 443,
-  timeout: 20000, // Network request timeouts in milliseconds
-  logging: false // Enable network request logging
-});
+const arweave = tools.arweave;
 
 /**
  * Common node functions for witness and service
@@ -36,6 +28,7 @@ class Node {
    */
   async stake() {
     if (this.stakeAmount > 0) {
+      console.log("Staking", this.stakeAmount);
       const txId = await tools.stake(this.stakeAmount);
       await this.checkTxConfirmation(txId, "staking");
     }
@@ -81,7 +74,8 @@ class Node {
       );
     const proposedLogs = currentTrafficLogs.proposedLogs;
     const matchingLog = proposedLogs.find(
-      (log) => log.owner === tools.address || log.gateWayId === URL_GATEWAY_LOGS
+      (log) =>
+        log.owner === tools.address || log.gateWayId === koiSdk.URL_GATEWAY_LOGS
     );
 
     return matchingLog === undefined;
@@ -93,7 +87,7 @@ class Node {
   async submitTrafficLog() {
     var task = "submitting traffic log";
     let arg = {
-      gateWayUrl: URL_GATEWAY_LOGS,
+      gateWayUrl: koiSdk.URL_GATEWAY_LOGS,
       stakeAmount: 2
     };
 

@@ -1,4 +1,4 @@
-const { tools } = require("../../helpers");
+const { tools, arweave } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
 const moment = require("moment");
 
@@ -25,6 +25,10 @@ const CORRUPTED_NFT = [
 ];
 
 // Setup s3 bucket
+aws.config = new aws.Config();
+aws.config.accessKeyId = process.env.S3_ACCESS_KEY_ID;
+aws.config.secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+aws.config.region = "us-east-1";
 const s3 = new aws.S3();
 const upload = multer({
   storage: multerS3({
@@ -93,11 +97,11 @@ async function getTopContentPredicted(req, res) {
       };
 
       for (let j = 0; j < rewardReport.length; j++) {
-        const ele = rewardReport[i];
+        const ele = rewardReport[j];
         const logSummary = ele.logsSummary;
 
         for (const txId in logSummary) {
-          if (txId == contentTxId) {
+          if (txId === contentTxId) {
             if (rewardReport.indexOf(ele) == rewardReport.length - 1) {
               contentViews.twentyFourHrViews = logSummary[contentTxId];
             }
@@ -140,7 +144,7 @@ async function getNFTState(req, res) {
   try {
     const tranxId = req.query.tranxId;
     const state = await tools._readContract();
-    const content = await tools.contentView(tranxId, state);
+    const content = await contentView(tranxId, state);
     content.timestamp = moment().unix() * 1000;
     if (content) tools.redisSetAsync(tranxId, JSON.stringify(content));
     if (!res.headersSent) res.status(200).send(content);
@@ -236,6 +240,47 @@ async function filterContent(paramOutputArr, days) {
   } catch (e) {
     console.error(e);
   }
+}
+
+/**
+ * Content view that first state cache
+ * @param {string} contentTxId NFT transaction id to view
+ * @param {*} state Contract state to view from
+ * @returns {any} Content object
+ */
+async function contentView(contentTxId, state) {
+  let rewardReport;
+  try {
+    rewardReport = state.stateUpdate.trafficLogs.rewardReport || [];
+  } catch (e) {
+    rewardReport = [];
+  }
+  const arweaveTxStatus = await arweave.transactions.getStatus(contentTxId);
+  const nftState =
+    arweaveTxStatus.status === 200
+      ? await tools.readNftState(contentTxId)
+      : JSON.parse(await tools.redisGetAsync(contentTxId));
+  const contentViews = {
+    ...nftState,
+    totalViews: 0,
+    totalReward: 0,
+    twentyFourHrViews: 0,
+    txIdContent: contentTxId
+  };
+  rewardReport.forEach((ele) => {
+    const logSummary = ele.logsSummary;
+    for (const txId in logSummary) {
+      if (txId === contentTxId) {
+        if (rewardReport.indexOf(ele) === rewardReport.length - 1)
+          contentViews.twentyFourHrViews = logSummary[contentTxId];
+        const rewardPerAttention = ele.rewardPerAttention;
+        contentViews.totalViews += logSummary[contentTxId];
+        const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
+        contentViews.totalReward += rewardPerLog;
+      }
+    }
+  });
+  return contentViews;
 }
 
 module.exports = {
