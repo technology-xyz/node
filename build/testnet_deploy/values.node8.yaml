@@ -1,7 +1,7 @@
 fullnameOverride: dev-koi-node-witness-indirect-2
 nameOverride: dev
 env:
-    nodeMode: service
+    nodeMode: witness
     redisIp: redis
     redisPort: 6379
     trustedServiceURL: http://koi-node-service-1:8080
