@@ -25,9 +25,17 @@ class Witness extends Node {
     console.log("Running witness node with address", tools.address);
     await this.stake();
 
+    let state, block;
     for (;;) {
-      const state = await tools.getContractState();
-      const block = await tools.getBlockHeight();
+      try {
+        state = await tools.getContractState();
+        block = await tools.getBlockHeight();
+        if (block < 1) throw new Error("Block error");
+      } catch (e) {
+        console.error("Error while updating state: ", e.message);
+        console.log("Retrying");
+        continue;
+      }
       console.log(block, "Searching for a task");
 
       if (this.direct && this.canSubmitTrafficLog(state, block))
