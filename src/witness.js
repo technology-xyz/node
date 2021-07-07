@@ -33,7 +33,7 @@ class Witness extends Node {
       if (this.direct && this.canSubmitTrafficLog(state, block))
         await this.submitTrafficLog(state, block);
 
-      if (checkForVote(state, block)) await this.searchVote(state);
+      if (checkForVote(state, block)) await this.tryVote(state);
 
       await this.tryRankDistribute(state, block);
 
@@ -43,10 +43,10 @@ class Witness extends Node {
   }
 
   /**
-   * Searches for vote and votes
+   * Tries to vote
    * @param {*} state Current contract state data
    */
-  async searchVote(state) {
+  async tryVote(state) {
     while (tools.totalVoted < state.votes.length - 1) {
       const id = tools.totalVoted;
       const voteId = id + 1;

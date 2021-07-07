@@ -43,7 +43,7 @@ class Service extends Node {
       console.log("Open http://localhost:" + port, "to view in browser");
     });
   }
-  
+
   /**
    * Main run loop
    */

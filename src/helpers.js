@@ -56,11 +56,11 @@ class Node {
 
     // Check if we're in the time frame, if not reset isLogsSubmitted and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (
-      block < trafficLogs.open ||
-      trafficLogs.open + OFFSET_SUBMIT_END < block
-    ) {
-      this.isLogsSubmitted = false;
+    if (block >= trafficLogs.open + OFFSET_SUBMIT_END) {
+      if (this.isLogsSubmitted) {
+        console.log("isLogsSubmitted reset");
+        this.isLogsSubmitted = false;
+      }
       return false;
     }
 
@@ -93,8 +93,8 @@ class Node {
 
     let tx = await tools.submitTrafficLog(arg);
     await this.checkTxConfirmation(tx, task);
-    console.log("Traffic log submission confirmed");
     this.isLogsSubmitted = true;
+    console.log("Logs submitted");
   }
 
   /**
@@ -107,7 +107,10 @@ class Node {
     // Check if we're in the time frame, if not reset isRanked and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
     if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close < block) {
-      this.isRanked = false;
+      if (this.isRanked) {
+        console.log("isRanked reset");
+        this.isRanked = false;
+      }
       return false;
     }
 
@@ -131,6 +134,7 @@ class Node {
     const tx = await tools.rankProposal();
     await this.checkTxConfirmation(tx, task);
     this.isRanked = true;
+    console.log("Ranked");
   }
 
   /**
@@ -143,7 +147,10 @@ class Node {
     // Check if it's time to distribute, if not reset isDistributed and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
     if (block < trafficLogs.close) {
-      this.isDistributed = false;
+      if (this.isDistributed) {
+        console.log("isDistributed reset");
+        this.isDistributed = false;
+      }
       return false;
     }
 
@@ -168,6 +175,7 @@ class Node {
     const tx = await tools.distributeDailyRewards();
     await this.checkTxConfirmation(tx, task);
     this.isDistributed = true;
+    console.log("Distributed");
   }
 
   /**
