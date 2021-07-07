@@ -8,6 +8,7 @@ const {
 const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
+const { Console } = require("console");
 
 const BUNDLER_REGISTER = "/register-node";
 
@@ -50,11 +51,19 @@ class Service extends Node {
   async run() {
     await this.stake();
 
+    let state, block;
     for (;;) {
       this.runPeriodic(); // Remove await to run in parallel
 
-      const state = await tools.getContractState();
-      const block = await tools.getBlockHeight();
+      try {
+        state = await tools.getContractState();
+        block = await tools.getBlockHeight();
+        if (block < 1) throw new Error("Block error");
+      } catch (e) {
+        Console.error("Error while updating state: ", e.message);
+        Console.log("Retrying");
+        continue;
+      }
       console.log(block, "Searching for a task");
 
       if (this.canSubmitTrafficLog(state, block)) await this.submitTrafficLog();
