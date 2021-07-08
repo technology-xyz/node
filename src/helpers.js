@@ -49,7 +49,7 @@ class Node {
     const logClose = state.stateUpdate.trafficLogs.close;
     if (logClose > this.lastLogClose) {
       if (this.lastLogClose !== 0) {
-        console.log("Reward distributed, resetting trackers");
+        console.log("Logs updated, resetting trackers");
         this.isDistributed = false;
         this.isLogsSubmitted = false;
         this.isRanked = false;
