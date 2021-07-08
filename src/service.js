@@ -55,15 +55,11 @@ class Service extends Node {
       this.runPeriodic(); // Remove await to run in parallel
 
       try {
-        state = await tools.getContractState();
-        block = await tools.getBlockHeight();
-        if (block < 1) throw new Error("Block error");
+        [state, block] = await this.getStateAndBlock();
       } catch (e) {
-        console.error("Error while updating state: ", e.message);
-        console.log("Retrying");
+        console.error(e.message);
         continue;
       }
-      console.log(block, "Searching for a task");
 
       if (this.canSubmitTrafficLog(state, block)) await this.submitTrafficLog();
 
@@ -159,7 +155,10 @@ class Service extends Node {
       const bundlerAddress = await tools.getWalletAddress();
       if (!(bundlerAddress in bundlers)) {
         const txId = (await batchUpdateContractState(voteId)).id;
-        await this.checkTxConfirmation(txId, task);
+        if (!(await this.checkTxConfirmation(txId, task))) {
+          console.log("Vote submission failed");
+          return;
+        }
         const arg = {
           batchFile: txId,
           voteId: voteId,
@@ -167,7 +166,10 @@ class Service extends Node {
         };
         const resultTx = await tools.batchAction(arg);
         task = "batch";
-        await this.checkTxConfirmation(resultTx, task);
+        if (!(await this.checkTxConfirmation(resultTx, task))) {
+          console.log("Batch failed");
+          return;
+        }
         activeVotes.pop();
       }
       activeVotes.pop();

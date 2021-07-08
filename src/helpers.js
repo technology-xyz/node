@@ -4,7 +4,7 @@ const OFFSET_PROPOSE_SLASH = 570;
 const OFFSET_RANK = 645;
 
 const MS_TO_MIN = 60000;
-
+const TIMEOUT_TX = 30 * MS_TO_MIN;
 // Tools singleton
 let koiSdk = require("@_koi/sdk/node");
 const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
@@ -21,17 +21,53 @@ class Node {
     this.isRanked = false;
     this.isDistributed = false;
     this.stakeAmount = 0;
+    this.lastBlock = 0;
+    this.lastLogClose = 0;
   }
 
   /**
    * Stakes and waits for stake to appear on chain
+   * @returns {bool} Whether stake was successful or not
    */
   async stake() {
     if (this.stakeAmount > 0) {
       console.log("Staking", this.stakeAmount);
       const txId = await tools.stake(this.stakeAmount);
-      await this.checkTxConfirmation(txId, "staking");
+      return await this.checkTxConfirmation(txId, "staking");
     }
+  }
+
+  /**
+   * Gets the state and block and resets trackers if logs updated
+   * @returns {any, number} Tuple containing state and block
+   */
+  async getStateAndBlock() {
+    const state = await tools.getContractState();
+    let block = await tools.getBlockHeight();
+    if (block < this.lastBlock) block = this.lastBlock;
+
+    const logClose = state.stateUpdate.trafficLogs.close;
+    if (logClose > this.lastLogClose) {
+      if (this.lastLogClose !== 0) {
+        console.log("Reward distributed, resetting trackers");
+        this.isDistributed = false;
+        this.isLogsSubmitted = false;
+        this.isRanked = false;
+      }
+
+      this.lastLogClose = logClose;
+    }
+
+    if (block > this.lastBlock)
+      console.log(
+        block,
+        "Searching for a task, distribution in",
+        logClose - block,
+        "blocks"
+      );
+    this.lastBlock = block;
+
+    return [state, block];
   }
 
   /**
@@ -54,18 +90,12 @@ class Node {
     // Check if we're an indirect witness
     if (this.direct === false) return false;
 
-    // Check if we're in the time frame, if not reset isLogsSubmitted and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (block >= trafficLogs.open + OFFSET_SUBMIT_END) {
-      if (this.isLogsSubmitted) {
-        console.log("isLogsSubmitted reset");
-        this.isLogsSubmitted = false;
-      }
+    if (
+      block >= trafficLogs.open + OFFSET_SUBMIT_END || // block too late or
+      this.isLogsSubmitted // logs already submitted
+    )
       return false;
-    }
-
-    // We haven't submitted yet
-    if (this.isLogsSubmitted) return false;
 
     // Check that our log isn't on the state yet and that our gateway hasn't been submitted yet
     const currentTrafficLogs =
@@ -77,8 +107,8 @@ class Node {
       (log) =>
         log.owner === tools.address || log.gateWayId === koiSdk.URL_GATEWAY_LOGS
     );
-
-    return matchingLog === undefined;
+    this.isLogsSubmitted = matchingLog !== undefined;
+    return !this.isLogsSubmitted;
   }
 
   /**
@@ -92,9 +122,10 @@ class Node {
     };
 
     let tx = await tools.submitTrafficLog(arg);
-    await this.checkTxConfirmation(tx, task);
-    this.isLogsSubmitted = true;
-    console.log("Logs submitted");
+    if (await this.checkTxConfirmation(tx, task)) {
+      this.isLogsSubmitted = true;
+      console.log("Logs submitted");
+    }
   }
 
   /**
@@ -104,25 +135,20 @@ class Node {
    * @returns {boolean} Wether we can rank
    */
   canRankProposal(state, block) {
-    // Check if we're in the time frame, if not reset isRanked and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (block < trafficLogs.open + OFFSET_RANK || trafficLogs.close < block) {
-      if (this.isRanked) {
-        console.log("isRanked reset");
-        this.isRanked = false;
-      }
+    if (
+      block < trafficLogs.open + OFFSET_RANK || // if too early to rank or
+      trafficLogs.close < block || // too late to rank or
+      this.isRanked // already ranked
+    )
       return false;
-    }
-
-    // If we've ranked, return false
-    if (this.isRanked) return false;
 
     // If our rank isn't on the state yet
-
     if (!trafficLogs.dailyTrafficLog.length) return false;
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
+    this.isRanked = currentTrafficLogs.isRanked;
     return !currentTrafficLogs.isRanked;
   }
 
@@ -132,9 +158,10 @@ class Node {
   async rankProposal() {
     const task = "ranking reward";
     const tx = await tools.rankProposal();
-    await this.checkTxConfirmation(tx, task);
-    this.isRanked = true;
-    console.log("Ranked");
+    if (await this.checkTxConfirmation(tx, task)) {
+      this.isRanked = true;
+      console.log("Ranked");
+    }
   }
 
   /**
@@ -144,27 +171,20 @@ class Node {
    * @returns {boolean} Wether we can distribute
    */
   canDistribute(state, block) {
-    // Check if it's time to distribute, if not reset isDistributed and return false
     const trafficLogs = state.stateUpdate.trafficLogs;
-    if (block < trafficLogs.close) {
-      if (this.isDistributed) {
-        console.log("isDistributed reset");
-        this.isDistributed = false;
-      }
+    if (
+      block < trafficLogs.close || // not time to distribute or
+      this.isDistributed || // we've already distributed or
+      !trafficLogs.dailyTrafficLog.length // daily traffic log is empty
+    )
       return false;
-    }
-
-    // If we've locally distributed, return false
-    if (this.isDistributed) return false;
-
-    // If there are no traffic logs, return false
-    if (!trafficLogs.dailyTrafficLog.length) return false;
 
     // If our distribution isn't on the state yet
     const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
       (trafficLog) => trafficLog.block === trafficLogs.open
     );
-    return currentTrafficLogs.isDistributed === false; // Could be undefined, must check false
+    this.isDistributed = currentTrafficLogs.isDistributed;
+    return !this.isDistributed;
   }
 
   /**
@@ -173,35 +193,39 @@ class Node {
   async distribute() {
     const task = "distributing reward";
     const tx = await tools.distributeDailyRewards();
-    await this.checkTxConfirmation(tx, task);
-    this.isDistributed = true;
-    console.log("Distributed");
+    if (await this.checkTxConfirmation(tx, task)) {
+      this.isDistributed = true;
+      console.log("Distributed");
+    }
   }
 
   /**
    *
    * @param {string} txId // Transaction ID
    * @param {*} task
+   * @returns {bool} Whether transaction was found (true) or timedout (false)
    */
   async checkTxConfirmation(txId, task) {
     const start = new Date().getTime() - 1;
-    const update_period = MS_TO_MIN * 10;
+    const update_period = MS_TO_MIN * 5;
+    const timeout = start + TIMEOUT_TX;
     let next_update = start + update_period;
-    process.stdout.write(`Waiting for "${task}" TX to be mined`);
+    console.log(`Waiting for "${task}" TX to be mined`);
     for (;;) {
       const now = new Date().getTime();
+      const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
+      if (now > timeout) {
+        console.log(`${task}" timed out after waiting ${elapsed_mins}m`);
+        return false;
+      }
       if (now > next_update) {
         next_update = now + update_period;
-        const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
-        process.stdout.write(
-          `\n${elapsed_mins}m waiting for "${task}" TX to be mined `
-        );
-      } else process.stdout.write(".");
+        console.log(`${elapsed_mins}m waiting for "${task}" TX to be mined `);
+      }
       try {
         await tools.getTransaction(txId);
-        const elapsed_mins = Math.round((now - start) / MS_TO_MIN);
-        console.log(`\nTransaction found in ${elapsed_mins}m`);
-        break;
+        console.log(`Transaction found in ${elapsed_mins}m`);
+        return true;
       } catch (_err) {
         // Silently catch error, might be dangerous
       }
