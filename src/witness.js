@@ -16,6 +16,7 @@ class Witness extends Node {
     super();
     this.direct = direct;
     this.stakeAmount = stakeAmount;
+    this.isProposeSlashed = false;
   }
 
   /**
@@ -26,6 +27,7 @@ class Witness extends Node {
     await this.stake();
 
     let state, block;
+
     for (;;) {
       try {
         [state, block] = await this.getStateAndBlock();
@@ -42,7 +44,7 @@ class Witness extends Node {
       await this.tryRankDistribute(state, block);
 
       if (!this.direct && checkProposeSlash(state, block))
-        await tools.proposeSlash();
+        await this.proposeSlash(state);
     }
   }
 
@@ -50,7 +52,7 @@ class Witness extends Node {
    * Tries to vote
    * @param {*} state Current contract state data
    */
-  async tryVote(state) {
+  async tryVote(state, attentionContract) {
     while (tools.totalVoted < state.votes.length - 1) {
       const id = tools.totalVoted;
       const voteId = id + 1;
@@ -58,12 +60,46 @@ class Witness extends Node {
         voteId,
         direct: this.direct
       };
-      const { message } = await tools.vote(payload);
+      const { message } = await tools.vote(payload, attentionContract);
       console.log(`VoteId ${voteId}: ${message}`);
     }
   }
-}
 
+  /**
+   * checks if the vote submitted to service node is submitted on chain, if not slash the service node
+   * @param {*} state Current contract state data
+   */
+  async proposeSlash(state, attentionContract) {
+    const receipts = tools.receipt;
+    const task = state.task;
+    const currentTask = task.dailyProposedLogs.find(
+      (dailylog) => dailylog.block === task.open
+    );
+    const proposedTrafficLogs = currentTask.proposedTrafficLogs;
+    for (let proposedTrafficLog of proposedTrafficLogs) {
+      const activeVoteReceipt = receipts.find(
+        (receipt) => receipt.vote.vote.voteId === proposedTrafficLog.voteId
+      );
+      const votes = state.votes;
+      const activeVote = votes.find(
+        (vote) => vote.id === proposedTrafficLog.voteId
+      );
+      if (activeVoteReceipt !== undefined) {
+        const voted = activeVote.voted;
+        if (!voted.includes(activeVoteReceipt.senderAddress)) {
+          let task = "receiptData";
+          const receiptTxId = await tools.postData(activeVoteReceipt);
+          await this.checkTxConfirmation(receiptTxId, task);
+          const tx = await tools.proposeSlash(receiptTxId, attentionContract);
+          task = "proposeSlash";
+          await this.checkTxConfirmation(tx, task);
+          console.log("slash is submitted");
+        }
+      }
+    }
+    this.isProposeSlashed = true;
+  }
+}
 /**
  * Checks if voting is available
  * @param {*} state Contract state data
@@ -85,7 +121,8 @@ function checkProposeSlash(state, block) {
   const trafficLogs = state.stateUpdate.trafficLogs;
   return (
     trafficLogs.open + OFFSET_PROPOSE_SLASH < block &&
-    block < trafficLogs.open + OFFSET_RANK
+    block < trafficLogs.open + OFFSET_RANK &&
+    !this.isProposeSlashed
   );
 }
 

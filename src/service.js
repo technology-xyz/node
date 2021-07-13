@@ -184,10 +184,10 @@ class Service extends Node {
  * @returns
  */
 function canSubmitBatch(state, block) {
-  const trafficLogs = state.stateUpdate.trafficLogs;
+  const task = state.task;
   return (
-    trafficLogs.open + OFFSET_BATCH_SUBMIT < block &&
-    block < trafficLogs.open + OFFSET_PROPOSE_SLASH
+    task.open + OFFSET_BATCH_SUBMIT < block &&
+    block < task.open + OFFSET_PROPOSE_SLASH
   );
 }
 
@@ -203,7 +203,7 @@ async function activeVoteId(state) {
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
-  const close = state.stateUpdate.trafficLogs.close;
+  const close = state.task.close;
   const activeVotes = [];
   for (let i = 0; i < votes.length; i++)
     if (votes[i].end === close && areVotesTracked[i])

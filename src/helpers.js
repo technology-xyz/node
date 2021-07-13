@@ -135,18 +135,18 @@ class Node {
    * @returns {boolean} Wether we can rank
    */
   canRankProposal(state, block) {
-    const trafficLogs = state.stateUpdate.trafficLogs;
+    const task = state.task;
     if (
-      block < trafficLogs.open + OFFSET_RANK || // if too early to rank or
-      trafficLogs.close < block || // too late to rank or
+      block < task.open + OFFSET_RANK || // if too early to rank or
+      task.close < block || // too late to rank or
       this.isRanked // already ranked
     )
       return false;
 
     // If our rank isn't on the state yet
-    if (!trafficLogs.dailyTrafficLog.length) return false;
-    const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-      (trafficLog) => trafficLog.block === trafficLogs.open
+    if (!task.dailyProposedLogs.length) return false;
+    const currentTrafficLogs = task.dailyProposedLogs.find(
+      (trafficLog) => trafficLog.block === task.open
     );
     this.isRanked = currentTrafficLogs.isRanked;
     return !currentTrafficLogs.isRanked;
@@ -171,17 +171,17 @@ class Node {
    * @returns {boolean} Wether we can distribute
    */
   canDistribute(state, block) {
-    const trafficLogs = state.stateUpdate.trafficLogs;
+    const task = state.task;
     if (
-      block < trafficLogs.close || // not time to distribute or
+      block < task.close || // not time to distribute or
       this.isDistributed || // we've already distributed or
-      !trafficLogs.dailyTrafficLog.length // daily traffic log is empty
+      !task.dailyProposedLogs.length // daily traffic log is empty
     )
       return false;
 
     // If our distribution isn't on the state yet
-    const currentTrafficLogs = trafficLogs.dailyTrafficLog.find(
-      (trafficLog) => trafficLog.block === trafficLogs.open
+    const currentTrafficLogs = task.dailyProposedLogs.find(
+      (trafficLog) => trafficLog.block === task.open
     );
     this.isDistributed = currentTrafficLogs.isDistributed;
     return !this.isDistributed;
