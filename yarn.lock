@@ -2,12 +2,12 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.22":
-  version "2.1.22"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.22.tgz#19f05c82a9497bf6b18c603e91aa6f855e9090bc"
-  integrity sha512-KkLzQ7dBeYE/vpXdaP69HXRdEFi3sOaIfI8wOczu8+9H8iQk00XlukhZHspBJFCU6e6YhgSwOkDrRirbihjusg==
+"@_koi/sdk@^2.1.28":
+  version "2.1.28"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.28.tgz#5a366e23e47525294d6b926260a0a2f011694423"
+  integrity sha512-MWUGJinrFwSAUResNxf46vng1gHHJwIjTlPC4e0QxphakRkM95XbhOVNsQf6PZAmTiqMZmSBz05Xnd9x9d/9tA==
   dependencies:
-    "@kyve/query" "^0.0.0-alpha.9"
+    "@kyve/query" "^0.0.0-alpha.19"
     arweave "^1.10.13"
     axios "^0.21.1"
     dotenv "^9.0.2"
@@ -54,39 +54,46 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@kyve/contract-lib@0.1.0-alpha.7":
-  version "0.1.0-alpha.7"
-  resolved "https://registry.npmjs.org/@kyve/contract-lib/-/contract-lib-0.1.0-alpha.7.tgz#c0525f1b1a8ca0de34bceaa8c1d8d16ab1d44f42"
-  integrity sha512-LPgKL8J4fziqjo2vdBXqwyMaO7iZeqMKbTOoAkHsIygOtkj6rtvzZ3EkB7929LnpeOVGFmE+kQ3TTpz4zCeDkA==
+"@kyve/contract-lib@0.1.0-alpha.14":
+  version "0.1.0-alpha.14"
+  resolved "https://registry.npmjs.org/@kyve/contract-lib/-/contract-lib-0.1.0-alpha.14.tgz#9fa73317b18b668f8ac20e611adcdd789d75fc34"
+  integrity sha512-M4dYIZvR6tHGemeCA7FNjl+GYL4zs1BHpDxeu4E8mI7brnw1H35HiHcv8s1NZ9JbOu9quNgUGyfja6sBwLZ/Xg==
   dependencies:
-    "@kyve/contract" "0.1.0-alpha.4"
-    arweave "^1.10.13"
-    smartweave "^0.4.29"
+    "@kyve/contract-pool" "^1.0.0-alpha.1"
+    arweave "^1.10.15"
+    cross-fetch "^3.1.4"
+    smartweave johnletey/SmartWeave#release
 
-"@kyve/contract@0.1.0-alpha.4":
-  version "0.1.0-alpha.4"
-  resolved "https://registry.npmjs.org/@kyve/contract/-/contract-0.1.0-alpha.4.tgz#5bfed0b16566d828d71bc967695a493027507b84"
-  integrity sha512-xJVOl29RnQyB7MJHpul1INlBdkZLrDkQzSoC+RHCaHk6fPgCuqCofh7aRfpu0jWS41eP7P/LBE4u5IcSUmDysA==
-
-"@kyve/core@0.0.0-alpha.10":
-  version "0.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@kyve/core/-/core-0.0.0-alpha.10.tgz#9213328f3aeb5e515a2a99ec5f1b7b67c287f723"
-  integrity sha512-GirXYDuiaRwfT6bSPVsIIGGvJQUujKPBQ/GJEkE7gyWbwggZF8qh3el0/9rtGAEMxaJOC1pCI9muqVnPBW+nrQ==
+"@kyve/contract-pool@^1.0.0-alpha.1":
+  version "1.0.0-alpha.1"
+  resolved "https://registry.npmjs.org/@kyve/contract-pool/-/contract-pool-1.0.0-alpha.1.tgz#420e33d0eca15acacc78cd1fd3dc511a62f53cb7"
+  integrity sha512-dfpO39QG6kWAuwaQHJc4LvjiMpclFlT8PUzOnMIsQA5rsSEE/d04CzOUmZf+mm+eI1hhb0TLw7t2kARR8AmYyg==
   dependencies:
-    "@kyve/contract-lib" "0.1.0-alpha.7"
+    arweave-bundles "^1.0.3"
+    prando "^6.0.1"
+
+"@kyve/core@0.0.0-alpha.17":
+  version "0.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@kyve/core/-/core-0.0.0-alpha.17.tgz#6131c341d0ee400607ee966a28cc2e7290b2a626"
+  integrity sha512-RLSRrQoLEINTNkdMagJa9fIbEUIQclLup8wI324/q03fMlQa1ez5UmIMaX6yG4CYxoXC6j0DBCIBeoEO0wX7EQ==
+  dependencies:
+    "@kyve/contract-lib" "0.1.0-alpha.14"
     ardb "^1.0.8"
     arweave "^1.10.11"
     arweave-bundles "^1.0.3"
+    chalk "^4.1.1"
+    fecha "^4.2.1"
+    object-hash "^2.2.0"
     rxjs "^6.6.6"
     smartweave "^0.4.27"
 
-"@kyve/query@^0.0.0-alpha.9":
-  version "0.0.0-alpha.13"
-  resolved "https://registry.npmjs.org/@kyve/query/-/query-0.0.0-alpha.13.tgz#99d7cef662875f9e1e2bd4989cf42d895540dd69"
-  integrity sha512-Ypqs3DHrc4dXhBHQrNGeUDlmqSPkTGNNxEeU35JqAC12jMbsymS54uNnGBXIuyMarx07HIQ8/t/jXMRoNYVM7w==
+"@kyve/query@^0.0.0-alpha.19":
+  version "0.0.0-alpha.23"
+  resolved "https://registry.npmjs.org/@kyve/query/-/query-0.0.0-alpha.23.tgz#fb1ad81b1300198e08a43e8487d6f92bc05ad145"
+  integrity sha512-WxWPoIh7UGN+rOrcj0Nbm1AwL5RhES5yMCbhd0Y7ZciNJlh3ipG40X0b+1pv/tkWMeKPUCCqT7mRYOxR5G4BAA==
   dependencies:
-    "@kyve/contract-lib" "0.1.0-alpha.7"
-    "@kyve/core" "0.0.0-alpha.10"
+    "@kyve/contract-lib" "0.1.0-alpha.14"
+    "@kyve/core" "0.0.0-alpha.17"
     ardb "^1.0.8"
     arweave "^1.10.11"
     arweave-bundles "^1.0.3"
@@ -267,6 +274,17 @@ arweave@^1.10.11, arweave@^1.10.13, arweave@^1.10.5:
   version "1.10.14"
   resolved "https://registry.npmjs.org/arweave/-/arweave-1.10.14.tgz#9d34bc92aeb9e974639be51198b697d783bc7927"
   integrity sha512-0xEjsrhSqqQNa6bDGztO+PhFOn5JkUiC5B/WSu+2KszdGXMuekos3XVkirIgrH4VKqLq84kLmN1ckXuiLkIWgQ==
+  dependencies:
+    arconnect "^0.2.8"
+    asn1.js "^5.4.1"
+    axios "^0.21.1"
+    base64-js "^1.3.1"
+    bignumber.js "^9.0.1"
+
+arweave@^1.10.15:
+  version "1.10.15"
+  resolved "https://registry.npmjs.org/arweave/-/arweave-1.10.15.tgz#c55d0c6f4eef60a4b89056976af411dcdffa83c8"
+  integrity sha512-dzct71xkkuGIqb3Cp0HI6X9V+5AvhpCLO70MGawPZ5sZ7n1QUrTKeGuOfWOGGMZx4r4vXRxQg33PUiJScDmNhA==
   dependencies:
     arconnect "^0.2.8"
     asn1.js "^5.4.1"
@@ -728,6 +746,13 @@ create-hmac@^1.1.0, create-hmac@^1.1.4, create-hmac@^1.1.7:
     ripemd160 "^2.0.0"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
+
+cross-fetch@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.npmjs.org/cross-fetch/-/cross-fetch-3.1.4.tgz#9723f3a3a247bf8b89039f3a380a9244e8fa2f39"
+  integrity sha512-1eAtFWdIubi6T4XPy6ei9iUFoKpUkIF971QLN8lIvvvwueI65+Nw5haMNKUwfJxabqlIIDODJKGrQ66gxC0PbQ==
+  dependencies:
+    node-fetch "2.6.1"
 
 cross-spawn@^7.0.2:
   version "7.0.3"
@@ -1259,6 +1284,11 @@ fast-levenshtein@^2.0.6:
   version "2.0.6"
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
+
+fecha@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.npmjs.org/fecha/-/fecha-4.2.1.tgz#0a83ad8f86ef62a091e22bb5a039cd03d23eecce"
+  integrity sha512-MMMQ0ludy/nBs1/o0zVOiKTpG7qMbonKUzjJgQFEuvq6INZ1OraKPRAWkBq5vlKLOUMpmNYG1JoN3oDPUQ9m3Q==
 
 figlet@^1.5.0:
   version "1.5.0"
@@ -2020,6 +2050,11 @@ next-tick@~1.0.0:
   resolved "https://registry.npmjs.org/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
+node-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
+
 node-forge@^0.8.1, node-forge@^0.8.2:
   version "0.8.5"
   resolved "https://registry.npmjs.org/node-forge/-/node-forge-0.8.5.tgz#57906f07614dc72762c84cef442f427c0e1b86ee"
@@ -2059,6 +2094,11 @@ object-assign@^4, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
+
+object-hash@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/object-hash/-/object-hash-2.2.0.tgz#5ad518581eefc443bd763472b8ff2e9c2c0d54a5"
+  integrity sha512-gScRMn0bS5fH+IuwyIFgnh9zBdo4DV+6GhygmWM9HyNJSgS0hScp1f5vjtm7oIIOiT9trXrShAkLFSc2IqKNgw==
 
 object-inspect@^1.10.3:
   version "1.10.3"
@@ -2201,6 +2241,11 @@ pify@^4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/pify/-/pify-4.0.1.tgz#4b2cd25c50d598735c50292224fd8c6df41e3231"
   integrity sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==
+
+prando@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/prando/-/prando-6.0.1.tgz#ffa8de84c2adc4975dd9df37ae4ada0458face53"
+  integrity sha512-ghUWxQ1T9IJmPu6eshc3VU0OwveUtXQ33ZLXYUcz1Oc5ppKLDXKp0TBDj6b0epwhEctzcQSNGR2iHyvQSn4W5A==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
@@ -2591,6 +2636,24 @@ smartweave@^0.4.27, smartweave@^0.4.29:
     "@types/inquirer" "^7.3.1"
     "@weavery/clarity" "^0.1.5"
     arweave "^1.10.11"
+    bignumber.js "^9.0.1"
+    chalk "^4.1.0"
+    clui "^0.3.6"
+    figlet "^1.5.0"
+    inquirer "^7.3.3"
+    json-beautify "^1.1.1"
+    loglevel "^1.7.0"
+    sentencer "^0.2.1"
+    yargs "^16.2.0"
+
+"smartweave@github:johnletey/SmartWeave#release":
+  version "0.4.38"
+  resolved "https://codeload.github.com/johnletey/SmartWeave/tar.gz/adbfc2a8da22b3fcd71907a591c9faaf814e03be"
+  dependencies:
+    "@types/clui" "^0.3.0"
+    "@types/inquirer" "^7.3.1"
+    "@weavery/clarity" "^0.1.5"
+    arweave "^1.10.15"
     bignumber.js "^9.0.1"
     chalk "^4.1.0"
     clui "^0.3.6"
