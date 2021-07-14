@@ -6,11 +6,11 @@ const OFFSET_RANK = 645;
 const MS_TO_MIN = 60000;
 const TIMEOUT_TX = 30 * MS_TO_MIN;
 // Tools singleton
-let koiSdk = require("@_koi/sdk/node");
+const koiSdk = require("@_koi/sdk/node");
 const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
 
 // Arweave singleton
-const arweave = tools.arweave;
+const arweave = require("@_koi/sdk/common").arweave;
 
 /**
  * Common node functions for witness and service
