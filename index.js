@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 require("dotenv").config();
 const prompts = require("prompts");
-const chalk = require("chalk");
+const fsPromises = require("fs/promises");
+const axios = require("axios");
+const smartweave = require("smartweave");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -20,9 +22,10 @@ const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
-const { tools } = require("./src/helpers");
-const Service = require("./src/service");
-const Witness = require("./src/witness");
+const { tools, arweave } = require("./src/helpers");
+const { verifyStake, setupWebServer, runPeriodic } = require("./src/bundler");
+
+const GATEWAY_URL = "https://arweave.net/";
 
 /**
  * Main entry point
@@ -54,91 +57,70 @@ async function main() {
             message: "Select operation mode",
 
             choices: [
-              { title: "Service", value: service },
-              { title: "Witness Direct", value: witnessDirect },
-              { title: "Witness Indirect", value: witness }
+              { title: "Bundler", value: "bundler" },
+              { title: "Witness", value: "witness" } // Indirect
             ]
           })
         ).mode;
 
-  // Run the node
-  await operationMode();
-}
-
-/**
- * Setup witness direct node
- */
-async function service() {
-  await verifyStake(Service);
-}
-
-/**
- * Setup witness direct node
- */
-async function witnessDirect() {
-  await verifyStake(Witness);
-}
-
-/**
- * Setup witness direct node
- */
-async function witness() {
-  const node = new Witness();
-  await node.run();
-}
-
-/**
- * Verify the address has staked
- * @param {*} nodeClass
- */
-async function verifyStake(nodeClass) {
-  const balance = await tools.getWalletBalance();
-  const koiBalance = await tools.getKoiBalance();
-  const contractState = await tools.getContractState();
-  console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
-
-  if (balance === "0") {
-    console.error(
-      chalk.green(
-        "Your wallet doesn't have any Ar, you can't interact directly, " +
-          "but you can claim free Ar here: " +
-          chalk.blue.underline.bold("https://faucet.arweave.net/")
-      )
-    );
-    return;
-  }
-
-  let stakeAmount = 0;
-  if (!(tools.address in contractState.stakes)) {
-    if (koiBalance === 0) {
-      console.error(
-        chalk.green(
-          "Your wallet doesn’t have koi balance, claim some free Koi here: " +
-            chalk.blue.underline.bold("https://koi.rocks/faucet")
-        )
-      );
+  // Prepare bundler mode
+  const state = await tools.getContractState();
+  let expressApp;
+  if (operationMode === "bundler") {
+    if (!(await verifyStake(state))) {
+      console.error("Could not verify stake");
       return;
     }
-
-    // Get and set stake amount
-    stakeAmount =
-      process.env.STAKE !== undefined
-        ? parseInt(process.env.STAKE)
-        : (
-            await prompts({
-              type: "number",
-              name: "stakeAmount",
-              message: "Please stake to Vote"
-            })
-          ).stakeAmount;
-    if (stakeAmount < 1) {
-      console.error("Stake amount too low. Aborting.");
-      return;
-    }
+    expressApp = setupWebServer();
+    runPeriodic(); // Don't await to run in parallel
   }
 
-  const node = new nodeClass(stakeAmount, true);
-  await node.run();
+  // Get selected tasks
+  const availableTasks = state.tasks.map((task) => ({
+    title: `${task.name} - ${task.id}`,
+    value: task
+  }));
+  const selectedTasks = (
+    await prompts({
+      type: "multiselect",
+      name: "selected",
+      message: "Select tasks",
+      choices: availableTasks,
+      hint: "- Space to select. Enter to submit"
+    })
+  ).selected;
+
+  // Load tasks
+  const taskEnv = [tools, fsPromises, expressApp];
+  const taskContractsProms = selectedTasks.map((task) =>
+    smartweave.readContract(arweave, task.contractTxId)
+  );
+  const taskContracts = await Promise.all(taskContractsProms);
+  const taskSrcProms = taskContracts.map((taskContract) =>
+    axios.get(GATEWAY_URL + taskContract.executableTxId)
+  );
+  const taskSrcs = (await Promise.all(taskSrcProms)).map((res) => res.data);
+  const executableTasks = taskSrcs.map((src) => loadTaskSource(src, taskEnv));
+
+  // Initialize tasks then start express app
+  await Promise.all(executableTasks.map((task) => task.setup()));
+  const port = process.env.SERVER_PORT || 8887;
+  expressApp.listen(port, () => {
+    console.log(`Open http://localhost:${port} to view in browser`);
+  });
+
+  // Execute tasks
+  await Promise.all(executableTasks.map((task) => task.execute()));
+  console.log("All tasks complete");
+}
+
+function loadTaskSource(taskSrc, taskEnv) {
+  const loadedTask = new Function(`
+      const [tools, fsPromises, expressApp] = arguments;
+      ${taskSrc};
+      return {setup, execute};
+  `);
+  return loadedTask(...taskEnv);
 }
 
 main();
