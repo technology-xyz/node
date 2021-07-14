@@ -71,6 +71,7 @@ async function main() {
       console.error("Could not verify stake");
       return;
     }
+    tools.loadRedisClient();
     expressApp = setupWebServer();
     runPeriodic(); // Don't await to run in parallel
   }
