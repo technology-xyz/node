@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 require("dotenv").config();
 const prompts = require("prompts");
-const fsPromises = require("fs/promises");
 const axios = require("axios");
 const smartweave = require("smartweave");
 
@@ -22,7 +21,7 @@ const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
-const { tools, arweave } = require("./src/helpers");
+const { tools, arweave, Namespace } = require("./src/helpers");
 const { verifyStake, setupWebServer, runPeriodic } = require("./src/bundler");
 
 const GATEWAY_URL = "https://arweave.net/";
@@ -64,16 +63,14 @@ async function main() {
         ).mode;
 
   // Prepare bundler mode
-  const state = await tools.getContractState();
-  let expressApp;
-  if (operationMode === "bundler") {
-    if (!(await verifyStake(state))) {
-      console.error("Could not verify stake");
-      return;
-    }
-    tools.loadRedisClient();
-    expressApp = setupWebServer();
-    runPeriodic(); // Don't await to run in parallel
+  const state = await smartweave.readContract(
+    // Replace with tools.getContractState()
+    arweave,
+    "L2kUJFK63AI9e7zDPtecWsU4Lfku4p1znLpYOVv5FoU"
+  );
+  if (operationMode === "bundler" && !(await verifyStake(state))) {
+    console.error("Could not verify stake");
+    return;
   }
 
   // Get selected tasks
@@ -87,41 +84,60 @@ async function main() {
       name: "selected",
       message: "Select tasks",
       choices: availableTasks,
-      hint: "- Space to select. Enter to submit"
+      hint: "- Space to select. Enter to submit",
+      instructions: false
     })
   ).selected;
 
+  // Initialize bundler
+  let expressApp;
+  if (operationMode === "bundler") {
+    tools.loadRedisClient();
+    expressApp = setupWebServer();
+    runPeriodic(); // Don't await to run in parallel
+  }
+
   // Load tasks
-  const taskEnv = [tools, fsPromises, expressApp];
-  const taskContractsProms = selectedTasks.map((task) =>
-    smartweave.readContract(arweave, task.contractTxId)
+  const taskStateProms = selectedTasks.map((task) =>
+    smartweave.readContract(arweave, task.txId)
   );
-  const taskContracts = await Promise.all(taskContractsProms);
-  const taskSrcProms = taskContracts.map((taskContract) =>
-    axios.get(GATEWAY_URL + taskContract.executableTxId)
+  const taskStates = await Promise.all(taskStateProms);
+  const taskSrcProms = taskStates.map((taskState) =>
+    axios.get(GATEWAY_URL + taskState.executableTxId)
   );
   const taskSrcs = (await Promise.all(taskSrcProms)).map((res) => res.data);
-  const executableTasks = taskSrcs.map((src) => loadTaskSource(src, taskEnv));
+  const executableTasks = taskSrcs.map((src, i) =>
+    loadTaskSource(src, new Namespace(selectedTasks[i].txId, expressApp))
+  );
 
   // Initialize tasks then start express app
-  await Promise.all(executableTasks.map((task) => task.setup()));
+  await Promise.all(
+    executableTasks.map((task, i) => task.setup(taskStates[i]))
+  );
   const port = process.env.SERVER_PORT || 8887;
   expressApp.listen(port, () => {
     console.log(`Open http://localhost:${port} to view in browser`);
   });
 
   // Execute tasks
-  await Promise.all(executableTasks.map((task) => task.execute()));
+  await Promise.all(
+    executableTasks.map((task, i) => task.execute(taskStates[i]))
+  );
   console.log("All tasks complete");
 }
 
-function loadTaskSource(taskSrc, taskEnv) {
+/**
+ * @param {string} taskSrc // Source of contract
+ * @param {Namespace} namespace // Wrapper object for redis, express, and filesystem
+ * @returns // Executable task
+ */
+function loadTaskSource(taskSrc, namespace) {
   const loadedTask = new Function(`
-      const [tools, fsPromises, expressApp] = arguments;
+      const [tools, namespace] = arguments;
       ${taskSrc};
       return {setup, execute};
   `);
-  return loadedTask(...taskEnv);
+  return loadedTask(tools, namespace);
 }
 
 main();

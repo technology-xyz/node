@@ -60,6 +60,7 @@ async function verifyStake(state) {
     const txId = await tools.stake(stakeAmount);
     return await checkTxConfirmation(txId, "staking");
   }
+  return true;
 }
 
 /**
