@@ -3,6 +3,7 @@ require("dotenv").config();
 const prompts = require("prompts");
 const axios = require("axios");
 const smartweave = require("smartweave");
+const { constants } = require("fs");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -133,11 +134,11 @@ async function main() {
  */
 function loadTaskSource(taskSrc, namespace) {
   const loadedTask = new Function(`
-      const [tools, namespace] = arguments;
+      const [tools, arweave, smartweave, fsConstants, namespace] = arguments;
       ${taskSrc};
       return {setup, execute};
   `);
-  return loadedTask(tools, namespace);
+  return loadedTask(tools, arweave, smartweave, constants, namespace);
 }
 
 main();

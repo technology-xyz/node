@@ -12,11 +12,11 @@ const arweave = require("@_koi/sdk/common").arweave;
  */
 class Namespace {
   /**
-   * @param {*} name Name of namespace
+   * @param {*} taskTxId Tasks transaction ID to be used as the namespace name
    * @param {*} expressApp // Express app for configuration
    */
-  constructor(name, expressApp) {
-    this.name = name;
+  constructor(taskTxId, expressApp) {
+    this.taskTxId = taskTxId;
     this.app = expressApp;
   }
 
@@ -26,7 +26,7 @@ class Namespace {
    * @returns {Promise<*>} Promise containing data
    */
   redisGet(path) {
-    return tools.redisGetAsync(this.name + path);
+    return tools.redisGetAsync(this.taskTxId + path);
   }
 
   /**
@@ -36,7 +36,7 @@ class Namespace {
    * @returns {Promise<void>}
    */
   redisSet(path, data) {
-    return tools.redisSetAsync(this.name + path, data);
+    return tools.redisSetAsync(this.taskTxId + path, data);
   }
 
   /**
@@ -48,11 +48,11 @@ class Namespace {
    */
   async fs(method, path, ...args) {
     try {
-      await fsPromises.access(this.name);
+      await fsPromises.access(this.taskTxId);
     } catch {
-      await fsPromises.mkdir(this.name);
+      await fsPromises.mkdir(this.taskTxId);
     }
-    return fsPromises[method](`${this.name}/${path}`, ...args);
+    return fsPromises[method](`${this.taskTxId}/${path}`, ...args);
   }
 
   /**
@@ -61,8 +61,8 @@ class Namespace {
    * @param {string} path // Endpoint path appended to namespace
    * @param {Function} callback // Callback function on traffic receive
    */
-  expressRoute(method, path, callback) {
-    return this.app[method](`${this.name}/${path}`, callback);
+  express(method, path, callback) {
+    return this.app[method](this.taskTxId + path, callback);
   }
 }
 
