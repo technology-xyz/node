@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 require("dotenv").config();
 const prompts = require("prompts");
-const axios = require("axios");
+// const axios = require("axios");
 const smartweave = require("smartweave");
 const { constants } = require("fs");
+const fs = require("fs/promises");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -25,7 +26,7 @@ for (const arg of PARSE_ARGS)
 const { tools, arweave, Namespace } = require("./src/helpers");
 const { verifyStake, setupWebServer, runPeriodic } = require("./src/bundler");
 
-const GATEWAY_URL = "https://arweave.net/";
+// const GATEWAY_URL = "https://arweave.net/";
 
 /**
  * Main entry point
@@ -74,21 +75,21 @@ async function main() {
     return;
   }
 
-  // Get selected tasks
-  const availableTasks = state.tasks.map((task) => ({
-    title: `${task.name} - ${task.id}`,
-    value: task
-  }));
-  const selectedTasks = (
-    await prompts({
-      type: "multiselect",
-      name: "selected",
-      message: "Select tasks",
-      choices: availableTasks,
-      hint: "- Space to select. Enter to submit",
-      instructions: false
-    })
-  ).selected;
+  // // Get selected tasks
+  // const availableTasks = state.tasks.map((task) => ({
+  //   title: `${task.name} - ${task.id}`,
+  //   value: task
+  // }));
+  // const selectedTasks = (
+  //   await prompts({
+  //     type: "multiselect",
+  //     name: "selected",
+  //     message: "Select tasks",
+  //     choices: availableTasks,
+  //     hint: "- Space to select. Enter to submit",
+  //     instructions: false
+  //   })
+  // ).selected;
 
   // Initialize bundler
   let expressApp;
@@ -99,6 +100,7 @@ async function main() {
   }
 
   // Load tasks
+  /*
   const taskStateProms = selectedTasks.map((task) =>
     smartweave.readContract(arweave, task.txId)
   );
@@ -109,6 +111,13 @@ async function main() {
   const taskSrcs = (await Promise.all(taskSrcProms)).map((res) => res.data);
   const executableTasks = taskSrcs.map((src, i) =>
     loadTaskSource(src, new Namespace(selectedTasks[i].txId, expressApp))
+  );
+  */
+
+  const taskStates = [null];
+  const taskSrcs = [await fs.readFile("executable.js", "utf8")];
+  const executableTasks = taskSrcs.map((src) =>
+    loadTaskSource(src, new Namespace("test", expressApp))
   );
 
   // Initialize tasks then start express app
