@@ -62,6 +62,7 @@ async function main() {
         ).mode;
 
   // Run the node
+  console.log("Operation mode:", operationMode.name);
   await operationMode();
 }
 
