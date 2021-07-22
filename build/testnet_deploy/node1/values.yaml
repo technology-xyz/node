@@ -1,0 +1,8 @@
+fullnameOverride: dev-koi-node-service-1
+nameOverride: dev
+env:
+    nodeMode: service
+    redisIp: redis
+    redisPort: 6379
+    trustedServiceURL: none
+    stake: 10
