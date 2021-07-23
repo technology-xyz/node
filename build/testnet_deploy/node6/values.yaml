@@ -4,4 +4,4 @@ env:
     nodeMode: witnessDirect
     redisIp: redis
     redisPort: 6379
-    trustedServiceURL: http://koi-node-service-1:8080
+    trustedServiceURL: http://dev-koi-node-service-1:8080
