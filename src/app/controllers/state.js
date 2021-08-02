@@ -165,10 +165,17 @@ async function getNFTState(req, res) {
   try {
     const tranxId = req.query.tranxId;
     const state = await tools._readContract();
-    const content = await contentView(tranxId, state);
-    content.timestamp = moment().unix() * 1000;
-    if (content) tools.redisSetAsync(tranxId, JSON.stringify(content));
-    if (!res.headersSent) res.status(200).send(content);
+    let content = await contentView(tranxId, state);
+    content.timestamp=(moment().unix())*1000
+    if(content && content.tx){
+      delete content.tx
+    }
+    if (content) {
+      redisSetAsync(tranxId, JSON.stringify(content));
+    }
+    if(!res.headersSent){ 
+      res.status(200).send(content);
+    }
   } catch (e) {
     console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
