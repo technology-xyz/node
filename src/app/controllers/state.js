@@ -237,7 +237,7 @@ async function filterContent(paramOutputArr, days) {
 
     return paramOutputArr;
   } catch (e) {
-    console.log(e);
+    console.error("Error filtering content:", e);
   }
 }
 
