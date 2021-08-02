@@ -210,7 +210,6 @@ async function filterContent(paramOutputArr, days) {
     let populatedOutputArr = await Promise.all(outputArr);
     populatedOutputArr = populatedOutputArr.map((e, index) => {
       if (!e) {
-        console.log("NOT", e);
         const transaction = paramOutputArr[index];
         return {
           txIdContent: Object.keys(transaction)[0],
@@ -238,7 +237,7 @@ async function filterContent(paramOutputArr, days) {
 
     return paramOutputArr;
   } catch (e) {
-    console.error(e);
+    console.log(e);
   }
 }
 

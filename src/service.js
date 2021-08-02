@@ -19,7 +19,8 @@ class Service extends Node {
     // Initialize redis client and webserver
     tools.loadRedisClient();
     this.startWebserver();
-    this.nextPeriod = 0;
+    this.next5mPeriod = 0;
+    this.next3hPeriod = 0;
   }
 
   startWebserver() {
@@ -77,24 +78,39 @@ class Service extends Node {
    */
   async runPeriodic() {
     const currTime = Date.now();
-    if (this.nextPeriod > currTime) return;
-    this.nextPeriod = currTime + 300000;
 
-    console.log("Running periodic tasks");
+    if (this.next3hPeriod < currTime) {
+      this.next3hPeriod = currTime + 10800000;
+      console.log("Running 3h periodic tasks");
 
-    // Propagate service nodes
-    try {
-      await this.propagateRegistry();
-    } catch (e) {
-      console.error("Error while propagating", e);
+      // Invalidate predicted state
+      try {
+        tools.redisClient.del("ContractPredictedState");
+        tools.redisClient.del("pendingStateArray");
+        console.log("Cache Invalidated");
+      } catch (e) {
+        console.error("Error invalidating predicted state");
+      }
     }
 
-    // Redis update predicted state cache
-    try {
-      console.log("Recalculating predicted state");
-      await tools.recalculatePredictedState(tools.wallet);
-    } catch (e) {
-      console.error("Error while recalculating predicted state", e);
+    if (this.next5mPeriod < currTime) {
+      this.next5mPeriod = currTime + 300000;
+      console.log("Running 5m periodic tasks");
+
+      // Propagate service nodes
+      try {
+        await this.propagateRegistry();
+      } catch (e) {
+        console.error("Error while propagating", e);
+      }
+
+      // Redis update predicted state cache
+      try {
+        console.log("Recalculating predicted state");
+        await tools.recalculatePredictedState(tools.wallet);
+      } catch (e) {
+        console.error("Error while recalculating predicted state", e);
+      }
     }
   }
 

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.28":
-  version "2.1.28"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.28.tgz#5a366e23e47525294d6b926260a0a2f011694423"
-  integrity sha512-MWUGJinrFwSAUResNxf46vng1gHHJwIjTlPC4e0QxphakRkM95XbhOVNsQf6PZAmTiqMZmSBz05Xnd9x9d/9tA==
+"@_koi/sdk@^2.1.36":
+  version "2.1.36"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.36.tgz#1866cd32c9d490060ee3729c412ea07e3961f543"
+  integrity sha512-4wq08UmZIQcV1Jlt8UbFKvdio0hKOrwXt2cOYiEqUN1cBg7Sq2le2EsNAVIGmdS1cmUEG2NLkxW9ujY9/ft8Pw==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.19"
     arweave "^1.10.13"
@@ -2646,7 +2646,7 @@ smartweave@^0.4.27, smartweave@^0.4.29:
     sentencer "^0.2.1"
     yargs "^16.2.0"
 
-"smartweave@github:johnletey/SmartWeave#release":
+smartweave@johnletey/SmartWeave#release:
   version "0.4.38"
   resolved "https://codeload.github.com/johnletey/SmartWeave/tar.gz/adbfc2a8da22b3fcd71907a591c9faaf814e03be"
   dependencies:
