@@ -54,6 +54,27 @@ const singleUpload = upload.single("file");
  * @param {*} req express.js request
  * @param {*} res express.js result object
  */
+async function getCurrentState(req, res) {
+  try {
+    let currentState = await tools._readContract();
+    if (!currentState) throw new Error("State not available");
+
+    res.status(200).send(currentState);
+    await tools.redisSetAsync(
+      "ContractCurrentState",
+      JSON.stringify(currentState)
+    );
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ error: "ERROR: " + e });
+  }
+}
+
+/**
+ *
+ * @param {*} req express.js request
+ * @param {*} res express.js result object
+ */
 async function getTopContentPredicted(req, res) {
   try {
     const state = await tools._readContract();
@@ -283,6 +304,7 @@ async function contentView(contentTxId, state) {
 }
 
 module.exports = {
+  getCurrentState,
   getTopContentPredicted,
   getNFTState,
   handleNFTUpload
