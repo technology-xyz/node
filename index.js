@@ -63,6 +63,7 @@ async function main() {
 
   // Run the node
   console.log("Operation mode:", operationMode.name);
+  process.env["NODE_MODE"] = operationMode.name;
   await operationMode();
 }
 
