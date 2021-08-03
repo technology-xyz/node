@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.1.40":
-  version "2.1.40"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.40.tgz#0e83709c8cb39d6c145227c3ed24d4670b789553"
-  integrity sha512-LBiusIBKeQgo87Kqend3Xf5yzfOEStADYLq8csq9ITFv3otS1/LrLPoPect2AGPIYjiGEnaXnl4SEOHkQLANlQ==
+"@_koi/sdk@^2.1.41":
+  version "2.1.41"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.1.41.tgz#36911b6a48f562cfa4672a5324d830f587e3e4f1"
+  integrity sha512-AjuqoHGnU0AUWumbjKPele8+ZjGZ8bxGdl+kWGLz/jKfFR5Jh4UaPJdwCZdZap0S0jC9lrLV77C7v/ebDCghsg==
   dependencies:
     "@kyve/query" "^0.0.0-alpha.19"
     arweave "^1.10.13"
