@@ -171,7 +171,7 @@ async function getNFTState(req, res) {
       delete content.tx
     }
     if (content) {
-      redisSetAsync(tranxId, JSON.stringify(content));
+      tools.redisSetAsync(tranxId, JSON.stringify(content));
     }
     if(!res.headersSent){ 
       res.status(200).send(content);
