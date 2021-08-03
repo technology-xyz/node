@@ -170,7 +170,14 @@ class Service extends Node {
       const bundlers = state.votes[voteId].bundlers;
       const bundlerAddress = await tools.getWalletAddress();
       if (!(bundlerAddress in bundlers)) {
-        const txId = (await batchUpdateContractState(voteId)).id;
+        let txId;
+        try {
+          txId = (await batchUpdateContractState(voteId)).id;
+        } catch (e) {
+          console.error("Unable to submit batch:", e);
+          activeVotes.pop();
+          continue;
+        }
         if (!(await this.checkTxConfirmation(txId, task))) {
           console.log("Vote submission failed");
           return;
