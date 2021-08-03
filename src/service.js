@@ -174,7 +174,7 @@ class Service extends Node {
         try {
           txId = (await batchUpdateContractState(voteId)).id;
         } catch (e) {
-          console.error("Unable to submit batch:", e);
+          console.error("Unable to submit batch, skipping:", e);
           activeVotes.pop();
           continue;
         }
