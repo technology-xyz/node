@@ -5,6 +5,9 @@ const OFFSET_RANK = 645;
 
 const MS_TO_MIN = 60000;
 const TIMEOUT_TX = 30 * MS_TO_MIN;
+
+const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
+
 // Tools singleton
 const koiSdk = require("@_koi/sdk/node");
 const tools = new koiSdk.Node(process.env.TRUSTED_SERVICE_URL);
@@ -66,7 +69,7 @@ class Node {
         "blocks"
       );
     this.lastBlock = block;
-
+    await rateLimit();
     return [state, block];
   }
 
@@ -229,8 +232,17 @@ class Node {
       } catch (_err) {
         // Silently catch error, might be dangerous
       }
+      await rateLimit();
     }
   }
+}
+
+/**
+ * Awaitable rate limit
+ * @returns
+ */
+function rateLimit() {
+  return new Promise((resolve) => setTimeout(resolve, ARWEAVE_RATE_LIMIT));
 }
 
 module.exports = {
