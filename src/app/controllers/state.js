@@ -214,7 +214,7 @@ async function handleNFTUpload(req, res) {
       req.body.fileLocation = req.file.location;
       await tools.redisSetAsync(txId, JSON.stringify(req.body));
       await tools.loadRedisClient();
-      await tools.recalculatePredictedState(tools.wallet);
+      tools.recalculatePredictedState(tools.wallet);
       res.json({ url: req.file.location });
     });
   } catch (err) {
