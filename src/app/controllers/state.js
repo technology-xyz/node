@@ -104,6 +104,7 @@ async function getTopContentPredicted(req, res) {
       rewardReport = [];
     }
 
+    //const start = Date.now();
     for (let i = 0; i < txIds.length; i++) {
       const contentTxId = txIds[i];
       const contentViews = {
@@ -113,21 +114,17 @@ async function getTopContentPredicted(req, res) {
         txIdContent: contentTxId
       };
 
-      for (let j = 0; j < rewardReport.length; j++) {
-        const ele = rewardReport[j];
+      for (const ele of rewardReport) {
         const logSummary = ele.logsSummary;
 
-        for (const txId in logSummary) {
-          if (txId === contentTxId) {
-            if (rewardReport.indexOf(ele) == rewardReport.length - 1) {
-              contentViews.twentyFourHrViews = logSummary[contentTxId];
-            }
+        if (contentTxId in logSummary) {
+          if (rewardReport.indexOf(ele) == rewardReport.length - 1)
+            contentViews.twentyFourHrViews = logSummary[contentTxId];
 
-            const rewardPerAttention = ele.rewardPerAttention;
-            contentViews.totalViews += logSummary[contentTxId];
-            const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
-            contentViews.totalReward += rewardPerLog;
-          }
+          const rewardPerAttention = ele.rewardPerAttention;
+          contentViews.totalViews += logSummary[contentTxId];
+          const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
+          contentViews.totalReward += rewardPerLog;
         }
       }
 
@@ -138,6 +135,8 @@ async function getTopContentPredicted(req, res) {
         }
       });
     }
+    //const end = Date.now();
+    //console.log("nested loops:", end - start);
     outputArr = outputArr.sort((a, b) => {
       if (a[Object.keys(a)[0]].totalViews < b[Object.keys(b)[0]].totalViews)
         return 1;
