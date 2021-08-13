@@ -95,7 +95,6 @@ async function getTopContentPredicted(req, res) {
     }
 
     // filtering txIdArr based on offset
-    let outputArr = [];
     if (offset != 0) txIds = await filterContent(txIds, offset);
     let rewardReport;
     try {
@@ -104,39 +103,33 @@ async function getTopContentPredicted(req, res) {
       rewardReport = [];
     }
 
-    //const start = Date.now();
-    for (let i = 0; i < txIds.length; i++) {
-      const contentTxId = txIds[i];
-      const contentViews = {
-        totalViews: 0,
-        totalReward: 0,
-        twentyFourHrViews: 0,
-        txIdContent: contentTxId
-      };
+    let outputArr = txIds.map((txId) => {
+      let totalViews = 0,
+        totalReward = 0,
+        twentyFourHrViews = 0;
 
-      for (const ele of rewardReport) {
-        const logSummary = ele.logsSummary;
-
-        if (contentTxId in logSummary) {
-          if (rewardReport.indexOf(ele) == rewardReport.length - 1)
-            contentViews.twentyFourHrViews = logSummary[contentTxId];
-
-          const rewardPerAttention = ele.rewardPerAttention;
-          contentViews.totalViews += logSummary[contentTxId];
-          const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
-          contentViews.totalReward += rewardPerLog;
+      for (const report of rewardReport) {
+        const logSummary = report.logsSummary;
+        if (txId in logSummary) {
+          totalViews += logSummary[txId];
+          totalReward += logSummary[txId] * report.rewardPerAttention;
         }
       }
 
-      outputArr.push({
-        [contentTxId]: {
-          owner: registerRecords[contentTxId],
-          ...contentViews
+      const lastSummary = rewardReport[rewardReport.length - 1].logsSummary;
+      if (txId in lastSummary) twentyFourHrViews = lastSummary[txId];
+
+      return {
+        [txId]: {
+          owner: registerRecords[txId],
+          txIdContent: txId,
+          totalViews,
+          totalReward,
+          twentyFourHrViews
         }
-      });
-    }
-    //const end = Date.now();
-    //console.log("nested loops:", end - start);
+      };
+    });
+
     outputArr = outputArr.sort((a, b) => {
       if (a[Object.keys(a)[0]].totalViews < b[Object.keys(b)[0]].totalViews)
         return 1;
