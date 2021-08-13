@@ -60,10 +60,6 @@ async function getCurrentState(req, res) {
     if (!currentState) throw new Error("State not available");
 
     res.status(200).send(currentState);
-    await tools.redisSetAsync(
-      "ContractCurrentState",
-      JSON.stringify(currentState)
-    );
   } catch (e) {
     console.log(e);
     res.status(500).send({ error: "ERROR: " + e });
@@ -166,14 +162,14 @@ async function getNFTState(req, res) {
     const tranxId = req.query.tranxId;
     const state = await tools._readContract();
     let content = await contentView(tranxId, state);
-    content.timestamp=(moment().unix())*1000
-    if(content && content.tx){
-      delete content.tx
+    content.timestamp = moment().unix() * 1000;
+    if (content && content.tx) {
+      delete content.tx;
     }
     if (content) {
       tools.redisSetAsync(tranxId, JSON.stringify(content));
     }
-    if(!res.headersSent){ 
+    if (!res.headersSent) {
       res.status(200).send(content);
     }
   } catch (e) {
