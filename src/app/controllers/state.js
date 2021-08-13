@@ -130,13 +130,10 @@ async function getTopContentPredicted(req, res) {
       };
     });
 
-    outputArr = outputArr.sort((a, b) => {
-      if (a[Object.keys(a)[0]].totalViews < b[Object.keys(b)[0]].totalViews)
-        return 1;
-      if (a[Object.keys(a)[0]].totalViews > b[Object.keys(b)[0]].totalViews)
-        return -1;
-      return 0;
-    });
+    outputArr = outputArr.sort(
+      (a, b) =>
+        b[Object.keys(b)[0]].totalViews - a[Object.keys(a)[0]].totalViews
+    );
     res.status(200).send(outputArr);
   } catch (e) {
     console.error(e);
