@@ -103,7 +103,7 @@ async function getTopContentPredicted(req, res) {
       rewardReport = [];
     }
 
-    let outputArr = txIds.map((txId) => {
+    const outputArr = txIds.map((txId) => {
       let totalViews = 0,
         totalReward = 0,
         twentyFourHrViews = 0;
@@ -130,10 +130,12 @@ async function getTopContentPredicted(req, res) {
       };
     });
 
-    outputArr = outputArr.sort(
+    const start = Date.now();
+    outputArr.sort(
       (a, b) =>
         b[Object.keys(b)[0]].totalViews - a[Object.keys(a)[0]].totalViews
     );
+    console.log("time", Date.now() - start);
     res.status(200).send(outputArr);
   } catch (e) {
     console.error(e);
