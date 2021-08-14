@@ -130,12 +130,10 @@ async function getTopContentPredicted(req, res) {
       };
     });
 
-    const start = Date.now();
     outputArr.sort(
       (a, b) =>
         b[Object.keys(b)[0]].totalViews - a[Object.keys(a)[0]].totalViews
     );
-    console.log("time", Date.now() - start);
     res.status(200).send(outputArr);
   } catch (e) {
     console.error(e);
