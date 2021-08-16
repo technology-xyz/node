@@ -82,7 +82,7 @@ async function witnessDirect() {
 }
 
 /**
- * Setup witness direct node
+ * Setup witness indirect node
  */
 async function witness() {
   const node = new Witness();

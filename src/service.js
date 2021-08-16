@@ -78,21 +78,6 @@ class Service extends Node {
    */
   async runPeriodic() {
     const currTime = Date.now();
-
-    if (this.next3hPeriod < currTime) {
-      this.next3hPeriod = currTime + 10800000;
-      console.log("Running 3h periodic tasks");
-
-      // Invalidate predicted state
-      try {
-        tools.redisClient.del("ContractPredictedState");
-        tools.redisClient.del("pendingStateArray");
-        console.log("Cache Invalidated");
-      } catch (e) {
-        console.error("Error invalidating predicted state");
-      }
-    }
-
     if (this.next5mPeriod < currTime) {
       this.next5mPeriod = currTime + 300000;
       console.log("Running 5m periodic tasks");
@@ -102,14 +87,6 @@ class Service extends Node {
         await this.propagateRegistry();
       } catch (e) {
         console.error("Error while propagating", e);
-      }
-
-      // Redis update predicted state cache
-      try {
-        console.log("Recalculating predicted state");
-        await tools.recalculatePredictedState(tools.wallet);
-      } catch (e) {
-        console.error("Error while recalculating predicted state", e);
       }
     }
   }

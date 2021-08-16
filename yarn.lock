@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.5":
-  version "2.2.0-beta.5"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.5.tgz#f92669dbfcbeadb9e6d3a64ada26b06b75d9583b"
-  integrity sha512-rqjobKOe6P767zSo4Io++/jJVuOI2oebDHgFMiW4XLuzk0E/XDHSNvLAjkn7hLHIWH9bK9gwGMNTMomYnOOQVA==
+"@_koi/sdk@^2.2.0-beta.8":
+  version "2.2.0-beta.8"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.8.tgz#f185d8c8f763ae4c5d6a5839f689d98c00b7b026"
+  integrity sha512-WnyWN9MnkEtlIrxNDYvJc7kWnUuCSmD6TVgMLYBFsuNZ8gXTi8s11qwYx5BrMgQc3UdSVZLHNMvyDE0o+E3f8A==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
@@ -16,7 +16,6 @@
     node-polyfill-webpack-plugin "^1.1.1"
     pem-jwk "^2.0.0"
     redis "^3.1.2"
-    smartweave "^0.4.29"
     web3 "^1.5.0"
 
 "@babel/code-frame@7.12.11":
@@ -462,7 +461,7 @@ articles@~0.2.1:
   resolved "https://registry.npmjs.org/articles/-/articles-0.2.2.tgz#cc6b429f8cfa811f41e7a08505abbb4e45503197"
   integrity sha512-S3Y4MPp+LD/l0HHm/4yrr6MoXhUkKT98ZdsV2tkTuBNywqUXEtvJT+NBO3KTSQEttc5EOwEJe2Xw8cZ9TI5Hrw==
 
-arweave@^1.10.11, arweave@^1.10.13, arweave@^1.10.15:
+arweave@^1.10.11, arweave@^1.10.13:
   version "1.10.16"
   resolved "https://registry.npmjs.org/arweave/-/arweave-1.10.16.tgz#b968590cb413242636196d2339562dd106840bb9"
   integrity sha512-j2UM7C/2MHO7Mv7wbzhihgVs8uN2+QltA+3cYaM82dNNEBBJylIClJUHHMqsK/2ejCnziQm4FofiUFbsQDdQDg==
@@ -531,9 +530,9 @@ available-typed-arrays@^1.0.4:
   integrity sha512-SA5mXJWrId1TaQjfxUYghbqQ/hYioKmLJvPJyDuYRtXXenFNMjj4hSSt1Cf1xsuXSXrtxrVC5Ot4eU6cOtBDdA==
 
 aws-sdk@^2.925.0:
-  version "2.968.0"
-  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.968.0.tgz#2cfa60cebce28211a9909980c7e30a2c103ad7b1"
-  integrity sha512-6kXJ/4asP+zI8oFJAUqEmVoaLOnAYriorigKy8ZjFe3ISl4w0PEOXBG1TtQFuLiNPR3BAvhRuOQ5yH6JfqDNNw==
+  version "2.969.0"
+  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.969.0.tgz#905b24d4d7ee1a41757953e663f4360638d77362"
+  integrity sha512-bDQenWDH9CdPIsgh7E6zgq2bO576teSnlQv1Oz0IwxVq+AbGsArSJXjNrvniV1l9TrqPOZk9dqBa/q4mOzwyLw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -2577,7 +2576,7 @@ kleur@^3.0.3:
 
 kohaku@koii-network/kohaku:
   version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/7485cb50fd26233762b6cf00e446fc79510cf0bc"
+  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/5eb402a676685e5a08f2e64003b9f2359ade56a8"
   dependencies:
     smartweave "0.4.31"
 
@@ -3722,25 +3721,6 @@ smartweave@0.4.31:
     "@types/inquirer" "^7.3.1"
     "@weavery/clarity" "^0.1.5"
     arweave "^1.10.11"
-    bignumber.js "^9.0.1"
-    chalk "^4.1.0"
-    clui "^0.3.6"
-    figlet "^1.5.0"
-    inquirer "^7.3.3"
-    json-beautify "^1.1.1"
-    loglevel "^1.7.0"
-    sentencer "^0.2.1"
-    yargs "^16.2.0"
-
-smartweave@^0.4.29:
-  version "0.4.41"
-  resolved "https://registry.npmjs.org/smartweave/-/smartweave-0.4.41.tgz#40a2cad2f443091b4fe5c8e6bf565d980fe91403"
-  integrity sha512-xixp9Nfuiy/2e2JmU0IICKI9iU0KMDbLKsS/SLOwpgj7LDUwIhfGzaOHWAcK5OJ2iij9dHYSmGPRjRk+wurKqA==
-  dependencies:
-    "@types/clui" "^0.3.0"
-    "@types/inquirer" "^7.3.1"
-    "@weavery/clarity" "^0.1.5"
-    arweave "^1.10.15"
     bignumber.js "^9.0.1"
     chalk "^4.1.0"
     clui "^0.3.6"
