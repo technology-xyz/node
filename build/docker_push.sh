@@ -34,6 +34,17 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
   fi
 
+  if [ "$TRAVIS_BRANCH" == "kohaku" ]; then
+
+    docker tag koi_node:dev public.ecr.aws/r3r0i7b9/koi_node:kohaku
+    docker push "public.ecr.aws/r3r0i7b9/koi_node:kohaku"
+
+    echo "Pushed koi_node:kohaku"
+
+    ./build/kohaku_deploy/deploy.sh
+
+  fi
+
 else
   echo "Skipping deploy because it's a pull request"
 fi

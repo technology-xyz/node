@@ -6,4 +6,5 @@ yarn-error.log
 package-lock.json
 data/*
 values.node*.dec.yaml
-build/testnet_deploy/koi-node
+build/*/koi-node
+.DS_Store

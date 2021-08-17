@@ -1,0 +1,8 @@
+fullnameOverride: kohaku-koi-node-witness-1
+nameOverride: kohaku
+env:
+    nodeMode: service
+    redisIp: redis
+    redisPort: 6379
+    trustedServiceURL: none
+    stake: 10
