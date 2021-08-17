@@ -1,5 +1,7 @@
 fullnameOverride: kohaku-koi-node-service-1
 nameOverride: kohaku
+service:
+    type: NodePort
 env:
     nodeMode: service
     redisIp: redis
