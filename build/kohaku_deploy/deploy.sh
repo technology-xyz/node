@@ -24,7 +24,7 @@ if [ "$TRAVIS_BRANCH" == "kohaku" ]; then
 
         for node in ${nodes[@]}; do
             sops -d ./$node/secrets.yaml > ./$node/secrets.dec.yaml
-            helm upgrade --install koi-$node ./koi-node -n koi -f ./$node/secrets.dec.yaml -f ./$node/values.yaml `echo $TAG`
+            helm upgrade --install koi-kohaku-$node ./koi-node -n koi -f ./$node/secrets.dec.yaml -f ./$node/values.yaml `echo $TAG`
         done
 
     fi
