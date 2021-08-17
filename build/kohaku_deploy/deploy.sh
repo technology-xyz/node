@@ -11,7 +11,8 @@ nodes=(
 if [ "$TRAVIS_BRANCH" == "kohaku" ]; then
 
     cd $TRAVIS_BUILD_DIR/build/kohaku_deploy
-    TAG="--set image.tag=kohaku"
+    SHORTSHA=`git log --pretty=format:'%h' -n 1`
+    TAG="--set image.tag=kohaku-$SHORTSHA"
 
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then

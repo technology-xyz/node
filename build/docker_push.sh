@@ -36,10 +36,12 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
   if [ "$TRAVIS_BRANCH" == "kohaku" ]; then
 
-    docker tag koi_node:dev public.ecr.aws/r3r0i7b9/koi_node:kohaku
-    docker push "public.ecr.aws/r3r0i7b9/koi_node:kohaku"
+    SHORTSHA=`git log --pretty=format:'%h' -n 1`
 
-    echo "Pushed koi_node:kohaku"
+    docker tag koi_node:dev "public.ecr.aws/r3r0i7b9/koi_node:kohaku-$SHORTSHA"
+    docker push "public.ecr.aws/r3r0i7b9/koi_node:kohaku-$SHORTSHA"
+
+    echo "Pushed koi_node:kohaku-$SHORTSHA"
 
     ./build/kohaku_deploy/deploy.sh
 
