@@ -8,11 +8,10 @@ nodes=(
 
 
 
-if [ "$TRAVIS_BRANCH" == "dev" ]; then
+if [ "$TRAVIS_BRANCH" == "kohaku" ]; then
 
-    cd $TRAVIS_BUILD_DIR/build/testnet_deploy
-    SHORTSHA=`git log --pretty=format:'%h' -n 1`
-    TAG="--set image.tag=dev-$SHORTSHA"
+    cd $TRAVIS_BUILD_DIR/build/kohaku_deploy
+    TAG="--set image.tag=kohaku"
 
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
