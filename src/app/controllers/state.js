@@ -73,7 +73,7 @@ async function getCurrentState(req, res) {
  */
 async function getTopContentPredicted(req, res) {
   try {
-    const state = await tools.getCurrentState();
+    const state = await tools.getContractState();
     const registerRecords = state.registeredRecord;
     let txIds = Object.keys(registerRecords).filter(
       (txId) => !CORRUPTED_NFT.includes(txId)
@@ -149,7 +149,7 @@ async function getTopContentPredicted(req, res) {
 async function getNFTState(req, res) {
   try {
     const tranxId = req.query.tranxId;
-    const state = await tools.getCurrentState();
+    const state = await tools.getContractState();
     let content = await contentView(tranxId, state);
     content.timestamp = moment().unix() * 1000;
     if (content && content.tx) {
