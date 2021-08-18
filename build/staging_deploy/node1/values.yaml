@@ -1,5 +1,7 @@
 fullnameOverride: staging-koi-node-service-1
 nameOverride: staging
+service:
+    type: NodePort
 env:
     nodeMode: service
     redisIp: redis
