@@ -54,6 +54,23 @@ const singleUpload = upload.single("file");
  * @param {*} req express.js request
  * @param {*} res express.js result object
  */
+async function getCurrentState(req, res) {
+  try {
+    let currentState = await tools._readContract();
+    if (!currentState) throw new Error("State not available");
+
+    res.status(200).send(currentState);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ error: "ERROR: " + e });
+  }
+}
+
+/**
+ *
+ * @param {*} req express.js request
+ * @param {*} res express.js result object
+ */
 async function getTopContentPredicted(req, res) {
   try {
     const state = await tools._readContract();
@@ -78,7 +95,6 @@ async function getTopContentPredicted(req, res) {
     }
 
     // filtering txIdArr based on offset
-    let outputArr = [];
     if (offset != 0) txIds = await filterContent(txIds, offset);
     let rewardReport;
     try {
@@ -87,47 +103,37 @@ async function getTopContentPredicted(req, res) {
       rewardReport = [];
     }
 
-    for (let i = 0; i < txIds.length; i++) {
-      const contentTxId = txIds[i];
-      const contentViews = {
-        totalViews: 0,
-        totalReward: 0,
-        twentyFourHrViews: 0,
-        txIdContent: contentTxId
-      };
+    const outputArr = txIds.map((txId) => {
+      let totalViews = 0,
+        totalReward = 0,
+        twentyFourHrViews = 0;
 
-      for (let j = 0; j < rewardReport.length; j++) {
-        const ele = rewardReport[j];
-        const logSummary = ele.logsSummary;
-
-        for (const txId in logSummary) {
-          if (txId === contentTxId) {
-            if (rewardReport.indexOf(ele) == rewardReport.length - 1) {
-              contentViews.twentyFourHrViews = logSummary[contentTxId];
-            }
-
-            const rewardPerAttention = ele.rewardPerAttention;
-            contentViews.totalViews += logSummary[contentTxId];
-            const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
-            contentViews.totalReward += rewardPerLog;
-          }
+      for (const report of rewardReport) {
+        const logSummary = report.logsSummary;
+        if (txId in logSummary) {
+          totalViews += logSummary[txId];
+          totalReward += logSummary[txId] * report.rewardPerAttention;
         }
       }
 
-      outputArr.push({
-        [contentTxId]: {
-          owner: registerRecords[contentTxId],
-          ...contentViews
+      const lastSummary = rewardReport[rewardReport.length - 1].logsSummary;
+      if (txId in lastSummary) twentyFourHrViews = lastSummary[txId];
+
+      return {
+        [txId]: {
+          owner: registerRecords[txId],
+          txIdContent: txId,
+          totalViews,
+          totalReward,
+          twentyFourHrViews
         }
-      });
-    }
-    outputArr = outputArr.sort((a, b) => {
-      if (a[Object.keys(a)[0]].totalViews < b[Object.keys(b)[0]].totalViews)
-        return 1;
-      if (a[Object.keys(a)[0]].totalViews > b[Object.keys(b)[0]].totalViews)
-        return -1;
-      return 0;
+      };
     });
+
+    outputArr.sort(
+      (a, b) =>
+        b[Object.keys(b)[0]].totalViews - a[Object.keys(a)[0]].totalViews
+    );
     res.status(200).send(outputArr);
   } catch (e) {
     console.error(e);
@@ -144,10 +150,17 @@ async function getNFTState(req, res) {
   try {
     const tranxId = req.query.tranxId;
     const state = await tools._readContract();
-    const content = await contentView(tranxId, state);
+    let content = await contentView(tranxId, state);
     content.timestamp = moment().unix() * 1000;
-    if (content) tools.redisSetAsync(tranxId, JSON.stringify(content));
-    if (!res.headersSent) res.status(200).send(content);
+    if (content && content.tx) {
+      delete content.tx;
+    }
+    if (content) {
+      tools.redisSetAsync(tranxId, JSON.stringify(content));
+    }
+    if (!res.headersSent) {
+      res.status(200).send(content);
+    }
   } catch (e) {
     console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
@@ -186,7 +199,7 @@ async function handleNFTUpload(req, res) {
       req.body.fileLocation = req.file.location;
       await tools.redisSetAsync(txId, JSON.stringify(req.body));
       await tools.loadRedisClient();
-      await tools.recalculatePredictedState(tools.wallet);
+      tools.recalculatePredictedState(tools.wallet);
       res.json({ url: req.file.location });
     });
   } catch (err) {
@@ -210,7 +223,6 @@ async function filterContent(paramOutputArr, days) {
     let populatedOutputArr = await Promise.all(outputArr);
     populatedOutputArr = populatedOutputArr.map((e, index) => {
       if (!e) {
-        console.log("NOT", e);
         const transaction = paramOutputArr[index];
         return {
           txIdContent: Object.keys(transaction)[0],
@@ -238,7 +250,7 @@ async function filterContent(paramOutputArr, days) {
 
     return paramOutputArr;
   } catch (e) {
-    console.error(e);
+    console.error("Error filtering content:", e);
   }
 }
 
@@ -284,6 +296,7 @@ async function contentView(contentTxId, state) {
 }
 
 module.exports = {
+  getCurrentState,
   getTopContentPredicted,
   getNFTState,
   handleNFTUpload

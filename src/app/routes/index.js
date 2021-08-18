@@ -1,6 +1,7 @@
 const heartbeat = require("../controllers/heartbeat"),
   submitVote = require("../controllers/submit_vote"),
   {
+    getCurrentState,
     getTopContentPredicted,
     getNFTState,
     handleNFTUpload
@@ -11,6 +12,7 @@ const heartbeat = require("../controllers/heartbeat"),
 module.exports = function (app) {
   app.get("/", heartbeat);
   app.get("/nodes", nodes);
+  app.get("/state/current", getCurrentState);
   app.get("/state/top-content-predicted", getTopContentPredicted);
   app.get("/state/nft", cache, getNFTState);
   app.post("/handle-nft-upload", handleNFTUpload);

@@ -25,15 +25,19 @@ class Witness extends Node {
     console.log("Running witness node with address", tools.address);
     await this.stake();
 
+    let state, block;
     for (;;) {
-      const state = await tools.getContractState();
-      const block = await tools.getBlockHeight();
-      console.log(block, "Searching for a task");
+      try {
+        [state, block] = await this.getStateAndBlock();
+      } catch (e) {
+        console.error(e.message);
+        continue;
+      }
 
       if (this.direct && this.canSubmitTrafficLog(state, block))
         await this.submitTrafficLog(state, block);
 
-      if (checkForVote(state, block)) await this.searchVote(state);
+      if (checkForVote(state, block)) await this.tryVote(state);
 
       await this.tryRankDistribute(state, block);
 
@@ -43,10 +47,10 @@ class Witness extends Node {
   }
 
   /**
-   * Searches for vote and votes
+   * Tries to vote
    * @param {*} state Current contract state data
    */
-  async searchVote(state) {
+  async tryVote(state) {
     while (tools.totalVoted < state.votes.length - 1) {
       const id = tools.totalVoted;
       const voteId = id + 1;

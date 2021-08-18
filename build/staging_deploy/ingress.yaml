@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:625593260641:certificate/ae11c727-5c9e-447f-bb91-20303cc9ef67
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01
+    external-dns.alpha.kubernetes.io/hostname: bundler.devkoi.com 
+    kubernetes.io/ingress.class: alb
+  name: staging-koi-node-service-1
+spec:
+  rules:
+  - host: bundler.devkoi.com
+    http:
+      paths:
+      - backend:
+          serviceName: staging-koi-node-service-1
+          servicePort: 8080

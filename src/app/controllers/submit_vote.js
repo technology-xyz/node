@@ -64,15 +64,15 @@ async function appendToBatch(submission) {
   } catch {
     // If file doesn't exist
     // Check for duplicate otherwise append file
-    const data = await readFile(batchFileName);
-    if (data.includes(submission.senderAddress)) return "duplicate";
-    await appendFile(batchFileName, "\r\n" + JSON.stringify(submission));
+    await writeFile(batchFileName, JSON.stringify(submission));
     return generateReceipt(submission);
   }
 
   // If file does exist
   // Write to file and generate receipt if no error
-  await writeFile(batchFileName, JSON.stringify(submission));
+  const data = await readFile(batchFileName);
+  if (data.includes(submission.senderAddress)) return "duplicate";
+  await appendFile(batchFileName, "\r\n" + JSON.stringify(submission));
   return generateReceipt(submission);
 }
 

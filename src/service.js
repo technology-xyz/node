@@ -19,7 +19,8 @@ class Service extends Node {
     // Initialize redis client and webserver
     tools.loadRedisClient();
     this.startWebserver();
-    this.nextPeriod = 0;
+    this.next5mPeriod = 0;
+    this.next3hPeriod = 0;
   }
 
   startWebserver() {
@@ -43,19 +44,23 @@ class Service extends Node {
       console.log("Open http://localhost:" + port, "to view in browser");
     });
   }
-  
+
   /**
    * Main run loop
    */
   async run() {
     await this.stake();
 
+    let state, block;
     for (;;) {
       this.runPeriodic(); // Remove await to run in parallel
 
-      const state = await tools.getContractState();
-      const block = await tools.getBlockHeight();
-      console.log(block, "Searching for a task");
+      try {
+        [state, block] = await this.getStateAndBlock();
+      } catch (e) {
+        console.error(e.message);
+        continue;
+      }
 
       if (this.canSubmitTrafficLog(state, block)) await this.submitTrafficLog();
 
@@ -73,24 +78,39 @@ class Service extends Node {
    */
   async runPeriodic() {
     const currTime = Date.now();
-    if (this.nextPeriod > currTime) return;
-    this.nextPeriod = currTime + 300000;
 
-    console.log("Running periodic tasks");
+    if (this.next3hPeriod < currTime) {
+      this.next3hPeriod = currTime + 10800000;
+      console.log("Running 3h periodic tasks");
 
-    // Propagate service nodes
-    try {
-      await this.propagateRegistry();
-    } catch (e) {
-      console.error("Error while propagating", e);
+      // Invalidate predicted state
+      try {
+        tools.redisClient.del("ContractPredictedState");
+        tools.redisClient.del("pendingStateArray");
+        console.log("Cache Invalidated");
+      } catch (e) {
+        console.error("Error invalidating predicted state");
+      }
     }
 
-    // Redis update predicted state cache
-    try {
-      console.log("Recalculating predicted state");
-      await tools.recalculatePredictedState(tools.wallet);
-    } catch (e) {
-      console.error("Error while recalculating predicted state", e);
+    if (this.next5mPeriod < currTime) {
+      this.next5mPeriod = currTime + 300000;
+      console.log("Running 5m periodic tasks");
+
+      // Propagate service nodes
+      try {
+        await this.propagateRegistry();
+      } catch (e) {
+        console.error("Error while propagating", e);
+      }
+
+      // Redis update predicted state cache
+      try {
+        console.log("Recalculating predicted state");
+        await tools.recalculatePredictedState(tools.wallet);
+      } catch (e) {
+        console.error("Error while recalculating predicted state", e);
+      }
     }
   }
 
@@ -150,8 +170,18 @@ class Service extends Node {
       const bundlers = state.votes[voteId].bundlers;
       const bundlerAddress = await tools.getWalletAddress();
       if (!(bundlerAddress in bundlers)) {
-        const txId = (await batchUpdateContractState(voteId)).id;
-        await this.checkTxConfirmation(txId, task);
+        let txId;
+        try {
+          txId = (await batchUpdateContractState(voteId)).id;
+        } catch (e) {
+          console.error("Unable to submit batch, skipping:", e);
+          activeVotes.pop();
+          continue;
+        }
+        if (!(await this.checkTxConfirmation(txId, task))) {
+          console.log("Vote submission failed");
+          return;
+        }
         const arg = {
           batchFile: txId,
           voteId: voteId,
@@ -159,7 +189,10 @@ class Service extends Node {
         };
         const resultTx = await tools.batchAction(arg);
         task = "batch";
-        await this.checkTxConfirmation(resultTx, task);
+        if (!(await this.checkTxConfirmation(resultTx, task))) {
+          console.log("Batch failed");
+          return;
+        }
         activeVotes.pop();
       }
       activeVotes.pop();
