@@ -1,0 +1,8 @@
+fullnameOverride: staging-koi-node-service-1
+nameOverride: staging
+env:
+    nodeMode: service
+    redisIp: redis
+    redisPort: 6379
+    trustedServiceURL: none
+    stake: 10
