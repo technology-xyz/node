@@ -1,5 +1,5 @@
 ---
 creation_rules:
-  - path_regex: values.*.yaml$
+  - path_regex: secrets.yaml
     kms: arn:aws:kms:us-east-1:625593260641:key/0226b9dd-407e-4e83-bc79-a2c4a81981c0
     encrypted_suffix: secrets
