@@ -6,3 +6,4 @@ env:
     redisPort: 6379
     trustedServiceURL: none
     stake: 10
+    tasks: lXzU83c66aCP5d69HzwOuqHAbmTY6qLQyd9LEAfHOdI

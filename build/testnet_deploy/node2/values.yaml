@@ -7,3 +7,4 @@ env:
     trustedServiceURL: http://dev-koi-node-service-1:8080
     serviceURL: http://dev-koi-node-service-2:8080
     stake: 10
+    tasks: lXzU83c66aCP5d69HzwOuqHAbmTY6qLQyd9LEAfHOdI
