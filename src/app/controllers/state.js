@@ -56,7 +56,7 @@ const singleUpload = upload.single("file");
  */
 async function getCurrentState(req, res) {
   try {
-    let currentState = await tools._readContract();
+    let currentState = await tools.getContractState();
     if (!currentState) throw new Error("State not available");
 
     res.status(200).send(currentState);
@@ -73,7 +73,7 @@ async function getCurrentState(req, res) {
  */
 async function getTopContentPredicted(req, res) {
   try {
-    const state = await tools._readContract();
+    const state = await tools.getContractState();
     const registerRecords = state.registeredRecord;
     let txIds = Object.keys(registerRecords).filter(
       (txId) => !CORRUPTED_NFT.includes(txId)
@@ -149,7 +149,7 @@ async function getTopContentPredicted(req, res) {
 async function getNFTState(req, res) {
   try {
     const tranxId = req.query.tranxId;
-    const state = await tools._readContract();
+    const state = await tools.getContractState();
     let content = await contentView(tranxId, state);
     content.timestamp = moment().unix() * 1000;
     if (content && content.tx) {
@@ -180,26 +180,10 @@ async function handleNFTUpload(req, res) {
         return res.json(err);
       }
       req.body = JSON.parse(req.body.data);
-      let pendingStateArray = await tools.redisGetAsync("pendingStateArray");
-      if (!pendingStateArray) pendingStateArray = [];
-      else pendingStateArray = JSON.parse(pendingStateArray);
-      pendingStateArray.push({
-        status: "pending",
-        txId: req.body.registerDataParams.id,
-        signedTx: req.body.tx,
-        owner: req.body.registerDataParams.ownerAddress
-        // dryRunState:response.state,
-      });
-      await tools.redisSetAsync(
-        "pendingStateArray",
-        JSON.stringify(pendingStateArray)
-      );
       const txId = req.body.registerDataParams.id;
       delete req.body.registerDataParams;
       req.body.fileLocation = req.file.location;
       await tools.redisSetAsync(txId, JSON.stringify(req.body));
-      await tools.loadRedisClient();
-      tools.recalculatePredictedState(tools.wallet);
       res.json({ url: req.file.location });
     });
   } catch (err) {

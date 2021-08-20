@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 require("dotenv").config();
+const fsPromises = require("fs/promises");
 const prompts = require("prompts");
-const chalk = require("chalk");
+const axios = require("axios");
+const kohaku = require("kohaku");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -12,7 +14,8 @@ const PARSE_ARGS = [
   "STAKE",
   "SERVICE_URL",
   "TRUSTED_SERVICE_URL",
-  "SERVER_PORT"
+  "SERVER_PORT",
+  "TASKS"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
@@ -20,9 +23,10 @@ const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
-const { tools } = require("./src/helpers");
-const Service = require("./src/service");
-const Witness = require("./src/witness");
+const { tools, arweave, Namespace } = require("./src/helpers");
+const { verifyStake, setupWebServer, runPeriodic } = require("./src/service");
+
+const GATEWAY_URL = "https://arweave.net/";
 
 /**
  * Main entry point
@@ -40,107 +44,114 @@ async function main() {
           })
         ).walletPath;
 
-  await tools.nodeLoadWallet(walletPath);
+  await tools.loadWallet(
+    JSON.parse(await fsPromises.readFile(walletPath, "utf8"))
+  );
   console.log("Loaded wallet with address", await tools.getWalletAddress());
 
   // Get operation mode
   const operationMode =
-    process.env.NODE_MODE !== undefined
-      ? eval(process.env.NODE_MODE)
-      : (
-          await prompts({
-            type: "select",
-            name: "mode",
-            message: "Select operation mode",
+    process.env.NODE_MODE ||
+    (
+      await prompts({
+        type: "select",
+        name: "mode",
+        message: "Select operation mode",
 
-            choices: [
-              { title: "Service", value: service },
-              { title: "Witness Direct", value: witnessDirect },
-              { title: "Witness Indirect", value: witness }
-            ]
-          })
-        ).mode;
+        choices: [
+          { title: "Service", value: "service" },
+          { title: "Witness", value: "witness" } // Indirect
+        ]
+      })
+    ).mode;
 
-  // Run the node
-  console.log("Operation mode:", operationMode.name);
-  process.env["NODE_MODE"] = operationMode.name;
-  await operationMode();
-}
-
-/**
- * Setup witness direct node
- */
-async function service() {
-  await verifyStake(Service);
-}
-
-/**
- * Setup witness direct node
- */
-async function witnessDirect() {
-  await verifyStake(Witness);
-}
-
-/**
- * Setup witness direct node
- */
-async function witness() {
-  const node = new Witness();
-  await node.run();
-}
-
-/**
- * Verify the address has staked
- * @param {*} nodeClass
- */
-async function verifyStake(nodeClass) {
-  const balance = await tools.getWalletBalance();
-  const koiBalance = await tools.getKoiBalance();
-  const contractState = await tools.getContractState();
-  console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
-
-  if (balance === "0") {
-    console.error(
-      chalk.green(
-        "Your wallet doesn't have any Ar, you can't interact directly, " +
-          "but you can claim free Ar here: " +
-          chalk.blue.underline.bold("https://faucet.arweave.net/")
-      )
-    );
+  // Prepare service mode
+  const state = await kohaku.readContract(arweave, tools.contractId);
+  if (operationMode === "service" && !(await verifyStake(state))) {
+    console.error("Could not verify stake");
     return;
   }
 
-  let stakeAmount = 0;
-  if (!(tools.address in contractState.stakes)) {
-    if (koiBalance === 0) {
-      console.error(
-        chalk.green(
-          "Your wallet doesn’t have koi balance, claim some free Koi here: " +
-            chalk.blue.underline.bold("https://koi.rocks/faucet")
-        )
-      );
-      return;
-    }
-
-    // Get and set stake amount
-    stakeAmount =
-      process.env.STAKE !== undefined
-        ? parseInt(process.env.STAKE)
-        : (
-            await prompts({
-              type: "number",
-              name: "stakeAmount",
-              message: "Please stake to Vote"
-            })
-          ).stakeAmount;
-    if (stakeAmount < 1) {
-      console.error("Stake amount too low. Aborting.");
-      return;
-    }
+  // Get selected tasks
+  console.log("Finding tasks");
+  const taskStateProms = state.tasks.map((task) =>
+    kohaku.readContract(arweave, task.txId)
+  );
+  const taskStates = await Promise.all(taskStateProms);
+  const availableTasks = taskStates.map((taskState, i) => ({
+    title: `${taskState.name} - ${state.tasks[i].txId}`,
+    value: [state.tasks[i].txId, taskState]
+  }));
+  let selectedTasks;
+  if (process.env.TASKS) {
+    const taskIds = process.env.TASKS.split(",");
+    selectedTasks = availableTasks
+      .filter((task) => taskIds.includes(task.value[0]))
+      .map((task) => task.value);
+  } else {
+    selectedTasks = (
+      await prompts({
+        type: "multiselect",
+        name: "selected",
+        message: "Select tasks",
+        choices: availableTasks,
+        hint: "- Space to select. Enter to submit",
+        instructions: false
+      })
+    ).selected;
   }
 
-  const node = new nodeClass(stakeAmount, true);
-  await node.run();
+  if (selectedTasks.length === 0) console.log("No task selected");
+
+  // Initialize service
+  let expressApp;
+  if (operationMode === "service") {
+    tools.loadRedisClient();
+    expressApp = setupWebServer();
+    runPeriodic(); // Don't await to run in parallel
+  }
+
+  // Load tasks
+  const taskSrcProms = selectedTasks.map((task) =>
+    axios.get(GATEWAY_URL + task[1].executableId)
+  );
+  const taskSrcs = (await Promise.all(taskSrcProms)).map((res) => res.data);
+  const executableTasks = taskSrcs.map((src, i) =>
+    loadTaskSource(src, new Namespace(selectedTasks[i][0], expressApp))
+  );
+
+  // Initialize tasks then start express app
+  await Promise.all(
+    executableTasks.map((task, i) => task.setup(selectedTasks[i][1]))
+  );
+  const port = process.env.SERVER_PORT || 8887;
+  if (operationMode === "service") {
+    expressApp.listen(port, () => {
+      console.log(`Open http://localhost:${port} to view in browser`);
+    });
+  }
+
+  // Execute tasks
+  await Promise.all(
+    executableTasks.map((task, i) => {
+      console.log("Running task", selectedTasks[i][0]);
+      task.execute(selectedTasks[i][1]);
+    })
+  );
+}
+
+/**
+ * @param {string} taskSrc // Source of contract
+ * @param {Namespace} namespace // Wrapper object for redis, express, and filesystem
+ * @returns // Executable task
+ */
+function loadTaskSource(taskSrc, namespace) {
+  const loadedTask = new Function(`
+      const [tools, namespace, require] = arguments;
+      ${taskSrc};
+      return {setup, execute};
+  `);
+  return loadedTask(tools, namespace, require);
 }
 
 main();
