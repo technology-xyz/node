@@ -108,6 +108,10 @@ async function main() {
   if (operationMode === "service") {
     tools.loadRedisClient();
     expressApp = setupWebServer();
+    const taskNames = JSON.stringify(selectedTasks.map((task) => task[0]));
+    expressApp.get("/tasks", (_req, res) => {
+      res.send(taskNames);
+    });
     runPeriodic(); // Don't await to run in parallel
   }
 
