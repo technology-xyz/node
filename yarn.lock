@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.9":
-  version "2.2.0-beta.9"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.9.tgz#de554e3cda3f33a1dcd93bb39c03c0b6a2b2d2bd"
-  integrity sha512-0Htl6AWQakETQ5JrCqZXiFuYVMJdwkd8gyZ6oCcuaiAJ+t96ygVGtRn5swTDjKNJ4LmQ5600WzZvgiEQiARcHw==
+"@_koi/sdk@^2.2.0-beta.10":
+  version "2.2.0-beta.10"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.10.tgz#8343458726ccca43887c12689067d6e498faccaf"
+  integrity sha512-zPJb92jNWdtkS35lMgSrIpuCww66INkE/mtasDWH5ylGsZg2gabqo0ezajc/U05qQZ882ahRRWxCanKz3lJH7w==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
@@ -2577,7 +2577,7 @@ kleur@^3.0.3:
 
 kohaku@koii-network/kohaku:
   version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/aac1568f621ce4a987ffe7e0fa3a9f9370f18a35"
+  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/277920245eadd719e6c238f8340a45f2151129b9"
   dependencies:
     smartweave "^0.4.41"
 

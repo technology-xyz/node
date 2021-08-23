@@ -28,6 +28,9 @@ const { verifyStake, setupWebServer, runPeriodic } = require("./src/service");
 
 const GATEWAY_URL = "https://arweave.net/";
 
+// TODO FIXME temporary until deployment script can handle TASKS envvar
+process.env["TASKS"] = "I4mdUAnRLkOV3s4WTKRAh49VdKbDBxxk5VPhTMenmOY";
+
 /**
  * Main entry point
  */
@@ -101,8 +104,6 @@ async function main() {
     ).selected;
   }
 
-  if (selectedTasks.length === 0) console.log("No task selected");
-
   // Initialize service
   let expressApp;
   if (operationMode === "service") {
@@ -110,6 +111,7 @@ async function main() {
     expressApp = setupWebServer();
     const taskNames = JSON.stringify(selectedTasks.map((task) => task[0]));
     expressApp.get("/tasks", (_req, res) => {
+      res.type("application/json");
       res.send(taskNames);
     });
     runPeriodic(); // Don't await to run in parallel
