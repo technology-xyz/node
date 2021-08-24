@@ -40,9 +40,6 @@ async function main() {
           })
         ).walletPath;
 
-  await tools.nodeLoadWallet(walletPath);
-  console.log("Loaded wallet with address", await tools.getWalletAddress());
-
   // Get operation mode
   const operationMode =
     process.env.NODE_MODE !== undefined
@@ -64,27 +61,36 @@ async function main() {
   // Run the node
   console.log("Operation mode:", operationMode.name);
   process.env["NODE_MODE"] = operationMode.name;
-  await operationMode();
+
+  await operationMode(walletPath);
 }
 
 /**
  * Setup witness direct node
  */
-async function service() {
+async function service(walletPath) {
+  const jwk = await tools.loadFile(walletPath);
+  await tools.loadWallet(jwk);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
+  await tools.getContractStateAwait(); // Fully initialize Kohaku
   await verifyStake(Service);
 }
 
 /**
  * Setup witness direct node
  */
-async function witnessDirect() {
+async function witnessDirect(walletPath) {
+  await tools.nodeLoadWallet(walletPath);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
   await verifyStake(Witness);
 }
 
 /**
  * Setup witness indirect node
  */
-async function witness() {
+async function witness(walletPath) {
+  await tools.nodeLoadWallet(walletPath);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
   const node = new Witness();
   await node.run();
 }
