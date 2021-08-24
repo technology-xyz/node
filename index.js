@@ -69,7 +69,7 @@ async function main() {
     ).mode;
 
   // Prepare service mode
-  const state = await kohaku.readContract(arweave, tools.contractId);
+  const state = await tools.getContractStateAwait(); // Fully initialize Kohaku
   if (operationMode === "service" && !(await verifyStake(state))) {
     console.error("Could not verify stake");
     return;
