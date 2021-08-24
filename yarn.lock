@@ -3,9 +3,9 @@
 
 
 "@_koi/sdk@^2.2.0-beta.11":
-  version "2.2.0-beta.11"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.11.tgz#9a197790feb1791c34c6276797ebd5de84f0ca1d"
-  integrity sha512-17eNm5MUFoO4WYN/x8CbZklMht12HHzEjxT8BtfURn4XhVvnKz1XXw9FqNVxUJ5HmeaNZ2X4PFaIfr+HGgeKyw==
+  version "2.2.0-beta.12"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.12.tgz#fe1ab378fc9490a40f512fd1be73c20adc657f84"
+  integrity sha512-RypvsDaN3cE5JPw5NbSbpXQU2yUzaqWiykH31BWhHgZEl3QO/+VygWyz35nGUDfC/OuK0If2RwEQ76zK15S4mA==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
@@ -704,10 +704,10 @@ ajv@^8.0.1:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-ans104@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.1.tgz#d70c4f43ad5a235732ea214aef334f2cf9e0b0de"
-  integrity sha512-0bzOw5Hqg8G23MITRduXIOzQL9UBxnm4nI/QSNJDWjRs2U8hr/BlE8OPERHbskPZstJLVPG1VZwCI1cbmZrOEA==
+ans104@^0.5.4:
+  version "0.5.5"
+  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.5.tgz#17284b0991e6469097d6783873d1738776680b83"
+  integrity sha512-weeA0SvlDWyJ/VQo5gnDfZxNB4yCdoY56nIFNM97TaN9LSK+c7vTcVanjuzy5KZ9S9gk9QD7g4KwGlVZjGEZGQ==
   dependencies:
     "@akiroz/size-chunker-stream" "^0.0.1"
     "@types/browser-or-node" "^1.3.0"
@@ -958,12 +958,12 @@ argparse@^1.0.7:
     sprintf-js "~1.0.2"
 
 arlocal@^1.0.29:
-  version "1.0.29"
-  resolved "https://registry.npmjs.org/arlocal/-/arlocal-1.0.29.tgz#bd957623fffd1b514a81cce3d56e50f91076035d"
-  integrity sha512-K7bSKWT/KxX6nv3XzWhNYufQUk+0gVIZ39CdmXMuStOh38TF9GIcHOUJ5ECaISJ5S1w0MOM/qQNycucfSybxEg==
+  version "1.0.32"
+  resolved "https://registry.npmjs.org/arlocal/-/arlocal-1.0.32.tgz#40541f576c9d033012d21ca72d203b9ceea8f432"
+  integrity sha512-7P1msme780XsNtFPi+P5BJX86fCzGInshZFnfCKmi3Yp8A3iQiJbHmShUaIo3ZqGdd/snvSaH1gP/HMR6edjww==
   dependencies:
     "@koa/cors" "^3.1.0"
-    ans104 "^0.5.1"
+    ans104 "^0.5.4"
     apollo-server-koa "^2.25.1"
     arweave-bundles "^1.0.3"
     graphql "^15.5.0"
@@ -3656,7 +3656,7 @@ koa@2.13.1, koa@^2.13.1:
 
 kohaku@koii-network/kohaku:
   version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/eeec41a35fd59470d94864f17398e546ccd5474c"
+  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/2aa16340594408a0f64ac5820d219c0ec5352fb2"
   dependencies:
     smartweave "^0.4.41"
 
