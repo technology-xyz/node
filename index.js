@@ -29,7 +29,7 @@ const { verifyStake, setupWebServer, runPeriodic } = require("./src/service");
 const GATEWAY_URL = "https://arweave.net/";
 
 // TODO FIXME temporary until deployment script can handle TASKS envvar
-process.env["TASKS"] = "I4mdUAnRLkOV3s4WTKRAh49VdKbDBxxk5VPhTMenmOY";
+process.env["TASKS"] = "wXotIq_fSPvYWR12h6IS-kfD18Y5jkr4UPPp15e0wo0";
 
 /**
  * Main entry point

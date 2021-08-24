@@ -7,7 +7,7 @@ const MS_TO_MIN = 60000;
 const TIMEOUT_TX = 30 * MS_TO_MIN;
 
 const ARWEAVE_RATE_LIMIT = 30000; // Reduce arweave load
-const KOII_CONTRACT = "54hi0oYJ2kNwezFmaGqXDbS3gb6ohdoZYL354ShyeNs";
+const KOII_CONTRACT = "LppT1p3wri4FCKzW5buohsjWxpJHC58_rgIO-rYTMB8";
 
 // Tools singleton
 const koiSdk = require("@_koi/sdk/node");
