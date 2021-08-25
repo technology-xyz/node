@@ -24,6 +24,15 @@ const CORRUPTED_NFT = [
   "ZTZDEPuAfh2Nsv9Ad46zJ4k6coHbZcmi7BcJgt126wU"
 ];
 
+const TOP_CONTENT_COOLDOWN = 60000;
+const topContentCache = {
+  0: { next: 0, cache: "[]" },
+  1: { next: 0, cache: "[]" },
+  7: { next: 0, cache: "[]" },
+  30: { next: 0, cache: "[]" },
+  365: { next: 0, cache: "[]" }
+};
+
 // Setup s3 bucket
 aws.config = new aws.Config();
 aws.config.accessKeyId = process.env.S3_ACCESS_KEY_ID;
@@ -93,6 +102,14 @@ async function getTopContentPredicted(req, res) {
         offset = 365;
     }
 
+    const now = Date.now();
+    res
+      .status(200)
+      .type("application/json")
+      .send(topContentCache[offset].cache);
+    if (now < topContentCache[offset].next) return;
+    topContentCache[offset].next = now + TOP_CONTENT_COOLDOWN;
+
     // filtering txIdArr based on offset
     if (offset != 0) txIds = await filterContent(txIds, offset);
     let rewardReport;
@@ -133,7 +150,7 @@ async function getTopContentPredicted(req, res) {
       (a, b) =>
         b[Object.keys(b)[0]].totalViews - a[Object.keys(a)[0]].totalViews
     );
-    res.status(200).send(outputArr);
+    topContentCache[offset].cache = JSON.stringify(outputArr);
   } catch (e) {
     console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
