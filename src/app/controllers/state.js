@@ -215,11 +215,11 @@ async function filterContent(nftIdArr, days) {
     }
   );
 
-  let i;
   const limitTimestamp = moment().subtract(days, "day").unix();
-  for (i = nftStates.length - 1; i >= 0; --i)
-    if (nftStates[i].createdAt < limitTimestamp) break;
-  return nftIdArr.slice(i + 1, nftIdArr.length);
+  for (let i = nftStates.length - 1; i > 0; --i)
+    if (nftStates[i].createdAt < limitTimestamp)
+      return nftIdArr.slice(i, nftIdArr.length);
+  return nftIdArr;
 }
 
 /**
