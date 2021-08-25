@@ -78,9 +78,8 @@ async function getTopContentPredicted(req, res) {
     let txIds = Object.keys(registerRecords).filter(
       (txId) => !CORRUPTED_NFT.includes(txId)
     );
-    const frequency = req.query.frequency;
     let offset = 0;
-    switch (frequency) {
+    switch (req.query.frequency) {
       case "24h":
         offset = 1;
         break;
@@ -194,48 +193,33 @@ async function handleNFTUpload(req, res) {
 
 /**
  *
- * @param {*} paramOutputArr
+ * @param {*} nftIdArr
  * @param {*} days
  * @returns
  */
-async function filterContent(paramOutputArr, days) {
-  console.log(days, "RECEIVED TOTAL", paramOutputArr.length);
-  try {
-    const outputArr = paramOutputArr.map((e) => {
-      return tools.redisGetAsync(e);
-    });
-    let populatedOutputArr = await Promise.all(outputArr);
-    populatedOutputArr = populatedOutputArr.map((e, index) => {
-      if (!e) {
-        const transaction = paramOutputArr[index];
+async function filterContent(nftIdArr, days) {
+  const nftStateProms = nftIdArr.map((nftId) => tools.redisGetAsync(nftId));
+  const now = moment().unix();
+  const nftStates = (await Promise.all(nftStateProms)).map(
+    (nftStateStr, index) => {
+      if (!nftStateStr)
         return {
-          txIdContent: Object.keys(transaction)[0],
-          createdAt: moment().unix()
+          txIdContent: nftIdArr[index],
+          createdAt: now
         };
-      }
-      const z = JSON.parse(e);
-      z.createdAt = e
-        ? moment(parseInt(z.createdAt) * 1000).unix()
-        : moment().unix();
-      return z;
-    });
-    let index = 0;
-    for (let i = populatedOutputArr.length - 1; i >= 0; i--) {
-      if (!populatedOutputArr[i] || !populatedOutputArr[i].createdAt) continue;
-      if (
-        populatedOutputArr[i].createdAt < moment().subtract(days, "day").unix()
-      ) {
-        index = i;
-        break;
-      }
+      const nftState = JSON.parse(nftStateStr);
+      nftState.createdAt = nftState.createdAt
+        ? parseInt(nftState.createdAt)
+        : now;
+      return nftState;
     }
-    paramOutputArr = paramOutputArr.slice(index, paramOutputArr.length);
-    console.log("RETURNED TOTAL", paramOutputArr.length);
+  );
 
-    return paramOutputArr;
-  } catch (e) {
-    console.error("Error filtering content:", e);
-  }
+  let i;
+  const limitTimestamp = moment().subtract(days, "day").unix();
+  for (i = nftStates.length - 1; i >= 0; --i)
+    if (nftStates[i].createdAt < limitTimestamp) break;
+  return nftIdArr.slice(i + 1, nftIdArr.length);
 }
 
 /**
