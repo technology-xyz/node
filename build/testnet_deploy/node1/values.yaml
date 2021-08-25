@@ -1,5 +1,7 @@
 fullnameOverride: dev-koi-node-service-1
 nameOverride: dev
+service:
+    type: NodePort
 env:
     nodeMode: service
     redisIp: redis
