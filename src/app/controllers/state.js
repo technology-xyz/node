@@ -6,6 +6,7 @@ const moment = require("moment");
 const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
+const fetch=require("node-fetch")
 
 const CORRUPTED_NFT = [
   "Y4txuRg9l1NXRSDZ7FDtZQiTl7Zv7RQ9impMzoReGDU",
@@ -190,18 +191,11 @@ async function getNFTState(req, res) {
  */
  async function getTotalKOIIEarned(req, res) {
   try {
-    const state = await tools.getContractState();
-    if(state.stateUpdate && state.stateUpdate.trafficLogs && state.stateUpdate.trafficLogs.rewardReport){
-      let totalKOIIEarned=0
-      for(let rewardReport of state.stateUpdate.trafficLogs.rewardReport){
-        if(rewardReport.rewardPerAttention){
-          totalKOIIEarned+=1000
-        }
-      }
-      return res.status(200).send({totalKOIIEarned})
-    }else{
-      res.status(500).send("Error occurred while fetching state")
-    }
+    let totalKOIIEarned=0
+    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
+    data=await data.json()
+    for(const nftState of data) totalKOIIEarned+=Object.values(nftState)[0].totalReward
+    return res.status(200).send({totalKOIIEarned})
   } catch (e) {
     console.error("Error",e)
     res.status(500).send("Error occurred while fetching totalKOIIEarned")
@@ -215,18 +209,11 @@ async function getNFTState(req, res) {
  */
  async function getTotalNFTViews(req, res) {
   try {
-    const state = await tools.getContractState();
-    if(state.stateUpdate && state.stateUpdate.trafficLogs && state.stateUpdate.trafficLogs.rewardReport){
-      let totalNFTViews=0
-      for(rewardReport of state.stateUpdate.trafficLogs.rewardReport){
-        if(rewardReport.rewardPerAttention){
-          totalNFTViews+=parseInt((1000/rewardReport.rewardPerAttention))
-        }
-      }  
-      return res.status(200).send({totalNFTViews})
-    }else{
-      res.status(500).send("Error occurred while fetching state")
-    }
+    let totalNFTViews=0
+    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
+    data=await data.json()
+    for(const nftState of data) totalNFTViews+=Object.values(nftState)[0].totalViews
+    return res.status(200).send({totalNFTViews})
   } catch (e) {
     console.error("Error",e)
     res.status(500).send("Error occurred while fetching totalNFTViews")
