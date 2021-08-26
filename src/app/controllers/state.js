@@ -82,11 +82,6 @@ async function getCurrentState(req, res) {
  */
 async function getTopContentPredicted(req, res) {
   try {
-    const state = await tools.getContractState();
-    const registerRecords = state.registeredRecord;
-    let txIds = Object.keys(registerRecords).filter(
-      (txId) => !CORRUPTED_NFT.includes(txId)
-    );
     let offset = 0;
     switch (req.query.frequency) {
       case "24h":
@@ -111,6 +106,11 @@ async function getTopContentPredicted(req, res) {
     topContentCache[offset].next = now + TOP_CONTENT_COOLDOWN;
 
     // filtering txIdArr based on offset
+    const state = await tools.getContractState();
+    const registerRecords = state.registeredRecord;
+    let txIds = Object.keys(registerRecords).filter(
+      (txId) => !CORRUPTED_NFT.includes(txId)
+    );
     if (offset != 0) txIds = await filterContent(txIds, offset);
     let rewardReport;
     try {
