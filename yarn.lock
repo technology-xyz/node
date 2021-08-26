@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.13":
-  version "2.2.0-beta.13"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.13.tgz#367c26212faba05e6737d3f716e8683bebd4620f"
-  integrity sha512-W05ebpPafl8xmLdnkfwCoGBBNF2mIvvZhh8C44Yq/4tqHrVwfxAZWju987RCpix1Gl3JeBRNtEBoyZqEuNT/0w==
+"@_koi/sdk@^2.2.0-beta.14":
+  version "2.2.0-beta.14"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.14.tgz#3dd6e3a73acb4a711bcb5e8f6265039ca065fc3a"
+  integrity sha512-JkND2uIJQXdUMx4GyzF8rGYBKyndUFNM+4+11kskxS+hcg6Dp29LlIGfuCcMg0lReaH6hDF5+X+5UtlhEwWK3g==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
@@ -705,9 +705,9 @@ ajv@^8.0.1:
     uri-js "^4.2.2"
 
 ans104@^0.5.4:
-  version "0.5.5"
-  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.5.tgz#17284b0991e6469097d6783873d1738776680b83"
-  integrity sha512-weeA0SvlDWyJ/VQo5gnDfZxNB4yCdoY56nIFNM97TaN9LSK+c7vTcVanjuzy5KZ9S9gk9QD7g4KwGlVZjGEZGQ==
+  version "0.5.6"
+  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.6.tgz#ef5ca9ca6d57552153b32c3b3a139524c1922f06"
+  integrity sha512-tQtHDz43xrJwLNvhd6Zt4xKO7Z/hVNcrj0QuQ3o7+AQH8LO8N/Y5IYV401W+M8eP+av9lLzZ6ASf7MG0eegFQw==
   dependencies:
     "@akiroz/size-chunker-stream" "^0.0.1"
     "@types/browser-or-node" "^1.3.0"
@@ -1092,9 +1092,9 @@ avsc@^5.7.1:
   integrity sha512-uUbetCWczQHbsKyX1C99XpQHBM8SWfovvaZhPIj23/1uV7SQf0WeRZbiLpw0JZm+LHTChfNgrLfDJOVoU2kU+A==
 
 aws-sdk@^2.925.0:
-  version "2.974.0"
-  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.974.0.tgz#4380e4746b2a799e3833a0ab021f3292b045ac63"
-  integrity sha512-/oNslIqWT8f9MKgl4jMS+B/M0pIPjWYsXC+DeiFKSH6xMAaVDURr+Qtze5FqEz13mMroO5PDQKfHaC/Z/yoZ3w==
+  version "2.976.0"
+  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.976.0.tgz#1e9d0d359698876eaa952c7c6223eac4c354ae2e"
+  integrity sha512-LWVh3nko6yGDfGcDW9nIClaukthkTueq7I/dXVNv4g9kuy2VOl5fVTPMACgTibWINAM29wZCM+gVQSSZu/Veow==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1716,9 +1716,9 @@ copy-to@^2.0.1:
   integrity sha1-JoD7uAaKSNCGVrYJgJK9r8kG9KU=
 
 core-js-pure@^3.10.2:
-  version "3.16.2"
-  resolved "https://registry.npmjs.org/core-js-pure/-/core-js-pure-3.16.2.tgz#0ef4b79cabafb251ea86eb7d139b42bd98c533e8"
-  integrity sha512-oxKe64UH049mJqrKkynWp6Vu0Rlm/BTXO/bJZuN2mmR3RtOFNepLlSWDd1eo16PzHpQAoNG97rLU1V/YxesJjw==
+  version "3.16.3"
+  resolved "https://registry.npmjs.org/core-js-pure/-/core-js-pure-3.16.3.tgz#41ccb9b6027535f8dd51a0af004c1c7f0a8c9ca7"
+  integrity sha512-6In+2RwN0FT5yK0ZnhDP5rco/NnuuFZhHauQizZiHo5lDnqAvq8Phxcpy3f+prJOqtKodt/cftBl/GTOW0kiqQ==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -2987,12 +2987,12 @@ html-comment-regex@^1.1.0:
   integrity sha512-P+M65QY2JQ5Y0G9KKdlDpo0zK+/OHptU5AaBwUfAIDJZk1MYf32Frm84EcOytfJE0t5JvkAnKlmjsXDnWzCJmQ==
 
 http-assert@^1.3.0:
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/http-assert/-/http-assert-1.4.1.tgz#c5f725d677aa7e873ef736199b89686cceb37878"
-  integrity sha512-rdw7q6GTlibqVVbXr0CKelfV5iY8G2HqEUkhSk297BMbSpSL8crXC+9rjKoMcZZEsksX30le6f/4ul4E28gegw==
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/http-assert/-/http-assert-1.5.0.tgz#c389ccd87ac16ed2dfa6246fd73b926aa00e6b8f"
+  integrity sha512-uPpH7OKX4H25hBmU6G1jWNaqJGpTXxey+YOUizJUAgu0AjLUeC8D73hTrhvDS5D+GJN1DN1+hhc/eF/wpxtp0w==
   dependencies:
     deep-equal "~1.0.1"
-    http-errors "~1.7.2"
+    http-errors "~1.8.0"
 
 http-cache-semantics@^4.0.0:
   version "4.1.0"
@@ -3021,7 +3021,7 @@ http-errors@1.7.3, http-errors@~1.7.2:
     statuses ">= 1.5.0 < 2"
     toidentifier "1.0.0"
 
-http-errors@^1.6.3, http-errors@^1.7.3:
+http-errors@^1.6.3, http-errors@^1.7.3, http-errors@~1.8.0:
   version "1.8.0"
   resolved "https://registry.npmjs.org/http-errors/-/http-errors-1.8.0.tgz#75d1bbe497e1044f51e4ee9e704a62f28d336507"
   integrity sha512-4I8r0C5JDhT5VkvI47QktDW75rNlGVsUf/8hzjCC/wkWI/jdTRmBb9aI7erSG82r1bjKY3F6k28WnsVxB1C73A==
@@ -3656,7 +3656,7 @@ koa@2.13.1, koa@^2.13.1:
 
 kohaku@koii-network/kohaku:
   version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/2aa16340594408a0f64ac5820d219c0ec5352fb2"
+  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/c0b7908af670ff4f8ea00118c2803096a9827ca3"
   dependencies:
     smartweave "^0.4.41"
 
@@ -4045,9 +4045,9 @@ nedb@^1.8.0:
     underscore "~1.4.4"
 
 needle@^2.2.1:
-  version "2.8.0"
-  resolved "https://registry.npmjs.org/needle/-/needle-2.8.0.tgz#1c8ef9c1a2c29dcc1e83d73809d7bc681c80a048"
-  integrity sha512-ZTq6WYkN/3782H1393me3utVYdq2XyqNUFBsprEE3VMAT0+hP/cItpnITpqsY6ep2yeFE4Tqtqwc74VqUlUYtw==
+  version "2.9.0"
+  resolved "https://registry.npmjs.org/needle/-/needle-2.9.0.tgz#c680e401f99b6c3d8d1f315756052edf3dc3bdff"
+  integrity sha512-UBLC4P8w9to3rAhWOQYXIXzTUio9yVnDzIeKxfGbF+Hngy+2bXTqqFK+6nF42EAQKfJdezXK6vzMsefUa1Y3ag==
   dependencies:
     debug "^3.2.6"
     iconv-lite "^0.4.4"
@@ -5110,9 +5110,9 @@ slice-ansi@^4.0.0:
     is-fullwidth-code-point "^3.0.0"
 
 smartweave@^0.4.41:
-  version "0.4.42"
-  resolved "https://registry.npmjs.org/smartweave/-/smartweave-0.4.42.tgz#8d508e80ffb93a5f88fe7e280032232f8ceb62a3"
-  integrity sha512-y8sEeXq5YEH12cg6iIEkx1H/lQ6Jq59N+B9UVj3UxvBax7n1AYdzbGoOK0LL9MRaY33QUuhbZ+jcSnfOW/sNiA==
+  version "0.4.43"
+  resolved "https://registry.npmjs.org/smartweave/-/smartweave-0.4.43.tgz#0a52dc7dd743dc8300d93e802115b1218f3f9bf6"
+  integrity sha512-jvWwkA3qpdrXngVAE9CeJRxNR0MbsNwvWq+m5U9GrtPY6IFOf9VUIC0mnWJ6SM+rcmXCDBCVFguNqWYfbL9DnA==
   dependencies:
     "@types/clui" "^0.3.0"
     "@types/inquirer" "^7.3.1"
