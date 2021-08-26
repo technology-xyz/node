@@ -188,6 +188,55 @@ async function getNFTState(req, res) {
  * @param {*} req
  * @param {*} res
  */
+ async function getTotalKOIIEarned(req, res) {
+  try {
+    const state = await tools.getContractState();
+    if(state.stateUpdate && state.stateUpdate.trafficLogs && state.stateUpdate.trafficLogs.rewardReport){
+      let totalKOIIEarned=0
+      for(let rewardReport of state.stateUpdate.trafficLogs.rewardReport){
+        if(rewardReport.rewardPerAttention){
+          totalKOIIEarned+=1000
+        }
+      }
+      return res.status(200).send({totalKOIIEarned})
+    }else{
+      res.status(500).send("Error occurred while fetching state")
+    }
+  } catch (e) {
+    console.error("Error",e)
+    res.status(500).send("Error occurred while fetching totalKOIIEarned")
+  }
+}
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+ async function getTotalNFTViews(req, res) {
+  try {
+    const state = await tools.getContractState();
+    if(state.stateUpdate && state.stateUpdate.trafficLogs && state.stateUpdate.trafficLogs.rewardReport){
+      let totalNFTViews=0
+      for(rewardReport of state.stateUpdate.trafficLogs.rewardReport){
+        if(rewardReport.rewardPerAttention){
+          totalNFTViews+=parseInt((1000/rewardReport.rewardPerAttention))
+        }
+      }  
+      return res.status(200).send({totalNFTViews})
+    }else{
+      res.status(500).send("Error occurred while fetching state")
+    }
+  } catch (e) {
+    console.error("Error",e)
+    res.status(500).send("Error occurred while fetching totalNFTViews")
+  }
+}
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 async function handleNFTUpload(req, res) {
   try {
     singleUpload(req, res, async (err) => {
@@ -284,5 +333,7 @@ module.exports = {
   getCurrentState,
   getTopContentPredicted,
   getNFTState,
-  handleNFTUpload
+  handleNFTUpload,
+  getTotalNFTViews,
+  getTotalKOIIEarned
 };
