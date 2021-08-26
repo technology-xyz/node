@@ -6,6 +6,7 @@ const moment = require("moment");
 const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
+const fetch=require("node-fetch")
 
 const CORRUPTED_NFT = [
   "Y4txuRg9l1NXRSDZ7FDtZQiTl7Zv7RQ9impMzoReGDU",
@@ -188,6 +189,41 @@ async function getNFTState(req, res) {
  * @param {*} req
  * @param {*} res
  */
+ async function getTotalKOIIEarned(req, res) {
+  try {
+    let totalKOIIEarned=0
+    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
+    data=await data.json()
+    for(const nftState of data) totalKOIIEarned+=Object.values(nftState)[0].totalReward
+    return res.status(200).send({totalKOIIEarned})
+  } catch (e) {
+    console.error("Error",e)
+    res.status(500).send("Error occurred while fetching totalKOIIEarned")
+  }
+}
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+ async function getTotalNFTViews(req, res) {
+  try {
+    let totalNFTViews=0
+    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
+    data=await data.json()
+    for(const nftState of data) totalNFTViews+=Object.values(nftState)[0].totalViews
+    return res.status(200).send({totalNFTViews})
+  } catch (e) {
+    console.error("Error",e)
+    res.status(500).send("Error occurred while fetching totalNFTViews")
+  }
+}
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 async function handleNFTUpload(req, res) {
   try {
     singleUpload(req, res, async (err) => {
@@ -284,5 +320,7 @@ module.exports = {
   getCurrentState,
   getTopContentPredicted,
   getNFTState,
-  handleNFTUpload
+  handleNFTUpload,
+  getTotalNFTViews,
+  getTotalKOIIEarned
 };
