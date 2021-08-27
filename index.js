@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 require("dotenv").config();
-const fsPromises = require("fs/promises");
 const prompts = require("prompts");
+const kohaku = require("@_koi/kohaku");
 const axios = require("axios");
-const kohaku = require("kohaku");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -15,7 +14,8 @@ const PARSE_ARGS = [
   "SERVICE_URL",
   "TRUSTED_SERVICE_URL",
   "SERVER_PORT",
-  "TASKS"
+  "TASKS",
+  "RESTORE_KOHAKU"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
@@ -44,9 +44,7 @@ async function main() {
           })
         ).walletPath;
 
-  await tools.loadWallet(
-    JSON.parse(await fsPromises.readFile(walletPath, "utf8"))
-  );
+  await tools.loadWallet(await tools.loadFile(walletPath));
   console.log("Loaded wallet with address", await tools.getWalletAddress());
 
   // Get operation mode
@@ -65,8 +63,24 @@ async function main() {
       })
     ).mode;
 
+  if (operationMode === "service") tools.loadRedisClient();
+
+  // Fully initialize Kohaku (maybe only do this for service node, but witness can't get state for now so this is okay)
+  if (process.env["RESTORE_KOHAKU"] !== "false") {
+    const restore = await tools.redisGetAsync("kohaku");
+    if (restore) {
+      console.log("Importing Kohaku restore point");
+      await kohaku.importCache(arweave, restore);
+    } else {
+      console.log(
+        "Attempted to restore Kohaku but redis[kohaku] was invalid:",
+        restore
+      );
+    }
+  }
+  const state = await tools.getContractStateAwait();
+
   // Prepare service mode
-  const state = await tools.getContractStateAwait(); // Fully initialize Kohaku
   if (operationMode === "service" && !(await verifyStake(state))) {
     console.error("Could not verify stake");
     return;

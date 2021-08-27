@@ -1,5 +1,7 @@
 const { tools } = require("./helpers");
 const axios = require("axios");
+const kohaku = require("@_koi/kohaku");
+
 const BUNDLER_REGISTER = "/register-node";
 const prompts = require("prompts");
 
@@ -97,6 +99,14 @@ async function runPeriodic() {
     await propagateRegistry();
   } catch (e) {
     console.error("Error while propagating", e);
+  }
+
+  // Update Kohaku restore point
+  try {
+    await tools.redisSetAsync("kohaku", kohaku.exportCache());
+    console.log("Kohaku restore point updated");
+  } catch (e) {
+    console.error("Error while updating Kohaku restore point", e);
   }
 
   setTimeout(runPeriodic, 300000);
