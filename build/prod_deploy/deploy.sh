@@ -19,7 +19,7 @@ if [ "$TRAVIS_BRANCH" == "main" ]; then
 
     cd $TRAVIS_BUILD_DIR/build/prod_deploy
     SHORTSHA=`git log --pretty=format:'%h' -n 1`
-    TAG="--set image.tag=dev-$SHORTSHA"
+    TAG="--set image.tag=main-$SHORTSHA"
 
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
