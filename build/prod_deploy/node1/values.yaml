@@ -5,7 +5,7 @@ service:
     type: NodePort
 env:
     nodeMode: service
-    redisIp: redis
+    redisIp: redis-master
     redisPort: 6379
     trustedServiceURL: none
     stake: 10
