@@ -17,7 +17,7 @@ nodes=(
 
 if [ "$TRAVIS_BRANCH" == "main" ]; then
 
-    cd $TRAVIS_BUILD_DIR/build/staging_deploy
+    cd $TRAVIS_BUILD_DIR/build/prod_deploy
     SHORTSHA=`git log --pretty=format:'%h' -n 1`
     TAG="--set image.tag=dev-$SHORTSHA"
 
