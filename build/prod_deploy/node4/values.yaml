@@ -1,0 +1,9 @@
+fullnameOverride: prod-koi-node-service-4
+nameOverride: prod
+env:
+    nodeMode: service
+    redisIp: redis
+    redisPort: 6379
+    trustedServiceURL: http://prod-koi-node-service-1:8080
+    serviceURL: http://prod-koi-node-service-4:8080
+    stake: 10

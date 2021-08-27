@@ -1,5 +1,6 @@
-fullnameOverride: kohaku-koi-node-service-1
-nameOverride: kohaku
+replicaCount: 3
+fullnameOverride: prod-koi-node-service-1
+nameOverride: prod
 service:
     type: NodePort
 env:
