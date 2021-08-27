@@ -29,6 +29,9 @@ async function submitVote(req, res) {
 
   const receipt = await checkVote(submission);
 
+  if (!receipt.accepted)
+    console.error("Submission with invalid signature received:", submission);
+
   return receipt.accepted
     ? res.json({
         message: "success",
