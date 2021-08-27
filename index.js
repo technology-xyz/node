@@ -87,9 +87,12 @@ async function service(walletPath) {
         "Attempted to restore Kohaku but redis[kohaku] was invalid:",
         restore
       );
-      await tools.getContractStateAwait();
     }
-  } else await tools.getContractStateAwait();
+  }
+  await tools.getContractStateAwait();
+  const initialHeight = kohaku.getCacheHeight();
+  console.log("Kohaku initialized to height", kohaku.getCacheHeight());
+  if (initialHeight < 1) throw new Error("Failed to initialize");
 
   await verifyStake(Service);
 }
