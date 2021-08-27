@@ -8,6 +8,7 @@ const {
 const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
+const kohaku = require("kohaku");
 
 const BUNDLER_REGISTER = "/register-node";
 
@@ -16,11 +17,9 @@ class Service extends Node {
     super();
     this.stakeAmount = stakeAmount;
 
-    // Initialize redis client and webserver
-    tools.loadRedisClient();
+    // Initialize webserver
     this.startWebserver();
     this.next5mPeriod = 0;
-    this.next3hPeriod = 0;
   }
 
   startWebserver() {
@@ -87,6 +86,13 @@ class Service extends Node {
         await this.propagateRegistry();
       } catch (e) {
         console.error("Error while propagating", e);
+      }
+
+      // Update Kohaku restore point
+      try {
+        await tools.redisSetAsync("kohaku", kohaku.exportCache());
+      } catch (e) {
+        console.error("Error while updating Kohaku restore point", e);
       }
     }
   }

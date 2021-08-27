@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@_koi/sdk@^2.2.0-beta.14":
-  version "2.2.0-beta.14"
-  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.14.tgz#3dd6e3a73acb4a711bcb5e8f6265039ca065fc3a"
-  integrity sha512-JkND2uIJQXdUMx4GyzF8rGYBKyndUFNM+4+11kskxS+hcg6Dp29LlIGfuCcMg0lReaH6hDF5+X+5UtlhEwWK3g==
+"@_koi/sdk@^2.2.0-beta.15":
+  version "2.2.0-beta.15"
+  resolved "https://registry.npmjs.org/@_koi/sdk/-/sdk-2.2.0-beta.15.tgz#b1dcb5201a292b3c9a7ef847ea764a087057d5ec"
+  integrity sha512-QfPEdK+YuJT5AlLo7ZiK/FFDloKJSjVMgqkAqeY74G6EF8cs6uue8R4YNgHsoTim3s+y8clzZBdcp3P79GmUZQ==
   dependencies:
     arweave "^1.10.13"
     axios "^0.21.1"
@@ -504,9 +504,9 @@
     "@types/node" "*"
 
 "@types/http-assert@*":
-  version "1.5.2"
-  resolved "https://registry.npmjs.org/@types/http-assert/-/http-assert-1.5.2.tgz#a7fb59a7ca366e141789a084555a633801b9af3b"
-  integrity sha512-Ddzuzv/bB2prZnJKlS1sEYhaeT50wfJjhcTTTQLjEsEZJlk3XB4Xohieyq+P4VXIzg7lrQ1Spd/PfRnBpQsdqA==
+  version "1.5.3"
+  resolved "https://registry.npmjs.org/@types/http-assert/-/http-assert-1.5.3.tgz#ef8e3d1a8d46c387f04ab0f2e8ab8cb0c5078661"
+  integrity sha512-FyAOrDuQmBi8/or3ns4rwPno7/9tJTijVW6aQQjK02+kOQ8zmoNg2XJtAuQhvQcy1ASJq38wirX5//9J1EqoUA==
 
 "@types/http-errors@*":
   version "1.8.1"
@@ -579,9 +579,9 @@
     "@types/node" "*"
 
 "@types/node@*":
-  version "16.7.1"
-  resolved "https://registry.npmjs.org/@types/node/-/node-16.7.1.tgz#c6b9198178da504dfca1fd0be9b2e1002f1586f0"
-  integrity sha512-ncRdc45SoYJ2H4eWU9ReDfp3vtFqDYhjOsKlFFUDEn8V1Bgr2RjYal8YT5byfadWIRluhPFU6JiDOl0H6Sl87A==
+  version "16.7.2"
+  resolved "https://registry.npmjs.org/@types/node/-/node-16.7.2.tgz#0465a39b5456b61a04d98bd5545f8b34be340cb7"
+  integrity sha512-TbG4TOx9hng8FKxaVrCisdaxKxqEwJ3zwHoCWXZ0Jw6mnvTInpaB99/2Cy4+XxpXtjNv9/TgfGSvZFyfV/t8Fw==
 
 "@types/node@11.11.6":
   version "11.11.6"
@@ -594,9 +594,9 @@
   integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
 
 "@types/node@^12.12.6":
-  version "12.20.20"
-  resolved "https://registry.npmjs.org/@types/node/-/node-12.20.20.tgz#ce3d6c13c15c5e622a85efcd3a1cb2d9c7fa43a6"
-  integrity sha512-kqmxiJg4AT7rsSPIhO6eoBIx9mNwwpeH42yjtgQh6X2ANSpLpvToMXv+LMFdfxpwG1FZXZ41OGZMiUAtbBLEvg==
+  version "12.20.21"
+  resolved "https://registry.npmjs.org/@types/node/-/node-12.20.21.tgz#575e91f59c2e79318c2d39a48286c6954e484fd5"
+  integrity sha512-Qk7rOvV2A4vNgXNS88vEvbJE1NDFPCQ8AU+pNElrU2bA4yrRDef3fg3SUe+xkwyin3Bpg/Xh5JkNWTlsOcS2tA==
 
 "@types/pbkdf2@^3.0.0":
   version "3.1.0"
@@ -705,9 +705,9 @@ ajv@^8.0.1:
     uri-js "^4.2.2"
 
 ans104@^0.5.4:
-  version "0.5.6"
-  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.6.tgz#ef5ca9ca6d57552153b32c3b3a139524c1922f06"
-  integrity sha512-tQtHDz43xrJwLNvhd6Zt4xKO7Z/hVNcrj0QuQ3o7+AQH8LO8N/Y5IYV401W+M8eP+av9lLzZ6ASf7MG0eegFQw==
+  version "0.5.7"
+  resolved "https://registry.npmjs.org/ans104/-/ans104-0.5.7.tgz#b7ad35d5929f7fdfda1864eb6ab7de242f1d8808"
+  integrity sha512-m0wPd9/5zh0xwtUbPz/W2Rz0Dm/WuyQNIPOozo3LId08Gl9oOu3H99Y7/HWodNnG2Sdwj8W7iS3R8khpMwveDA==
   dependencies:
     "@akiroz/size-chunker-stream" "^0.0.1"
     "@types/browser-or-node" "^1.3.0"
@@ -1092,9 +1092,9 @@ avsc@^5.7.1:
   integrity sha512-uUbetCWczQHbsKyX1C99XpQHBM8SWfovvaZhPIj23/1uV7SQf0WeRZbiLpw0JZm+LHTChfNgrLfDJOVoU2kU+A==
 
 aws-sdk@^2.925.0:
-  version "2.976.0"
-  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.976.0.tgz#1e9d0d359698876eaa952c7c6223eac4c354ae2e"
-  integrity sha512-LWVh3nko6yGDfGcDW9nIClaukthkTueq7I/dXVNv4g9kuy2VOl5fVTPMACgTibWINAM29wZCM+gVQSSZu/Veow==
+  version "2.977.0"
+  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.977.0.tgz#14533cd1ba2611bd60becf4498e7eadcc8483b0a"
+  integrity sha512-LU0ityBR3w28Ewwr+V0xu4KyQr8i4C1ypafmBNttYm3FHVUDDPQ/hLHASnGq1zGp6rBxBxO1ZE6meFqpKXIaug==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -3656,7 +3656,7 @@ koa@2.13.1, koa@^2.13.1:
 
 kohaku@koii-network/kohaku:
   version "1.0.0"
-  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/c0b7908af670ff4f8ea00118c2803096a9827ca3"
+  resolved "https://codeload.github.com/koii-network/kohaku/tar.gz/d850b2ac53a74bd040c2aa7e897167cc4cecb5f1"
   dependencies:
     smartweave "^0.4.41"
 

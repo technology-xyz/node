@@ -1,12 +1,13 @@
 const { tools, arweave } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
 const moment = require("moment");
+const kohaku = require("kohaku");
 
 // TODO, remove dependency on AWS
 const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
-const fetch=require("node-fetch")
+const fetch = require("node-fetch");
 
 const CORRUPTED_NFT = [
   "Y4txuRg9l1NXRSDZ7FDtZQiTl7Zv7RQ9impMzoReGDU",
@@ -64,12 +65,12 @@ const singleUpload = upload.single("file");
  * @param {*} req express.js request
  * @param {*} res express.js result object
  */
-async function getCurrentState(req, res) {
+async function getCurrentState(_req, res) {
   try {
-    let currentState = await tools.getContractState();
-    if (!currentState) throw new Error("State not available");
-
-    res.status(200).send(currentState);
+    // Use kohaku.readContractCache to avoid JSON parsing. Should be 1000x faster than tools.getContractState
+    const state = kohaku.readContractCache(tools.contractId);
+    if (!state) throw new Error("State not available");
+    res.status(200).send(state);
   } catch (e) {
     console.log(e);
     res.status(500).send({ error: "ERROR: " + e });
@@ -189,16 +190,19 @@ async function getNFTState(req, res) {
  * @param {*} req
  * @param {*} res
  */
- async function getTotalKOIIEarned(req, res) {
+async function getTotalKOIIEarned(req, res) {
   try {
-    let totalKOIIEarned=0
-    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
-    data=await data.json()
-    for(const nftState of data) totalKOIIEarned+=Object.values(nftState)[0].totalReward
-    return res.status(200).send({totalKOIIEarned})
+    let totalKOIIEarned = 0;
+    let data = await fetch(
+      "http://localhost:8887/state/top-content-predicted?frequency=all"
+    );
+    data = await data.json();
+    for (const nftState of data)
+      totalKOIIEarned += Object.values(nftState)[0].totalReward;
+    return res.status(200).send({ totalKOIIEarned });
   } catch (e) {
-    console.error("Error",e)
-    res.status(500).send("Error occurred while fetching totalKOIIEarned")
+    console.error("Error", e);
+    res.status(500).send("Error occurred while fetching totalKOIIEarned");
   }
 }
 
@@ -207,16 +211,19 @@ async function getNFTState(req, res) {
  * @param {*} req
  * @param {*} res
  */
- async function getTotalNFTViews(req, res) {
+async function getTotalNFTViews(req, res) {
   try {
-    let totalNFTViews=0
-    let data=await fetch("http://localhost:8887/state/top-content-predicted?frequency=all")
-    data=await data.json()
-    for(const nftState of data) totalNFTViews+=Object.values(nftState)[0].totalViews
-    return res.status(200).send({totalNFTViews})
+    let totalNFTViews = 0;
+    let data = await fetch(
+      "http://localhost:8887/state/top-content-predicted?frequency=all"
+    );
+    data = await data.json();
+    for (const nftState of data)
+      totalNFTViews += Object.values(nftState)[0].totalViews;
+    return res.status(200).send({ totalNFTViews });
   } catch (e) {
-    console.error("Error",e)
-    res.status(500).send("Error occurred while fetching totalNFTViews")
+    console.error("Error", e);
+    res.status(500).send("Error occurred while fetching totalNFTViews");
   }
 }
 /**

@@ -2,6 +2,7 @@
 require("dotenv").config();
 const prompts = require("prompts");
 const chalk = require("chalk");
+const kohaku = require("kohaku");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -12,7 +13,8 @@ const PARSE_ARGS = [
   "STAKE",
   "SERVICE_URL",
   "TRUSTED_SERVICE_URL",
-  "SERVER_PORT"
+  "SERVER_PORT",
+  "RESTORE_KOHAKU"
 ];
 let yargs = require("yargs");
 for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
@@ -69,10 +71,26 @@ async function main() {
  * Setup witness direct node
  */
 async function service(walletPath) {
+  tools.loadRedisClient();
   const jwk = await tools.loadFile(walletPath);
   await tools.loadWallet(jwk);
   console.log("Loaded wallet with address", await tools.getWalletAddress());
-  await tools.getContractStateAwait(); // Fully initialize Kohaku
+
+  // Fully initialize Kohaku
+  if (process.env["RESTORE_KOHAKU"] !== "false") {
+    const kohakuCache = await tools.redisGetAsync("kohaku");
+    if (kohakuCache) {
+      console.log("Importing Kohaku restore point");
+      await kohaku.importCache(kohakuCache);
+    } else {
+      console.log(
+        "Attempted to restore Kohaku but redis[kohaku] was invalid:",
+        kohakuCache
+      );
+      await tools.getContractStateAwait();
+    }
+  } else await tools.getContractStateAwait();
+
   await verifyStake(Service);
 }
 
