@@ -1,7 +1,0 @@
-fullnameOverride: prod-koi-node-witness-indirect-1
-nameOverride: prod
-env:
-    nodeMode: witness
-    redisIp: redis-master
-    redisPort: 6379
-    trustedServiceURL: http://prod-koi-node-service-1:8080

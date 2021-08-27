@@ -1,4 +1,5 @@
-fullnameOverride: prod-koi-node-witness-direct-1
+fullnameOverride: prod-koi-node-witnesses
+replicaCount: 40
 nameOverride: prod
 env:
     nodeMode: witness
