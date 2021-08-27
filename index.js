@@ -66,6 +66,7 @@ async function main() {
   if (operationMode === "service") tools.loadRedisClient();
 
   // Fully initialize Kohaku (maybe only do this for service node, but witness can't get state for now so this is okay)
+  /* // TODO FIXME temp disabled while contracts change frequently
   if (process.env["RESTORE_KOHAKU"] !== "false") {
     const restore = await tools.redisGetAsync("kohaku");
     if (restore) {
@@ -78,6 +79,7 @@ async function main() {
       );
     }
   }
+  */
   const state = await tools.getContractStateAwait();
   const initialHeight = kohaku.getCacheHeight();
   console.log("Kohaku initialized to height", kohaku.getCacheHeight());
