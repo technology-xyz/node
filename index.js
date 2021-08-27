@@ -2,7 +2,7 @@
 require("dotenv").config();
 const prompts = require("prompts");
 const chalk = require("chalk");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -22,7 +22,7 @@ const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
 
-const { tools } = require("./src/helpers");
+const { tools, arweave } = require("./src/helpers");
 const Service = require("./src/service");
 const Witness = require("./src/witness");
 
@@ -78,14 +78,14 @@ async function service(walletPath) {
 
   // Fully initialize Kohaku
   if (process.env["RESTORE_KOHAKU"] !== "false") {
-    const kohakuCache = await tools.redisGetAsync("kohaku");
-    if (kohakuCache) {
+    const restore = await tools.redisGetAsync("kohaku");
+    if (restore) {
       console.log("Importing Kohaku restore point");
-      await kohaku.importCache(kohakuCache);
+      await kohaku.importCache(arweave, restore);
     } else {
       console.log(
         "Attempted to restore Kohaku but redis[kohaku] was invalid:",
-        kohakuCache
+        restore
       );
       await tools.getContractStateAwait();
     }

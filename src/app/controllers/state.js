@@ -1,7 +1,7 @@
 const { tools, arweave } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
 const moment = require("moment");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 
 // TODO, remove dependency on AWS
 const aws = require("aws-sdk");

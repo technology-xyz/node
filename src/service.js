@@ -8,7 +8,7 @@ const {
 const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
-const kohaku = require("kohaku");
+const kohaku = require("@_koi/kohaku");
 
 const BUNDLER_REGISTER = "/register-node";
 
@@ -91,6 +91,7 @@ class Service extends Node {
       // Update Kohaku restore point
       try {
         await tools.redisSetAsync("kohaku", kohaku.exportCache());
+        console.log("Kohaku restore point updated");
       } catch (e) {
         console.error("Error while updating Kohaku restore point", e);
       }
