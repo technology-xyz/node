@@ -6,7 +6,7 @@ const OFFSET_RANK = 645;
 const MS_TO_MIN = 60000;
 const TIMEOUT_TX = 30 * MS_TO_MIN;
 
-const ARWEAVE_RATE_LIMIT = 30000; // Reduce arweave load
+const ARWEAVE_RATE_LIMIT = 60000; // Reduce arweave load
 
 // Tools singleton
 const koiSdk = require("@_koi/sdk/node");
