@@ -70,7 +70,7 @@ async function getCurrentState(_req, res) {
     // Use kohaku.readContractCache to avoid JSON parsing. Should be 1000x faster than tools.getContractState
     const state = kohaku.readContractCache(tools.contractId);
     if (!state) throw new Error("State not available");
-    res.status(200).send(state);
+    res.status(200).type("application/json").send(state);
   } catch (e) {
     console.log(e);
     res.status(500).send({ error: "ERROR: " + e });
