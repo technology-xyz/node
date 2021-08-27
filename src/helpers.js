@@ -229,8 +229,11 @@ class Node {
         await tools.getTransaction(txId);
         console.log(`Transaction found in ${elapsed_mins}m`);
         return true;
-      } catch (_err) {
-        // Silently catch error, might be dangerous
+      } catch (e) {
+        if (e.type === "TX_FAILED") {
+          console.error(e.type, "while checking tx confirmation");
+          return false;
+        }
       }
       await rateLimit();
     }
