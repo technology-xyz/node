@@ -79,6 +79,9 @@ async function main() {
     }
   }
   const state = await tools.getContractStateAwait();
+  const initialHeight = kohaku.getCacheHeight();
+  console.log("Kohaku initialized to height", kohaku.getCacheHeight());
+  if (initialHeight < 1) throw new Error("Failed to initialize");
 
   // Prepare service mode
   if (operationMode === "service" && !(await verifyStake(state))) {
