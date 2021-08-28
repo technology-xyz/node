@@ -29,16 +29,14 @@ async function submitVote(req, res) {
 
   const receipt = await checkVote(submission);
 
-  if (!receipt.accepted)
-    console.error("Submission with invalid signature received:", submission);
-
   return receipt.accepted
     ? res.json({
         message: "success",
         receipt: receipt
       })
     : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
-        message: "Invalid signature or insufficient stake."
+        message:
+          "Invalid signature, duplicate, or insufficient stake. code:" + receipt
       });
 }
 
