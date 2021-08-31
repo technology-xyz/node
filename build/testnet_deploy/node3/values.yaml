@@ -1,5 +1,7 @@
 fullnameOverride: testnet-koi-node-service-3
 nameOverride: testnet
+service:
+    type: NodePort
 env:
     nodeMode: service
     redisIp: redis-master
