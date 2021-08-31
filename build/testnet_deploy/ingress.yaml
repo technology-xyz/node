@@ -32,5 +32,5 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: testnet-koi-node-service-3
+          serviceName: testnet-koi-node-service-4
           servicePort: 8080
