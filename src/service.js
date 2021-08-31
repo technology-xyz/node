@@ -9,6 +9,7 @@ const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
 const kohaku = require("@_koi/kohaku");
+const fetch = require("node-fetch");
 
 const BUNDLER_REGISTER = "/register-node";
 
@@ -38,7 +39,7 @@ class Service extends Node {
     let txPath = path.join(__dirname, "app/tx");
     app.use("/tx", express.static(txPath));
     require("./app/routes")(app);
-    const port = process.env.SERVER_PORT || 8887;
+    const port = process.env.SERVER_PORT;
     app.listen(port, () => {
       console.log("Open http://localhost:" + port, "to view in browser");
     });
@@ -94,6 +95,17 @@ class Service extends Node {
         console.log("Kohaku restore point updated");
       } catch (e) {
         console.error("Error while updating Kohaku restore point", e);
+      }
+
+      // Ping top-content-predicted to keep it up to date
+      try {
+        await fetch(
+          "http://localhost:" +
+            process.env.SERVER_PORT +
+            "/state/top-content-predicted?frequency=all"
+        );
+      } catch (e) {
+        console.error("Error pinging top-content-predicted");
       }
     }
   }

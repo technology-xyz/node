@@ -220,7 +220,9 @@ async function getTotalKOIIEarned(req, res) {
   try {
     let totalKOIIEarned = 0;
     let data = await fetch(
-      "http://localhost:8887/state/top-content-predicted?frequency=all"
+      "http://localhost:" +
+        process.env.SERVER_PORT +
+        "/state/top-content-predicted?frequency=all"
     );
     data = await data.json();
     for (const nftState of data)
@@ -241,7 +243,9 @@ async function getTotalNFTViews(req, res) {
   try {
     let totalNFTViews = 0;
     let data = await fetch(
-      "http://localhost:8887/state/top-content-predicted?frequency=all"
+      "http://localhost:" +
+        process.env.SERVER_PORT +
+        "/state/top-content-predicted?frequency=all"
     );
     data = await data.json();
     for (const nftState of data)

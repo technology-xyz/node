@@ -21,6 +21,7 @@ for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
+process.env.SERVER_PORT = process.env.SERVER_PORT || 8887;
 
 const { tools, arweave } = require("./src/helpers");
 const Service = require("./src/service");
