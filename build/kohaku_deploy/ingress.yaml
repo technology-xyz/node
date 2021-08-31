@@ -28,9 +28,9 @@ spec:
       - backend:
           serviceName: kohaku-koi-node-service-3
           servicePort: 8080
-  - host: kohaku-ports-4.koii.live
+  - host: kohaku-ports-3.koii.live
     http:
       paths:
       - backend:
-          serviceName: kohaku-koi-node-service-3
+          serviceName: kohaku-koi-node-service-4
           servicePort: 8080
