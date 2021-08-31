@@ -89,6 +89,7 @@ async function service(walletPath) {
       );
     }
   }
+  console.log("Building cache from", kohaku.getCacheHeight());
   await tools.getKoiiStateAwait();
   const initialHeight = kohaku.getCacheHeight();
   console.log("Kohaku initialized to height", kohaku.getCacheHeight());
