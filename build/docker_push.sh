@@ -16,7 +16,7 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     echo "Pushed koi_node:dev-$SHORTSHA"
 
-    ./build/dev_deploy/deploy.sh
+    ./build/testnet_deploy/deploy.sh
 
   fi
 
@@ -29,7 +29,7 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     echo "Pushed koi_node:main-$SHORTSHA and koi_node:latest"
 
-    ./build/prod_deploy/deploy.sh
+    ./build/kohaku_deploy/deploy.sh
 
   fi
 
