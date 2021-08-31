@@ -1,4 +1,4 @@
-fullnameOverride: kohaku-koi-node-witness-indirect-1
+fullnameOverride: kohaku-koi-node-witness-3
 nameOverride: kohaku
 env:
     nodeMode: witness
