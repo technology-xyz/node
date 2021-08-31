@@ -1,4 +1,4 @@
-fullnameOverride: testnet-koi-node-witness-direct-1
+fullnameOverride: testnet-koi-node-witness-1
 nameOverride: testnet
 env:
     nodeMode: witness
