@@ -45,7 +45,7 @@ class Node {
    * @returns {any, number} Tuple containing state and block
    */
   async getStateAndBlock() {
-    const state = await tools.getContractState();
+    const state = await tools.getKoiiState();
     let block = await tools.getBlockHeight();
     if (block < this.lastBlock) block = this.lastBlock;
 

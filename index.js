@@ -89,7 +89,7 @@ async function service(walletPath) {
       );
     }
   }
-  await tools.getContractStateAwait();
+  await tools.getKoiiStateAwait();
   const initialHeight = kohaku.getCacheHeight();
   console.log("Kohaku initialized to height", kohaku.getCacheHeight());
   if (initialHeight < 1) throw new Error("Failed to initialize");
@@ -121,9 +121,9 @@ async function witness(walletPath) {
  * @param {*} nodeClass
  */
 async function verifyStake(nodeClass) {
+  const contractState = await tools.getKoiiState();
   const balance = await tools.getWalletBalance();
   const koiBalance = await tools.getKoiBalance();
-  const contractState = await tools.getContractState();
   console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
 
   if (balance === "0") {

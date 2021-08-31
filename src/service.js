@@ -150,7 +150,7 @@ class Service extends Node {
     let task = "submitting votes";
     while (activeVotes.length > 0) {
       const voteId = activeVotes[activeVotes.length - 1];
-      const state = await tools.getContractState();
+      const state = await tools.getKoiiState();
       const bundlers = state.votes[voteId].bundlers;
       const bundlerAddress = await tools.getWalletAddress();
       if (!(bundlerAddress in bundlers)) {

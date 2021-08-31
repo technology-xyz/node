@@ -22,7 +22,7 @@ async function getNodes() {
  * @returns {boolean} Wether some new nodes were added or not
  */
 async function registerNodes(newNodes) {
-  const state = await tools.getContractState();
+  const state = await tools.getKoiiState();
 
   // Filter stale nodes from registry
   let nodes = await getNodes();
