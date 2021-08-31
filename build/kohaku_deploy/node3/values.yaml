@@ -9,3 +9,4 @@ env:
     trustedServiceURL: http://kohaku-koi-node-service-1:8080
     serviceURL: http://kohaku-koi-node-service-3:8080
     stake: 10
+    tasks: wXotIq_fSPvYWR12h6IS-kfD18Y5jkr4UPPp15e0wo0
