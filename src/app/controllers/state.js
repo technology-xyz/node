@@ -195,8 +195,7 @@ async function filterContent(nftIdArr, days) {
  */
 async function getNFTState(req, res) {
   try {
-    // Faster than tools.getKoiiState
-    const state = JSON.parse(await kohaku.readContractCache(tools.contractId));
+    const state = await tools.getKoiiState();
     const tranxId = req.query.tranxId;
     const view = await tools.contentView(tranxId, state);
     if (view) {
