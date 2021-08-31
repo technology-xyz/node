@@ -2,7 +2,7 @@ const { tools } = require("./helpers");
 const axios = require("axios");
 const kohaku = require("@_koi/kohaku");
 
-const BUNDLER_REGISTER = "/register-node";
+const SERVICE_REGISTER = "/register-node";
 const prompts = require("prompts");
 
 const MS_TO_MIN = 60000;
@@ -151,7 +151,7 @@ async function propagateRegistry() {
   payload = await tools.signPayload(payload);
 
   // Register self in target registry
-  axios.post(target + BUNDLER_REGISTER, payload, {
+  await axios.post(target + SERVICE_REGISTER, payload, {
     headers: { "content-type": "application/json" }
   });
 }
