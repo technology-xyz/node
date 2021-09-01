@@ -1,4 +1,4 @@
-replicaCount: 3
+replicaCount: 1
 fullnameOverride: testnet-koi-node-service-1
 nameOverride: testnet
 service:
