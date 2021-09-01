@@ -125,10 +125,12 @@ async function propagateRegistry() {
     }
   };
   payload = await tools.signPayload(payload);
-  await registerNodes([payload]);
 
   // Don't propagate if this node is a primary node
-  if (tools.bundlerUrl === "none") return;
+  if (tools.bundlerUrl === "none") {
+    await registerNodes([payload]);
+    return;
+  }
   console.log("Propagating Registry");
 
   // Select a target
@@ -143,6 +145,7 @@ async function propagateRegistry() {
 
   // Get targets node registry and add it to ours
   const newNodes = await tools.getNodes(target);
+  newNodes.push(payload);
   await registerNodes(newNodes);
 
   // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
@@ -152,9 +155,18 @@ async function propagateRegistry() {
   }
 
   // Register self in target registry
-  await axios.post(target + SERVICE_REGISTER, payload, {
-    headers: { "content-type": "application/json" }
-  });
+  await axios
+    .post(target + SERVICE_REGISTER, payload, {
+      headers: { "content-type": "application/json" }
+    })
+    .catch((e) => {
+      if (e.response)
+        console.error(
+          e.response ? e.response.status : "Unknown",
+          "error while registering to",
+          target
+        );
+    });
 }
 
 /**
