@@ -1,4 +1,5 @@
 const { tools } = require("./helpers");
+const { registerNodes, getNodes } = require("./app/helpers/nodes");
 const axios = require("axios");
 const kohaku = require("@_koi/kohaku");
 
@@ -116,14 +117,23 @@ async function runPeriodic() {
  * Fetch and propagate node registry
  */
 async function propagateRegistry() {
+  // Update our own registration
+  let payload = {
+    data: {
+      url: process.env.SERVICE_URL,
+      timestamp: Date.now()
+    }
+  };
+  payload = await tools.signPayload(payload);
+  await registerNodes([payload]);
+
   // Don't propagate if this node is a primary node
   if (tools.bundlerUrl === "none") return;
   console.log("Propagating Registry");
 
-  let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
-  let nodes = await getNodes();
-
   // Select a target
+  let nodes = await getNodes();
+  nodes = nodes.filter((node) => node.data.url !== process.env.SERVICE_URL); // Remove self from targets
   let target;
   if (!nodes || nodes.length === 0) target = tools.bundlerUrl;
   else {
@@ -140,15 +150,6 @@ async function propagateRegistry() {
     console.error("SERVICE_URL not set, skipping registration");
     return;
   }
-
-  // Sign payload
-  let payload = {
-    data: {
-      url: process.env.SERVICE_URL,
-      timestamp: Date.now()
-    }
-  };
-  payload = await tools.signPayload(payload);
 
   // Register self in target registry
   await axios.post(target + SERVICE_REGISTER, payload, {
