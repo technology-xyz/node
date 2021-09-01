@@ -5,6 +5,7 @@ const {
   OFFSET_BATCH_SUBMIT,
   OFFSET_PROPOSE_SLASH
 } = require("./helpers");
+let { registerNodes, getNodes } = require("./app/helpers/nodes");
 const { access, readFile } = require("fs/promises");
 const { constants } = require("fs");
 const axios = require("axios");
@@ -117,21 +118,6 @@ class Service extends Node {
    * Fetch and propagate node registry
    */
   async propagateRegistry() {
-    // Don't propagate if this node is a primary node
-    if (tools.bundlerUrl === "none") return;
-    console.log("Propagating Registry");
-
-    let { registerNodes, getNodes } = require("./app/helpers/nodes"); // Load lazily to wait for Redis
-    let nodes = await getNodes();
-
-    // Select a target
-    let target;
-    if (!nodes || nodes.length === 0) target = tools.bundlerUrl;
-    else {
-      const selection = nodes[Math.floor(Math.random() * nodes.length)];
-      target = selection.data.url;
-    }
-
     // Update our own registration
     let payload = {
       data: {
@@ -140,14 +126,28 @@ class Service extends Node {
       }
     };
     payload = await tools.signPayload(payload);
+    await registerNodes([payload]);
+
+    // Don't propagate if this node is a primary node
+    if (tools.bundlerUrl === "none") return;
+    console.log("Propagating Registry");
+
+    // Select a target
+    let nodes = await getNodes();
+    nodes = nodes.filter((node) => node.data.url !== process.env.SERVICE_URL); // Remove self from targets
+    let target;
+    if (!nodes || nodes.length === 0) target = tools.bundlerUrl;
+    else {
+      const selection = nodes[Math.floor(Math.random() * nodes.length)];
+      target = selection.data.url;
+    }
 
     // Get targets node registry and add it to ours
     const newNodes = await tools.getNodes(target);
-    newNodes.push(payload);
     await registerNodes(newNodes);
 
-    // Don't register if we don't have a trusted URL as we are a trusted node
-    if (process.env.TRUSTED_SERVICE_URL === "none") {
+    // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
+    if (process.env.TRUSTED_SERVICE_URL) {
       console.error("SERVICE_URL not set, skipping registration");
       return;
     }
