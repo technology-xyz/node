@@ -40,9 +40,7 @@ async function registerNodes(newNodes) {
     }
 
     // Filter addresses with an invalid signature
-    const verification = await tools.verifySignature(node);
-    console.log("Verification result:", verification);
-    return verification;
+    return await tools.verifySignature(node);
   });
 
   // Filter out duplicate entries
