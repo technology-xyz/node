@@ -1,4 +1,4 @@
-const { tools, arweave } = require("../../helpers");
+const { tools } = require("../../helpers");
 const StatusCodes = require("../config/status_codes");
 const moment = require("moment");
 const kohaku = require("@_koi/kohaku");
@@ -67,10 +67,10 @@ const singleUpload = upload.single("file");
  */
 async function getCurrentState(_req, res) {
   try {
-    // Use kohaku.readContractCache to avoid JSON parsing. Should be 1000x faster than tools.getContractState
+    // Use kohaku.readContractCache to avoid JSON parsing. Should be 1000x faster than tools.getKoiiState
     const state = kohaku.readContractCache(tools.contractId);
     if (!state) throw new Error("State not available");
-    res.status(200).send(state);
+    res.status(200).type("application/json").send(state);
   } catch (e) {
     console.log(e);
     res.status(500).send({ error: "ERROR: " + e });
@@ -108,7 +108,7 @@ async function getTopContentPredicted(req, res) {
     topContentCache[offset].next = now + TOP_CONTENT_COOLDOWN;
 
     // filtering txIdArr based on offset
-    const state = await tools.getContractState();
+    const state = await tools.getKoiiState();
     const registerRecords = state.registeredRecord;
     let txIds = Object.keys(registerRecords).filter(
       (txId) => !CORRUPTED_NFT.includes(txId)
@@ -161,24 +161,49 @@ async function getTopContentPredicted(req, res) {
 
 /**
  *
+ * @param {*} nftIdArr
+ * @param {*} days
+ * @returns
+ */
+async function filterContent(nftIdArr, days) {
+  const nftViewProms = nftIdArr.map((nftId) => tools.redisGetAsync(nftId));
+  const now = moment().unix();
+  const nftViews = (await Promise.all(nftViewProms)).map(
+    (nftViewStr, index) => {
+      if (!nftViewStr)
+        return {
+          txIdContent: nftIdArr[index],
+          createdAt: now
+        };
+      const nftView = JSON.parse(nftViewStr);
+      nftView.createdAt = nftView.createdAt ? parseInt(nftView.createdAt) : now;
+      return nftView;
+    }
+  );
+
+  const limitTimestamp = moment().subtract(days, "day").unix();
+  for (let i = nftViews.length - 1; i > 0; --i)
+    if (nftViews[i].createdAt < limitTimestamp)
+      return nftIdArr.slice(i, nftIdArr.length);
+  return nftIdArr;
+}
+
+/**
+ *
  * @param {*} req
  * @param {*} res
  */
 async function getNFTState(req, res) {
   try {
+    const state = await tools.getKoiiState();
     const tranxId = req.query.tranxId;
-    const state = await tools.getContractState();
-    let content = await contentView(tranxId, state);
-    content.timestamp = moment().unix() * 1000;
-    if (content && content.tx) {
-      delete content.tx;
+    const view = await tools.contentView(tranxId, state);
+    if (view) {
+      view.timestamp = moment().unix() * 1000;
+      if (view.tx) delete view.tx;
+      tools.redisSetAsync(tranxId, JSON.stringify(view));
     }
-    if (content) {
-      tools.redisSetAsync(tranxId, JSON.stringify(content));
-    }
-    if (!res.headersSent) {
-      res.status(200).send(content);
-    }
+    if (!res.headersSent) res.status(200).send(view);
   } catch (e) {
     console.error(e);
     res.status(500).send({ error: "ERROR: " + e });
@@ -194,7 +219,9 @@ async function getTotalKOIIEarned(req, res) {
   try {
     let totalKOIIEarned = 0;
     let data = await fetch(
-      "http://localhost:8887/state/top-content-predicted?frequency=all"
+      "http://localhost:" +
+        process.env.SERVER_PORT +
+        "/state/top-content-predicted?frequency=all"
     );
     data = await data.json();
     for (const nftState of data)
@@ -215,7 +242,9 @@ async function getTotalNFTViews(req, res) {
   try {
     let totalNFTViews = 0;
     let data = await fetch(
-      "http://localhost:8887/state/top-content-predicted?frequency=all"
+      "http://localhost:" +
+        process.env.SERVER_PORT +
+        "/state/top-content-predicted?frequency=all"
     );
     data = await data.json();
     for (const nftState of data)
@@ -226,6 +255,7 @@ async function getTotalNFTViews(req, res) {
     res.status(500).send("Error occurred while fetching totalNFTViews");
   }
 }
+
 /**
  *
  * @param {*} req
@@ -249,78 +279,6 @@ async function handleNFTUpload(req, res) {
     console.error(err);
     res.sendStatus(StatusCodes.RESPONSE_IMAGE_ERROR);
   }
-}
-
-/**
- *
- * @param {*} nftIdArr
- * @param {*} days
- * @returns
- */
-async function filterContent(nftIdArr, days) {
-  const nftStateProms = nftIdArr.map((nftId) => tools.redisGetAsync(nftId));
-  const now = moment().unix();
-  const nftStates = (await Promise.all(nftStateProms)).map(
-    (nftStateStr, index) => {
-      if (!nftStateStr)
-        return {
-          txIdContent: nftIdArr[index],
-          createdAt: now
-        };
-      const nftState = JSON.parse(nftStateStr);
-      nftState.createdAt = nftState.createdAt
-        ? parseInt(nftState.createdAt)
-        : now;
-      return nftState;
-    }
-  );
-
-  const limitTimestamp = moment().subtract(days, "day").unix();
-  for (let i = nftStates.length - 1; i > 0; --i)
-    if (nftStates[i].createdAt < limitTimestamp)
-      return nftIdArr.slice(i, nftIdArr.length);
-  return nftIdArr;
-}
-
-/**
- * Content view that first state cache
- * @param {string} contentTxId NFT transaction id to view
- * @param {*} state Contract state to view from
- * @returns {any} Content object
- */
-async function contentView(contentTxId, state) {
-  let rewardReport;
-  try {
-    rewardReport = state.stateUpdate.trafficLogs.rewardReport || [];
-  } catch (e) {
-    rewardReport = [];
-  }
-  const arweaveTxStatus = await arweave.transactions.getStatus(contentTxId);
-  const nftState =
-    arweaveTxStatus.status === 200
-      ? await tools.readNftState(contentTxId)
-      : JSON.parse(await tools.redisGetAsync(contentTxId));
-  const contentViews = {
-    ...nftState,
-    totalViews: 0,
-    totalReward: 0,
-    twentyFourHrViews: 0,
-    txIdContent: contentTxId
-  };
-  rewardReport.forEach((ele) => {
-    const logSummary = ele.logsSummary;
-    for (const txId in logSummary) {
-      if (txId === contentTxId) {
-        if (rewardReport.indexOf(ele) === rewardReport.length - 1)
-          contentViews.twentyFourHrViews = logSummary[contentTxId];
-        const rewardPerAttention = ele.rewardPerAttention;
-        contentViews.totalViews += logSummary[contentTxId];
-        const rewardPerLog = logSummary[contentTxId] * rewardPerAttention;
-        contentViews.totalReward += rewardPerLog;
-      }
-    }
-  });
-  return contentViews;
 }
 
 module.exports = {
