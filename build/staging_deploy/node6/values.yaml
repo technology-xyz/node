@@ -1,7 +1,0 @@
-fullnameOverride: staging-koi-node-witness-direct-2
-nameOverride: staging
-env:
-    nodeMode: witnessDirect
-    redisIp: redis
-    redisPort: 6379
-    trustedServiceURL: http://staging-koi-node-service-1:8080

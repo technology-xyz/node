@@ -5,32 +5,32 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:625593260641:certificate/7e83430a-f771-4087-bce5-39162c2abb32
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01
-    external-dns.alpha.kubernetes.io/hostname: kohaku.koii.live
+    external-dns.alpha.kubernetes.io/hostname: testnet.koii.live
     kubernetes.io/ingress.class: alb
-  name: kohaku-koi-node-service-1
+  name: testnet-koi-node-service-1
 spec:
   rules:
-  - host: kohaku.koii.live
+  - host: testnet.koii.live
     http:
       paths:
       - backend:
-          serviceName: kohaku-koi-node-service-1
+          serviceName: testnet-koi-node-service-1
           servicePort: 8080
-  - host: kohaku-ports-1.koii.live
+  - host: testnet-ports-1.koii.live
     http:
       paths:
       - backend:
-          serviceName: kohaku-koi-node-service-2
+          serviceName: testnet-koi-node-service-2
           servicePort: 8080
-  - host: kohaku-ports-2.koii.live
+  - host: testnet-ports-2.koii.live
     http:
       paths:
       - backend:
-          serviceName: kohaku-koi-node-service-3
+          serviceName: testnet-koi-node-service-3
           servicePort: 8080
-  - host: kohaku-ports-4.koii.live
+  - host: testnet-ports-4.koii.live
     http:
       paths:
       - backend:
-          serviceName: kohaku-koi-node-service-3
+          serviceName: testnet-koi-node-service-4
           servicePort: 8080

@@ -24,7 +24,7 @@ if [ "$TRAVIS_BRANCH" == "dev" ]; then
     # This is not a pull request in travis. Configure kubectl, eksctl
     if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
-        aws eks update-kubeconfig --name koi --region us-west-2
+        aws eks update-kubeconfig --name testnet-koii-live --region us-west-2
 
         export HELM_EXPERIMENTAL_OCI=1
         helm chart pull public.ecr.aws/r3r0i7b9/koi_node_helm:latest
