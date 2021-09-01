@@ -35,7 +35,8 @@ async function submitVote(req, res) {
         receipt: receipt
       })
     : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
-        message: "Invalid signature or insufficient stake."
+        message:
+          "Invalid signature, duplicate, or insufficient stake. code:" + receipt
       });
 }
 

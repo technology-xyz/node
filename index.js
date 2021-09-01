@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 require("dotenv").config();
 const prompts = require("prompts");
+const chalk = require("chalk");
 const kohaku = require("@_koi/kohaku");
-const axios = require("axios");
 
 // Parse cli params
 const PARSE_ARGS = [
@@ -14,7 +14,6 @@ const PARSE_ARGS = [
   "SERVICE_URL",
   "TRUSTED_SERVICE_URL",
   "SERVER_PORT",
-  "TASKS",
   "RESTORE_KOHAKU"
 ];
 let yargs = require("yargs");
@@ -22,11 +21,11 @@ for (const arg of PARSE_ARGS) yargs = yargs.option(arg, { type: "string" });
 const argv = yargs.help().argv;
 for (const arg of PARSE_ARGS)
   if (argv[arg] !== undefined) process.env[arg] = argv[arg];
+process.env.SERVER_PORT = process.env.SERVER_PORT || 8887;
 
-const { tools, arweave, Namespace } = require("./src/helpers");
-const { verifyStake, setupWebServer, runPeriodic } = require("./src/service");
-
-const GATEWAY_URL = "https://arweave.net/";
+const { tools, arweave } = require("./src/helpers");
+const Service = require("./src/service");
+const Witness = require("./src/witness");
 
 /**
  * Main entry point
@@ -44,29 +43,41 @@ async function main() {
           })
         ).walletPath;
 
-  await tools.loadWallet(await tools.loadFile(walletPath));
-  console.log("Loaded wallet with address", await tools.getWalletAddress());
-
   // Get operation mode
   const operationMode =
-    process.env.NODE_MODE ||
-    (
-      await prompts({
-        type: "select",
-        name: "mode",
-        message: "Select operation mode",
+    process.env.NODE_MODE !== undefined
+      ? eval(process.env.NODE_MODE)
+      : (
+          await prompts({
+            type: "select",
+            name: "mode",
+            message: "Select operation mode",
 
-        choices: [
-          { title: "Service", value: "service" },
-          { title: "Witness", value: "witness" } // Indirect
-        ]
-      })
-    ).mode;
+            choices: [
+              { title: "Service", value: service },
+              { title: "Witness Direct", value: witnessDirect },
+              { title: "Witness Indirect", value: witness }
+            ]
+          })
+        ).mode;
 
-  if (operationMode === "service") tools.loadRedisClient();
+  // Run the node
+  console.log("Operation mode:", operationMode.name);
+  process.env["NODE_MODE"] = operationMode.name;
 
-  // Fully initialize Kohaku (maybe only do this for service node, but witness can't get state for now so this is okay)
-  /* // TODO FIXME temp disabled while contracts change frequently
+  await operationMode(walletPath);
+}
+
+/**
+ * Setup witness direct node
+ */
+async function service(walletPath) {
+  tools.loadRedisClient();
+  const jwk = await tools.loadFile(walletPath);
+  await tools.loadWallet(jwk);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
+
+  // Fully initialize Kohaku
   if (process.env["RESTORE_KOHAKU"] !== "false") {
     const restore = await tools.redisGetAsync("kohaku");
     if (restore) {
@@ -79,101 +90,86 @@ async function main() {
       );
     }
   }
-  */
-  const state = await tools.getContractStateAwait();
+  console.log("Building cache from", kohaku.getCacheHeight());
+  await tools.getKoiiStateAwait();
   const initialHeight = kohaku.getCacheHeight();
   console.log("Kohaku initialized to height", kohaku.getCacheHeight());
   if (initialHeight < 1) throw new Error("Failed to initialize");
 
-  // Prepare service mode
-  if (operationMode === "service" && !(await verifyStake(state))) {
-    console.error("Could not verify stake");
-    return;
-  }
-
-  // Get selected tasks
-  console.log("Finding tasks");
-  const taskStateProms = state.tasks.map((task) =>
-    kohaku.readContract(arweave, task.txId)
-  );
-  const taskStates = await Promise.all(taskStateProms);
-  const availableTasks = taskStates.map((taskState, i) => ({
-    title: `${taskState.name} - ${state.tasks[i].txId}`,
-    value: [state.tasks[i].txId, taskState]
-  }));
-  let selectedTasks;
-  if (process.env.TASKS) {
-    const taskIds = process.env.TASKS.split(",");
-    selectedTasks = availableTasks
-      .filter((task) => taskIds.includes(task.value[0]))
-      .map((task) => task.value);
-  } else {
-    selectedTasks = (
-      await prompts({
-        type: "multiselect",
-        name: "selected",
-        message: "Select tasks",
-        choices: availableTasks,
-        hint: "- Space to select. Enter to submit",
-        instructions: false
-      })
-    ).selected;
-  }
-
-  // Initialize service
-  let expressApp;
-  if (operationMode === "service") {
-    tools.loadRedisClient();
-    expressApp = setupWebServer();
-    const taskNames = JSON.stringify(selectedTasks.map((task) => task[0]));
-    expressApp.get("/tasks", (_req, res) => {
-      res.type("application/json");
-      res.send(taskNames);
-    });
-    runPeriodic(); // Don't await to run in parallel
-  }
-
-  // Load tasks
-  const taskSrcProms = selectedTasks.map((task) =>
-    axios.get(GATEWAY_URL + task[1].executableId)
-  );
-  const taskSrcs = (await Promise.all(taskSrcProms)).map((res) => res.data);
-  const executableTasks = taskSrcs.map((src, i) =>
-    loadTaskSource(src, new Namespace(selectedTasks[i][0], expressApp))
-  );
-
-  // Initialize tasks then start express app
-  await Promise.all(
-    executableTasks.map((task, i) => task.setup(selectedTasks[i][1]))
-  );
-  const port = process.env.SERVER_PORT || 8887;
-  if (operationMode === "service") {
-    expressApp.listen(port, () => {
-      console.log(`Open http://localhost:${port} to view in browser`);
-    });
-  }
-
-  // Execute tasks
-  await Promise.all(
-    executableTasks.map((task, i) => {
-      console.log("Running task", selectedTasks[i][0]);
-      task.execute(selectedTasks[i][1]);
-    })
-  );
+  await verifyStake(Service);
 }
 
 /**
- * @param {string} taskSrc // Source of contract
- * @param {Namespace} namespace // Wrapper object for redis, express, and filesystem
- * @returns // Executable task
+ * Setup witness direct node
  */
-function loadTaskSource(taskSrc, namespace) {
-  const loadedTask = new Function(`
-      const [tools, namespace, require] = arguments;
-      ${taskSrc};
-      return {setup, execute};
-  `);
-  return loadedTask(tools, namespace, require);
+async function witnessDirect(walletPath) {
+  await tools.nodeLoadWallet(walletPath);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
+  await verifyStake(Witness);
+}
+
+/**
+ * Setup witness indirect node
+ */
+async function witness(walletPath) {
+  await tools.nodeLoadWallet(walletPath);
+  console.log("Loaded wallet with address", await tools.getWalletAddress());
+  const node = new Witness();
+  await node.run();
+}
+
+/**
+ * Verify the address has staked
+ * @param {*} nodeClass
+ */
+async function verifyStake(nodeClass) {
+  const contractState = await tools.getKoiiState();
+  const balance = await tools.getWalletBalance();
+  const koiBalance = await tools.getKoiBalance();
+  console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
+
+  if (balance === "0") {
+    console.error(
+      chalk.green(
+        "Your wallet doesn't have any Ar, you can't interact directly, " +
+          "but you can claim free Ar here: " +
+          chalk.blue.underline.bold("https://faucet.arweave.net/")
+      )
+    );
+    return;
+  }
+
+  let stakeAmount = 0;
+  if (!(tools.address in contractState.stakes)) {
+    if (koiBalance === 0) {
+      console.error(
+        chalk.green(
+          "Your wallet doesn’t have koi balance, claim some free Koi here: " +
+            chalk.blue.underline.bold("https://koi.rocks/faucet")
+        )
+      );
+      return;
+    }
+
+    // Get and set stake amount
+    stakeAmount =
+      process.env.STAKE !== undefined
+        ? parseInt(process.env.STAKE)
+        : (
+            await prompts({
+              type: "number",
+              name: "stakeAmount",
+              message: "Please stake to Vote"
+            })
+          ).stakeAmount;
+    if (stakeAmount < 1) {
+      console.error("Stake amount too low. Aborting.");
+      return;
+    }
+  }
+
+  const node = new nodeClass(stakeAmount, true);
+  await node.run();
 }
 
 main();

@@ -2,9 +2,6 @@
 
 The following repo contains a CLI interface to interact with contract and also guides on how you can create your very own KOI_Task.
 
-Example:
-`yarn start --TRUSTED_SERVICE_URL=none --AR_WALLET=../wallet.json --NODE_MODE=service --TASKS=VUZakty8P1-hatk117ImiwYSmFVR1PNf78-21aqtAp4`
-
 ## Install
 
 For a minimally working witness node:
@@ -21,12 +18,11 @@ Additionally, if you would like to like to run a service node, do the following 
 
 ## CLI Params and Env vars
 
-- **TASKS** - Comma separated task IDS to be executed
 - **REDIS_IP** - Redis IP to connect to
 - **REDIS_PORT** - Redis port to connect to
 - **AR_WALLET** - Path to Arweave wallet json
-- **NODE_MODE** - [service|witness] Node mode to use
-- **STAKE** - Amount of AR token to stake, required for `service` and recommended for `witness` modes
+- **NODE_MODE** - [service|witness|witnessDirect] Node mode to use
+- **STAKE** - Amount of AR token to stake, required for `service` and recommended for `witnessDirect` modes
 - **SERVER_PORT** - Port for the express server to operate on
 - **SERVICE_URL** - URL to propagate to other nodes to discover this node. Skips registration if left empty.
 - **TRUSTED_SERVICE_URL** - Initial service node to bootstrap propagation, set to `none` to disable propagation, or if this is a trusted node. Uses SDK default if left empty (https://bundler.openkoi.com:8888)

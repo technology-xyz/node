@@ -22,7 +22,7 @@ async function getNodes() {
  * @returns {boolean} Wether some new nodes were added or not
  */
 async function registerNodes(newNodes) {
-  const state = await tools.getContractState();
+  const state = await tools.getKoiiState();
 
   // Filter stale nodes from registry
   let nodes = await getNodes();
@@ -40,9 +40,7 @@ async function registerNodes(newNodes) {
     }
 
     // Filter addresses with an invalid signature
-    const verification = await tools.verifySignature(node);
-    console.log("Verification result:", verification);
-    return verification;
+    return await tools.verifySignature(node);
   });
 
   // Filter out duplicate entries
