@@ -91,7 +91,10 @@ class Service extends Node {
 
       // Update Kohaku restore point
       try {
-        await tools.redisSetAsync("kohaku", kohaku.exportCache());
+        await tools.redisSetAsync(
+          "kohaku",
+          kohaku.exportCache([tools.contractId])
+        );
         console.log("Kohaku restore point updated");
       } catch (e) {
         console.error("Error while updating Kohaku restore point", e);
@@ -129,17 +132,7 @@ class Service extends Node {
       target = selection.data.url;
     }
 
-    // Get targets node registry and add it to ours
-    const newNodes = await tools.getNodes(target);
-    await registerNodes(newNodes);
-
-    // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
-    if (!process.env.SERVICE_URL) {
-      console.error("SERVICE_URL not set, skipping registration");
-      return;
-    }
-
-    // Sign payload
+    // Update our own registration
     let payload = {
       data: {
         url: process.env.SERVICE_URL,
@@ -147,6 +140,17 @@ class Service extends Node {
       }
     };
     payload = await tools.signPayload(payload);
+
+    // Get targets node registry and add it to ours
+    const newNodes = await tools.getNodes(target);
+    newNodes.push(payload);
+    await registerNodes(newNodes);
+
+    // Don't register if we don't have a trusted URL as we are a trusted node
+    if (process.env.TRUSTED_SERVICE_URL === "none") {
+      console.error("SERVICE_URL not set, skipping registration");
+      return;
+    }
 
     // Register self in target registry
     axios.post(target + BUNDLER_REGISTER, payload, {
