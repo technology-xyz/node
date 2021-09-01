@@ -104,7 +104,7 @@ async function runPeriodic() {
 
   // Update Kohaku restore point
   try {
-    await tools.redisSetAsync("kohaku", kohaku.exportCache());
+    await tools.redisSetAsync("kohaku", kohaku.exportRecursiveCache());
     console.log("Kohaku restore point updated");
   } catch (e) {
     console.error("Error while updating Kohaku restore point", e);
