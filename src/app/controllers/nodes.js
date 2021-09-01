@@ -23,11 +23,11 @@ async function nodes(_req, res) {
  */
 async function registerNode(req, res) {
   try {
-    const regRes = registerNodes([req.body]);
-
+    const regRes = await registerNodes([req.body]);
+    console.log("Registration received:", req.body, "\nresult:", regRes);
     return regRes
       ? res.status(200)
-      : res.status(StatusCodes.RESPONSE_ACTION_FAILED).json({
+      : res.status(StatusCodes.RESPONSE_CONFLICT).json({
           message: "Registration is duplicate, outdated, or invalid"
         });
   } catch (e) {
