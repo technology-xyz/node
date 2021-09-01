@@ -12,7 +12,7 @@ const axios = require("axios");
 const kohaku = require("@_koi/kohaku");
 const fetch = require("node-fetch");
 
-const BUNDLER_REGISTER = "/register-node";
+const SERVICE_REGISTER = "/register-node";
 
 class Service extends Node {
   constructor(stakeAmount = 0) {
@@ -147,13 +147,13 @@ class Service extends Node {
     await registerNodes(newNodes);
 
     // Don't register if we don't have a URL, we wouldn't be able to direct anyone to us.
-    if (process.env.TRUSTED_SERVICE_URL) {
+    if (!process.env.SERVICE_URL) {
       console.error("SERVICE_URL not set, skipping registration");
       return;
     }
 
     // Register self in target registry
-    axios.post(target + BUNDLER_REGISTER, payload, {
+    await axios.post(target + SERVICE_REGISTER, payload, {
       headers: { "content-type": "application/json" }
     });
   }
