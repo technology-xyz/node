@@ -37,9 +37,7 @@ async function verifyStake(state) {
         chalk.green(
           "Your wallet doesn’t have koi balance, claim some free Koi here:"
         ),
-        chalk.blue.underline.bold("https://koi.rocks/faucet"),
-        "\nState balances:",
-        state.balances
+        chalk.blue.underline.bold("https://koi.rocks/faucet")
       );
       return false;
     }
