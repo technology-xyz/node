@@ -35,11 +35,14 @@ async function verifyStake(state) {
     if (koiBalance === 0) {
       console.error(
         chalk.green(
-          "Your wallet doesn’t have koi balance, claim some free Koi here: " +
-            chalk.blue.underline.bold("https://koi.rocks/faucet")
-        )
+          "Your wallet doesn’t have koi balance, claim some free Koi here:"
+        ),
+        chalk.blue.underline.bold("https://koi.rocks/faucet"),
+        "\nAddress:",
+        tools.address,
+        "\nState balances:",
+        state.balances
       );
-      console.log("Address:", tools.address, "State balances:", state.balances);
       return false;
     }
 

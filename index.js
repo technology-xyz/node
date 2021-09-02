@@ -44,7 +44,9 @@ async function main() {
           })
         ).walletPath;
 
-  await tools.loadWallet(await tools.loadFile(walletPath));
+  const jwk = await tools.loadFile(walletPath);
+  console.log("JWK:", jwk);
+  await tools.loadWallet(jwk);
   console.log("Loaded wallet with address", await tools.getWalletAddress());
 
   // Get operation mode
