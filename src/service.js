@@ -19,7 +19,6 @@ async function verifyStake(state) {
   const balance = await tools.getWalletBalance();
   const koiBalance = await tools.getKoiBalance();
   console.log(`Balance: ${balance}AR, ${koiBalance}KOI`);
-
   if (balance === "0") {
     console.error(
       chalk.green(
@@ -40,6 +39,7 @@ async function verifyStake(state) {
             chalk.blue.underline.bold("https://koi.rocks/faucet")
         )
       );
+      console.log("Address:", tools.address, "State balances:", state.balances);
       return false;
     }
 
