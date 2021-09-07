@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
       if (content && content.owner && !content.fileLocation) {
         res.status(200).send(content);
         if (
-          !moment().subtract(15, "minutes").isAfter(moment(content.timestamp))
+          moment().subtract(15, "minutes").isBefore(moment(content.timestamp))
         )
           return;
       }
