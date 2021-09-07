@@ -197,7 +197,7 @@ async function getNFTState(req, res) {
   try {
     const state = await tools.getKoiiState();
     const tranxId = req.query.tranxId;
-    const view = await tools.contentView(tranxId, state);
+    const view = await tools.computeContentView(tranxId, state);
     if (view) {
       view.timestamp = moment().unix() * 1000;
       if (view.tx) delete view.tx;
