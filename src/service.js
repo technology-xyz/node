@@ -222,15 +222,18 @@ function canSubmitBatch(state, block) {
 async function activeVoteId(state) {
   // Check if votes are tracked simultaneously
   const votes = state.votes;
-  const areVotesTrackedProms = votes.map((vote) => isVoteTracked(vote.id));
+  const close = state.stateUpdate.trafficLogs.close;
+
+  const votesOpen = votes.filter((vote) => vote.end == close);
+  console.log(votesOpen);
+  const areVotesTrackedProms = votesOpen.map((vote) => isVoteTracked(vote.id));
   const areVotesTracked = await Promise.all(areVotesTrackedProms);
 
   // Get active votes
-  const close = state.stateUpdate.trafficLogs.close;
   const activeVotes = [];
-  for (let i = 0; i < votes.length; i++)
-    if (votes[i].end === close && areVotesTracked[i])
-      activeVotes.push(votes[i].id);
+  for (let i = 0; i < votesOpen.length; i++)
+    if (votesOpen[i].end === close && areVotesTracked[i])
+      activeVotes.push(votesOpen[i].id);
   return activeVotes;
 }
 
@@ -240,7 +243,7 @@ async function activeVoteId(state) {
  * @returns {boolean} Whether vote exists
  */
 async function isVoteTracked(voteId) {
-  const batchFileName = __dirname + "/../app/bundles/" + voteId;
+  const batchFileName = __dirname + "/app/bundles/" + voteId;
   try {
     await access(batchFileName, constants.F_OK);
     return true;
@@ -266,7 +269,7 @@ async function batchUpdateContractState(voteId) {
  * @returns {string} Vote file contents in utf8
  */
 async function getVotesFile(fileId) {
-  const batchFileName = __dirname + "/../bundles/" + fileId;
+  const batchFileName = __dirname + "/app/bundles/" + fileId;
   await access(batchFileName, constants.F_OK);
   return await readFile(batchFileName, "utf8");
 }
