@@ -124,7 +124,15 @@ class Node {
       stakeAmount: 2
     };
 
-    let tx = await tools.submitTrafficLog(arg);
+    let tx;
+    try {
+      tx = await tools.submitTrafficLog(arg);
+    } catch (e) {
+      console.error("Error while submitting traffic log:", e);
+      console.log("Skipping log submission to avoid error loop");
+      this.isLogsSubmitted = false;
+      return;
+    }
     if (await this.checkTxConfirmation(tx, task)) {
       this.isLogsSubmitted = true;
       console.log("Logs submitted");
