@@ -5,4 +5,4 @@ env:
     redisIp: redis-master
     redisPort: 6379
     trustedServiceURL: https://testnet.koii.live
-    tasks: hFhD2XG0LNKQTo4WCMfhFbD2ssxMn1vOyzwZt0qiJI4
+    tasks: ekc18fHESh4ylONf6JZX9qUsGB4bW9DTj5dfWwvYjKs

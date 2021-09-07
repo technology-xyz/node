@@ -1,4 +1,4 @@
-const KOII_CONTRACT = "k-3vYDcwrusBtnouFXh6QlRvwfH57lLvnG8jnf_q1EM";
+const KOII_CONTRACT = "kAAMofwpEVYnf0qBLRox-GG56nLAqt3M04-Qz7N9sl4";
 
 const koiSdk = require("@_koi/sdk/node");
 const fsPromises = require("fs/promises");
