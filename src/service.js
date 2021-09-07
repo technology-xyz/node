@@ -240,7 +240,7 @@ async function activeVoteId(state) {
  * @returns {boolean} Whether vote exists
  */
 async function isVoteTracked(voteId) {
-  const batchFileName = __dirname + "/../app/bundles/" + voteId;
+  const batchFileName = __dirname + "/app/bundles/" + voteId;
   try {
     await access(batchFileName, constants.F_OK);
     return true;
@@ -266,7 +266,7 @@ async function batchUpdateContractState(voteId) {
  * @returns {string} Vote file contents in utf8
  */
 async function getVotesFile(fileId) {
-  const batchFileName = __dirname + "/../bundles/" + fileId;
+  const batchFileName = __dirname + "/app/bundles/" + fileId;
   await access(batchFileName, constants.F_OK);
   return await readFile(batchFileName, "utf8");
 }
