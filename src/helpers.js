@@ -130,7 +130,7 @@ class Node {
     } catch (e) {
       console.error("Error while submitting traffic log:", e);
       console.log("Skipping log submission to avoid error loop");
-      this.isLogsSubmitted = false;
+      this.isLogsSubmitted = true;
       return;
     }
     if (await this.checkTxConfirmation(tx, task)) {
